@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kobothewolf.com/schemas/document.schema.json",
+  "title": "Saved document (.kobo.json), version 1",
+  "description": "EV §3.5 with DESIGN §3.5 changes. Untrusted input: every string is capped (NFR-4).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app", "version", "estilo", "frente", "reverso", "caras"],
+  "properties": {
+    "app": { "const": "kobo-exe-editor" },
+    "version": { "const": 1 },
+    "estilo": { "$ref": "#/$defs/key" },
+    "frente": { "$ref": "#/$defs/faceId" },
+    "reverso": { "$ref": "#/$defs/faceId" },
+    "caras": {
+      "type": "object",
+      "maxProperties": 64,
+      "propertyNames": { "$ref": "#/$defs/faceId" },
+      "additionalProperties": { "$ref": "#/$defs/face" }
+    },
+    "artePropio": { "type": "string", "maxLength": 2796226, "pattern": "^data:image/png;base64,[A-Za-z0-9+/]+={0,2}$" },
+    "acento": { "$ref": "#/$defs/hex" },
+    "sombra": { "$ref": "#/$defs/hex" },
+    "rotTit": { "$ref": "#/$defs/degrees" },
+    "escala": { "type": "number", "minimum": 10, "maximum": 300 },
+    "anguloWashi": { "$ref": "#/$defs/degrees" }
+  },
+  "$defs": {
+    "key": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 },
+    "faceId": { "type": "string", "pattern": "^[a-z0-9]+-[fr]$", "maxLength": 40 },
+    "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "degrees": { "type": "number", "minimum": -180, "maximum": 180 },
+    "face": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "textos": {
+          "type": "object",
+          "maxProperties": 64,
+          "propertyNames": { "pattern": "^(0|[1-9][0-9]?)$" },
+          "additionalProperties": { "type": "string", "maxLength": 90 }
+        },
+        "ocultosEd": { "type": "array", "maxItems": 64, "uniqueItems": true, "items": { "type": "integer", "minimum": 0, "maximum": 99 } },
+        "ocultasPiezas": { "type": "array", "maxItems": 64, "uniqueItems": true, "items": { "type": "string", "maxLength": 60 } },
+        "arte": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 },
+        "fondo": { "$ref": "#/$defs/key" },
+        "rotSt": { "$ref": "#/$defs/degrees" },
+        "brillitos": { "type": "integer", "minimum": 0, "maximum": 64 }
+      }
+    }
+  }
+}

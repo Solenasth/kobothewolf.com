@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kobothewolf.com/schemas/tokens.schema.json",
+  "title": "Style tokens",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["estilo", "nombre", "version", "formato", "color", "tipografia", "antirreglas", "contacto"],
+  "properties": {
+    "estilo": { "$ref": "#/$defs/key" },
+    "nombre": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+    "formato": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tarjeta_mm", "tarjeta_px_css", "impresion_dpi", "sangrado_mm"],
+      "properties": {
+        "tarjeta_mm": { "$ref": "#/$defs/pair" },
+        "tarjeta_px_css": { "$ref": "#/$defs/pair" },
+        "impresion_dpi": { "type": "integer", "minimum": 72, "maximum": 1200 },
+        "sangrado_mm": { "type": "number", "minimum": 0, "maximum": 10 },
+        "canva_px": { "$ref": "#/$defs/pair" }
+      }
+    },
+    "color": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+      "additionalProperties": { "$ref": "#/$defs/hex" }
+    },
+    "degradados": {
+      "type": "object",
+      "additionalProperties": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/hex" } }
+    },
+    "tipografia": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_fuentes_por_cara", "roles"],
+      "properties": {
+        "max_fuentes_por_cara": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "roles": {
+          "type": "object",
+          "additionalProperties": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$" } }
+        }
+      }
+    },
+    "antirreglas": { "type": "object", "additionalProperties": { "$ref": "#/$defs/rule" } },
+    "efectos_imagen": {
+      "type": "object",
+      "additionalProperties": { "type": "object", "additionalProperties": { "$ref": "#/$defs/rule" } }
+    },
+    "intocables": { "type": "array", "items": { "type": "string", "maxLength": 200 } },
+    "contacto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["telegram", "url"],
+      "properties": {
+        "telegram": { "const": "@KoboTheWolf" },
+        "url": { "const": "https://t.me/KoboTheWolf" },
+        "sitio": { "type": "string", "pattern": "^https://" }
+      }
+    }
+  },
+  "$defs": {
+    "key": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 },
+    "hex": { "type": "string", "pattern": "^#[0-9A-F]{6}$" },
+    "pair": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "items": false, "minItems": 2 },
+    "rule": {
+      "anyOf": [
+        { "type": "number" },
+        { "type": "string", "maxLength": 40 },
+        { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/rule" } },
+        { "type": "object", "additionalProperties": { "$ref": "#/$defs/rule" } }
+      ]
+    }
+  }
+}
