@@ -1,0 +1,84 @@
+/* boykisser-uwu: CSS shared by every face (DESIGN §5.1). Scoped at build time
+   under [data-cara]; `&` is the face root. Ported from P8 (the demo's shared
+   rules plus the editor's face rules); fonts are declared in
+   src/theme/fonts.css, outside face CSS. */
+
+/* Face root: 960 × 560 with 3 mm of bleed. The editor may set --acento and
+   --sombra inline on the root; these are the defaults. */
+& {
+  --crema: #FFF8EE; --blanco: #FFFFFF; --algodon: #FFE4EE; --rosa: #FFC8DD; --rubor: #E5484D;
+  --azul: #BDE0FE; --cielo: #8EC5FF; --lila: #CDB4DB; --brillo: #FFE58F; --tinta: #2B2233; --tinta2: #6B5B73;
+  --acento: #FF8FB8; --sombra: #FF8FB8;
+  /* The chosen accent drives every variant: --chicle is the style's accent. */
+  --chicle: var(--acento);
+  position: relative;
+  width: 960px;
+  height: 560px;
+  overflow: hidden;
+  font-family: Plumon, cursive;
+  color: var(--tinta);
+}
+&, & * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* The card at the cut line: 900 × 500 at (30, 30). */
+.card { position: absolute; left: 30px; top: 30px; width: 900px; height: 500px; }
+
+/* Backgrounds (editor.json fondos); the editor puts fondo-<key> on the root. */
+&.fondo-gingham {
+  background-color: var(--crema);
+  background-image: linear-gradient(90deg, rgba(189, 224, 254, .38) 50%, transparent 50%), linear-gradient(rgba(189, 224, 254, .38) 50%, transparent 50%);
+  background-size: 36px 36px;
+  background-position: 30px 30px;
+}
+&.fondo-cuaderno {
+  background-color: var(--blanco);
+  background-image: linear-gradient(rgba(142, 197, 255, .22) 1px, transparent 1px), linear-gradient(90deg, rgba(142, 197, 255, .22) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: 30px 30px;
+}
+&.fondo-femboy { background: repeating-linear-gradient(-35deg, #FFE4EE 0 28px, #FFFFFF 28px 56px, #E6F2FF 56px 84px, #FFFFFF 84px 112px); }
+&.fondo-crema { background: var(--crema); }
+&.fondo-algodon { background: var(--algodon); }
+
+/* Drawn icons: the style's fonts have no ♡ ✔ ☑ ☐. */
+.ico { display: inline-block; width: .85em; height: .85em; vertical-align: -.08em; background: no-repeat center/contain; }
+.ico-cor { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 86C22 66 6 50 6 31 6 16 17 6 30 6c9 0 16 6 20 13 4-7 11-13 20-13 13 0 24 10 24 25 0 19-16 35-44 55z' fill='%23FF8FB8' stroke='%232B2233' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.ico-ok { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M14 54 L40 80 L88 20' fill='none' stroke='%232B2233' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.ico-si { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='8' y='8' width='84' height='84' rx='16' fill='%23FFC8DD' stroke='%232B2233' stroke-width='9'/%3E%3Cpath d='M26 52 L44 70 L76 30' fill='none' stroke='%232B2233' stroke-width='11' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.ico-no { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='8' y='8' width='84' height='84' rx='16' fill='%23FFFFFF' stroke='%232B2233' stroke-width='9'/%3E%3C/svg%3E"); }
+
+/* Pieces drawn with code. */
+.spark {
+  position: absolute;
+  width: var(--s, 16px);
+  height: var(--s, 16px);
+  background: var(--c, var(--brillo));
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+.washi {
+  position: absolute;
+  width: var(--w, 96px);
+  height: 24px;
+  opacity: .85;
+  transform: rotate(var(--r, 14deg));
+  background: repeating-linear-gradient(90deg, var(--a, #FFC8DD) 0 10px, var(--b, #FFFFFF) 10px 20px);
+  clip-path: polygon(0 6%, 3% 0, 97% 8%, 100% 0, 98% 50%, 100% 100%, 96% 92%, 4% 100%, 0 94%, 2% 50%);
+}
+.washi::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 0 50%, transparent 3px, transparent 0), linear-gradient(transparent, rgba(255, 255, 255, .25)); }
+.mono { position: absolute; width: var(--w, 120px); }
+.marco { border: 3.5px solid var(--tinta); border-radius: 8px 12px 7px 14px; }
+.bote span { display: inline-block; }
+.bote span:nth-child(odd) { transform: rotate(-3deg) translateY(2px); }
+.bote span:nth-child(even) { transform: rotate(3deg) translateY(-2px); }
+
+/* Contact: the main QR and the optional site block. */
+.qr { position: absolute; background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 0 0 3px var(--tinta); }
+.qr img { display: block; width: 100%; image-rendering: pixelated; }
+.sitio { position: absolute; display: grid; grid-template-columns: 96px 1fr; column-gap: 12px; align-items: center; width: 284px; }
+.sitio > b { grid-column: 1 / -1; font: 18px/1 Plumon; color: var(--tinta); font-weight: normal; margin: 0 0 6px 2px; }
+.sitio .qr { position: static; width: 96px; padding: 6px; border-radius: 10px; }
+.sitio .txt { font: 16px/1.12 Plumon; color: var(--tinta2); }
+.sitio .url { display: block; font: 16px Plumon; color: var(--tinta); margin-top: 4px; }
+.arroba { font: 30px Plumon; letter-spacing: .5px; }
+.cred { position: absolute; font: 9px Silk; color: var(--chicle); letter-spacing: .3px; }
+.st { position: absolute; }

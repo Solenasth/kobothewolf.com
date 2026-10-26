@@ -1,0 +1,23 @@
+/* Gatito de código (cod-f / cod-r), ported from P8. Scoped to these two faces at build time.
+   The cat is drawn on the canvas by montar.ts (#13). */
+
+/* Front */
+canvas { position: absolute; left: 28px; top: 22px; }
+.lado { position: absolute; left: 500px; top: 56px; width: 370px; }
+.init { font: 17px Code; color: var(--tinta2); }
+.init i { font-style: normal; color: #E0559B; }
+.nombre { font: 58px/0.98 Burbuja; color: var(--tinta); margin: 18px 0 12px; transform: rotate(-2deg); }
+.nombre .k { color: var(--chicle); }
+.rol { font: 23px/1.3 Plumon; }
+.ok { margin-top: 22px; display: inline-block; font: 17px Code; background: var(--blanco); padding: 8px 14px; border-radius: 10px; box-shadow: 0 0 0 3px var(--tinta), 5px 6px 0 3px var(--azul); transform: rotate(1.5deg); }
+
+/* Back */
+.ventana { position: absolute; left: 46px; top: 50px; width: 520px; height: 330px; background: var(--blanco); border-radius: 14px; box-shadow: 0 0 0 3.5px var(--tinta), 8px 9px 0 3.5px var(--rosa); overflow: hidden; }
+.barra { height: 38px; background: var(--rosa); border-bottom: 3.5px solid var(--tinta); display: flex; align-items: center; gap: 8px; padding: 0 14px; font: 18px Plumon; }
+.barra i { width: 14px; height: 14px; border-radius: 50%; background: var(--blanco); box-shadow: 0 0 0 2.5px var(--tinta); }
+.barra span { margin-left: auto; }
+pre { font: 16px/1.55 Code; padding: 16px 20px; color: var(--tinta); white-space: pre; }
+pre .p { color: #E0559B; }
+pre .s { color: #3D8BD9; }
+pre .c { color: #B49BB0; }
+pre .n { color: #9B6BD1; }

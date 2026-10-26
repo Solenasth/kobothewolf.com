@@ -1,0 +1,18 @@
+/* Programming socks (soc-f / soc-r), ported from P8. Scoped to these two faces at build time. */
+
+/* Front */
+.femboy { background: repeating-linear-gradient(-35deg, var(--rosa) 0 28px, var(--blanco) 28px 56px, var(--azul) 56px 84px, var(--blanco) 84px 112px); }
+.franja { position: absolute; left: -40px; right: -40px; top: 328px; height: 96px; transform: rotate(-4deg); box-shadow: 0 0 0 3.5px var(--tinta); }
+.titulo { position: absolute; left: 44px; top: 40px; font: 64px/0.95 Burbuja; color: var(--tinta); }
+.titulo .on { display: inline-block; background: var(--chicle); color: var(--blanco); padding: 2px 18px 8px; border-radius: 16px; box-shadow: 0 0 0 3.5px var(--tinta); transform: rotate(3deg); margin-left: 6px; }
+.check { position: absolute; left: 52px; top: 200px; font: 22px/1.4 Plumon; }
+.burbuja { position: absolute; left: 290px; top: 186px; width: 270px; padding-right: 26px!important; background: var(--blanco); padding: 12px 16px; border-radius: 18px; font: 19px/1.25 Plumon; box-shadow: 0 0 0 3px var(--tinta); transform: rotate(2deg); }
+.burbuja::after { content: ""; position: absolute; right: -30px; top: 30px; border: 12px solid transparent; border-left: 20px solid var(--tinta); }
+.nombre { position: absolute; left: 52px; bottom: 22px; font: 30px Plumon; background: var(--blanco); padding: 2px 14px; border-radius: 10px; box-shadow: 0 0 0 3px var(--tinta); }
+
+/* Back */
+.frase { position: absolute; left: 44px; top: 42px; font: 40px/1.05 Burbuja; color: var(--tinta); transform: rotate(-2deg); width: 470px; }
+.frase em { font-style: normal; color: var(--chicle); }
+.git { position: absolute; left: 48px; top: 176px; font: 17px Code; background: var(--blanco); padding: 10px 14px; border-radius: 10px; box-shadow: 0 0 0 3px var(--tinta); transform: rotate(-1deg); }
+.git .p { color: #E0559B; }
+.git .s { color: #3D8BD9; }
