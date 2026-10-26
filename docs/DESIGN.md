@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 9: §3.2 marks parser, §7 piece keys, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 10: §5.2 store, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -134,6 +134,12 @@ Recorded in `0006-css-scoping-not-shadow-dom.md` once approved.
 - `paint()` applies state to the DOM as P8's `pintar()` did.
 - Text goes in only through `textContent` or per-letter `<span>`s, never `innerHTML` (NFR-4).
 - Persistence: saved under `localStorage['kobo-editor-v1']`, debounced, with every read and write in `try/catch`. The user's sticker is capped at 2 MB; above that, text state is still saved and a notice explains it.
+- **Implementation** (`src/core/store.ts`, `src/core/paint.ts`):
+  - `createStore()` takes the faces' marks, the style lists and ranges, the storage (or `null`), and a `reencode(dataUri)` function. The browser's canvas re-encoder is plugged in with the upload control (#16).
+  - **Every value from outside is checked against the style**, whether it comes from an action, saved state or an imported file. Unknown faces, fields and pieces are dropped. Colors must be in the style lists, numbers are clamped to the ranges, sparkles to the face's count, and `arte: "propio"` needs a sticker. Anything invalid falls back to the default. Migration fills each face object in place.
+  - Saved state is parsed like an imported file. If it's invalid, the editor starts fresh.
+  - Notices: `storage-unavailable`, `storage-full`, `sticker-not-saved`, `saved-state-invalid`.
+  - `paintFace()` hides with the `data-oculto` / `data-oculto-pieza` attributes, styled `display:none !important` as in P8, which also works on SVG bows. Bounce text gets letter `<span>`s built by the caller.
 
 ### 5.3 Sticker from the user's image `[FR-E6]`
 - The EV §6.3 algorithm is ported from P8 into typed, pure functions over `Uint8Array` masks.

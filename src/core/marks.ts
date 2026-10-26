@@ -60,16 +60,34 @@ function angle(style: string | null, pattern: RegExp): number {
   return match ? Number(match[1]) : 0;
 }
 
-function* walk(root: MarkElement, chain: MarkElement[] = []): Generator<{ el: MarkElement; chain: MarkElement[] }> {
-  for (const el of root.children) {
+function* walk<E extends MarkElement>(root: E, chain: E[] = []): Generator<{ el: E; chain: E[] }> {
+  for (const el of root.children as Iterable<E>) {
     const next = [...chain, el];
     yield { el, chain: next };
     yield* walk(el, next);
   }
 }
 
+/** The elements behind each field and piece, in the same order as readMarks(). */
+export interface BoundMarks<E extends MarkElement> {
+  fields: E[];
+  pieces: Map<string, E[]>;
+  sparks: E[];
+}
+
 /** Reads the marks of one face root (the element with data-cara). */
 export function readMarks(face: MarkElement): FaceMarks {
+  return scan(face).marks;
+}
+
+/** Same scan as readMarks(), keeping the elements for painting. */
+export function bindMarks<E extends MarkElement>(face: E): BoundMarks<E> {
+  return scan(face).bound;
+}
+
+function scan<E extends MarkElement>(face: E): { marks: FaceMarks; bound: BoundMarks<E> } {
+  const bound: BoundMarks<E> = { fields: [], pieces: new Map(), sparks: [] };
+  const bind = (key: string, el: E) => bound.pieces.set(key, [...(bound.pieces.get(key) ?? []), el]);
   const fields: TextField[] = [];
   const partes = new Map<string, { count: number; contact: boolean }>();
   const rotations: Rotation[] = [];
@@ -88,12 +106,14 @@ export function readMarks(face: MarkElement): FaceMarks {
       const group = partes.get(own) ?? { count: 0, contact: false };
       group.count++;
       partes.set(own, group);
+      bind(own, el);
     }
     if (parte !== undefined && locked) partes.get(parte)!.contact = true;
 
     const key = el.getAttribute('data-ed');
     if (key !== null && !locked && !CONTACT_TEXT.test(textOf(el))) {
       const cls = el.getAttribute('data-cls');
+      bound.fields.push(el);
       fields.push({
         index: fields.length,
         key,
@@ -105,17 +125,29 @@ export function readMarks(face: MarkElement): FaceMarks {
     }
 
     const slot = el.getAttribute('data-arte');
-    if ((slot === 'frente' || slot === 'reverso') && art === undefined) art = slot;
+    if (slot === 'frente' || slot === 'reverso') {
+      art ??= slot;
+      bind('arte', el);
+    }
 
     const rot = el.getAttribute('data-rot');
     if (rot === 'st' || rot === 'tit') {
       rotations.push({ kind: rot, degrees: angle(el.getAttribute('style'), /rotate\((-?[\d.]+)deg\)/) });
     }
 
-    if (el.getAttribute('data-lazo') !== null) lazos++;
+    if (el.getAttribute('data-lazo') !== null) {
+      lazos++;
+      bind('lazo', el);
+    }
     const classes = classesOf(el);
-    if (classes.includes('spark')) sparks++;
-    if (classes.includes('washi')) washis.push(angle(el.getAttribute('style'), /--r:\s*(-?[\d.]+)deg/) < 0 ? -1 : 1);
+    if (classes.includes('spark')) {
+      sparks++;
+      bound.sparks.push(el);
+    }
+    if (classes.includes('washi')) {
+      washis.push(angle(el.getAttribute('style'), /--r:\s*(-?[\d.]+)deg/) < 0 ? -1 : 1);
+      bind(`washi-${washis.length}`, el);
+    }
   }
 
   const pieces: Piece[] = [...partes].map(([key, g]) => ({ kind: 'parte', key, count: g.count, contact: g.contact }));
@@ -123,5 +155,5 @@ export function readMarks(face: MarkElement): FaceMarks {
   if (lazos) pieces.push({ kind: 'lazo', key: 'lazo', count: lazos });
   washis.forEach((sign, i) => pieces.push({ kind: 'washi', key: `washi-${i + 1}`, sign }));
 
-  return { fields, pieces, ...(art ? { art } : {}), rotations, sparks };
+  return { marks: { fields, pieces, ...(art ? { art } : {}), rotations, sparks }, bound };
 }
