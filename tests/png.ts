@@ -11,8 +11,8 @@ export interface Decoded {
 
 const CHANNELS: Record<number, number> = { 0: 1, 2: 3, 6: 4 };
 
-export function readPng(file: string): Decoded {
-  const buf = readFileSync(file);
+export function readPng(file: string | Uint8Array): Decoded {
+  const buf = typeof file === 'string' ? readFileSync(file) : Buffer.from(file);
   let offset = 8;
   let width = 0;
   let height = 0;
@@ -26,7 +26,7 @@ export function readPng(file: string): Decoded {
       width = body.readUInt32BE(0);
       height = body.readUInt32BE(4);
       type = body[9]!;
-      if (body[8] !== 8 || body[12] !== 0 || !(type in CHANNELS)) throw new Error(`${file}: unsupported PNG`);
+      if (body[8] !== 8 || body[12] !== 0 || !(type in CHANNELS)) throw new Error(`${typeof file === 'string' ? file : 'buffer'}: unsupported PNG`);
     }
     if (name === 'IDAT') idat.push(body);
     offset += length + 12;
