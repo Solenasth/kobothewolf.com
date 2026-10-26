@@ -1,5 +1,13 @@
 {
   "meta.title": "Kobo The Wolf",
   "meta.description": "Kobo The Wolf: trabajo freelance y el editor de tarjetas KOBO.EXE.",
-  "lang.label": "Idioma"
+  "lang.label": "Idioma",
+  "nav.skip": "Saltar al contenido",
+  "nav.makeCard": "Haz tu tarjeta ↓",
+  "profile.pitch": "Freelancer · pronto más sobre mí",
+  "profile.experience": "Más de 13 años de experiencia.",
+  "profile.contact": "Contacto",
+  "profile.email": "Correo",
+  "editor.title": "Editor de tarjetas",
+  "editor.soon": "El editor de tarjetas KOBO.EXE viene en camino: diseña tu propia tarjeta lista para imprimir y expórtala aquí mismo."
 }

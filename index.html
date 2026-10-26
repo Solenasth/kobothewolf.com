@@ -3,11 +3,50 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kobo The Wolf</title>
-    <meta name="description" content="Kobo The Wolf: freelance work and the KOBO.EXE card editor." />
+    <title data-i18n="meta.title"></title>
+    <meta name="description" data-i18n-content="meta.description" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kobothewolf.com/" />
+    <meta property="og:title" data-i18n-content="meta.title" />
+    <meta property="og:description" data-i18n-content="meta.description" />
+    <link rel="canonical" href="https://kobothewolf.com/" />
+    <link rel="alternate" hreflang="en" href="https://kobothewolf.com/?lang=en" />
+    <link rel="alternate" hreflang="es" href="https://kobothewolf.com/?lang=es" />
+    <link rel="alternate" hreflang="x-default" href="https://kobothewolf.com/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/theme/ui.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <a class="skip" href="#main" data-i18n="nav.skip"></a>
+    <div class="page">
+      <header class="top">
+        <nav data-i18n-aria-label="lang.label">
+          <ul class="lang">
+            <li><a href="?lang=en" hreflang="en" lang="en" data-lang="en" aria-current="true">EN</a></li>
+            <li><a href="?lang=es" hreflang="es" lang="es" data-lang="es">ES</a></li>
+          </ul>
+        </nav>
+        <a class="btn" href="#editor" data-i18n="nav.makeCard"></a>
+      </header>
+
+      <main id="main">
+        <section class="profile" aria-labelledby="name">
+          <h1 id="name">Kobo The Wolf</h1>
+          <p class="pitch" data-i18n="profile.pitch"></p>
+          <p class="experience" data-i18n="profile.experience"></p>
+          <h2 class="label" data-i18n="profile.contact"></h2>
+          <ul class="contact">
+            <li><a href="https://t.me/KoboTheWolf" rel="me noopener"><span class="k">Telegram</span> <span class="v">@KoboTheWolf</span></a></li>
+            <li><a href="mailto:contact@kobothewolf.com"><span class="k" data-i18n="profile.email"></span> <span class="v">contact@kobothewolf.com</span></a></li>
+          </ul>
+        </section>
+
+        <section id="editor" class="editor" aria-labelledby="editor-title">
+          <h2 id="editor-title" data-i18n="editor.title"></h2>
+          <div id="editor-root"><p data-i18n="editor.soon"></p></div>
+        </section>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

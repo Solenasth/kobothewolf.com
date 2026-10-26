@@ -1,5 +1,13 @@
 {
   "meta.title": "Kobo The Wolf",
   "meta.description": "Kobo The Wolf: freelance work and the KOBO.EXE card editor.",
-  "lang.label": "Language"
+  "lang.label": "Language",
+  "nav.skip": "Skip to content",
+  "nav.makeCard": "Make your card ↓",
+  "profile.pitch": "Freelancer · more about me soon",
+  "profile.experience": "13+ years of experience.",
+  "profile.contact": "Contact",
+  "profile.email": "Email",
+  "editor.title": "Card editor",
+  "editor.soon": "The KOBO.EXE card editor is on its way: design your own print-ready card and export it right here."
 }

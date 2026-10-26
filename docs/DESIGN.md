@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 5: §10 E2E runs in the pinned Playwright container, #26; rev. 4: §12 history shape, #24)
+**Status:** Approved 2026-10-26 (rev. 6: §6 static profile and language switch, #4; rev. 5: §10 Playwright container, #26; rev. 4: §12 history shape, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -169,6 +169,10 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
   4. `#editor`.
 - **Style:** the editor's UI tokens (`--ui-*`, `--tinta`, `--chicle`, …) and fonts (Burbuja, Plumon, Lazo, Silk) via `src/theme/ui.css`, shared by the profile and the editor (FR-P7).
 - **Copy** is provisional, in both catalogs, and marked for later polish.
+- **Static profile, one source of text:** profile elements in `index.html` carry `data-i18n="<key>"`. At build time a small Vite plugin fills them, the title and the description from `en.json` (escaped), so the no-JavaScript page and the English catalog can't drift (FR-P6). At runtime the same keys are re-applied with `textContent` when the language changes. The profile is plain HTML; Preact renders only what JavaScript owns (today the editor placeholder, later the editor).
+- **Language switch:** two links, `?lang=en` and `?lang=es`, so it still works without JavaScript. With JavaScript they switch in place (FR-I2), mark the active one with `aria-current`, and drop `?lang=` from the address so a reload keeps the remembered choice.
+- **CSP and build-only tags:** the CSP `<meta>` (§8) is injected at build time only, because the dev server needs inline scripts and a WebSocket.
+- **404:** `404.html` is a second Vite entry with both languages side by side and a link home, so it needs no JavaScript.
 - **Open Graph image:** a 1200 × 630 PNG rendered by CI from the default card.
 
 ## 7. Build-time validation `[FR-B3, FR-I5]`

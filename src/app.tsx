@@ -1,4 +1,9 @@
-// Placeholder root. The profile (#4) and the editor (#14) replace it.
+import { useEffect, useState } from 'preact/hooks';
+import { onLanguageChange, t } from './i18n';
+
+// Placeholder for the editor (#14). It re-renders when the language changes.
 export function App() {
-  return <h1>Kobo The Wolf</h1>;
+  const [, setLang] = useState(0);
+  useEffect(() => onLanguageChange(() => setLang((n) => n + 1)), []);
+  return <p>{t('editor.soon')}</p>;
 }
