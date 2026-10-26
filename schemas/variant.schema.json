@@ -8,6 +8,7 @@
   "required": ["id", "caras", "fondo", "archivo", "controles"],
   "properties": {
     "id": { "$ref": "#/$defs/key" },
+    "orden": { "type": "integer", "minimum": 0, "description": "Position in the variant tabs; variants sort by orden, then id (DESIGN §3.4)." },
     "caras": {
       "type": "object",
       "additionalProperties": false,

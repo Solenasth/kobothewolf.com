@@ -61,6 +61,13 @@ describe('FR-B3 schemas reject bad data', () => {
       expect.stringContaining('/caras/reverso'),
     );
   });
+
+  it('accepts a tab position and rejects one that is not a whole number', () => {
+    const v = (orden: unknown) => [{ dir: 'v/licencia', manifest: { ...clone(manifest), orden }, html }];
+    expect(checkStyle(ajv, style({ variants: v(2) }))).toEqual([]);
+    expect(checkStyle(ajv, style({ variants: v(1.5) }))).toContainEqual(expect.stringContaining('/orden must be integer'));
+    expect(checkStyle(ajv, style({ variants: v(-1) }))).toContainEqual(expect.stringContaining('/orden must be >= 0'));
+  });
 });
 
 describe('FR-E8 FR-E9 cross-file rules', () => {
