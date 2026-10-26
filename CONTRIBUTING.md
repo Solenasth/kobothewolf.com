@@ -101,6 +101,7 @@ npm ci                       # install exactly what the lockfile pins
 npx playwright install       # once: Chromium, Firefox and WebKit for E2E
 npm run dev                  # dev server
 npm run typecheck            # TypeScript, browser and Node configs
+npm run validate             # build-time data checks (catalog keys, …); also runs before build
 npm test                     # unit tests (vitest)
 npm run test:e2e             # builds, serves and runs E2E in all three browsers
 npm run build                # production build in dist/
