@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vitest/config';
 import en from './src/i18n/en.json' with { type: 'json' };
 import { fillStaticHtml } from './src/i18n/static-html.ts';
+import { scopeFaceCss } from './scripts/scope-css.ts';
 
 // DESIGN §8. Pages can't send headers, so the policy ships as a meta tag. It is
 // added to built pages only: the dev server needs inline scripts and a socket.
@@ -37,7 +38,7 @@ function contentSecurityPolicy(): Plugin {
 
 export default defineConfig({
   appType: 'mpa',
-  plugins: [staticI18n(), contentSecurityPolicy()],
+  plugins: [scopeFaceCss(), staticI18n(), contentSecurityPolicy()],
   oxc: {
     jsx: { runtime: 'automatic', importSource: 'preact' },
   },
