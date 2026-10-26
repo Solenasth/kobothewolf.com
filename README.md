@@ -2,9 +2,9 @@
 
 My site and a live demo of my freelance work: a short profile and the **KOBO.EXE card editor**. You can design and export print-ready business cards (90 × 50 mm, 300 dpi PNG and a print PDF) in the boykisser-uwu style, in Spanish or English.
 
-**Live:** https://kobothewolf.com *(coming with milestone M1)*
+**Live:** https://kobothewolf.com
 
-> Work in progress. The project is in bootstrap (milestone M0).
+> Work in progress: v0.1.0 has the profile and the inquiry form; the card editor arrives over milestones M2–M7. See [CHANGELOG.md](CHANGELOG.md).
 
 ## How this is built
 This repo is a showcase of the process as much as the product.
