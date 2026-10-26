@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 7: §6.1 inquiry form, #30; rev. 6: §6 static profile, #4; rev. 5: §10 Playwright container, #26; rev. 4: §12 history shape, #24)
+**Status:** Approved 2026-10-26 (rev. 8: §3.3 ranges, §7 rules, §11 validators, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -82,9 +82,9 @@ These are the lists P8 hard-coded. They hold keys only; display names come from 
   "sombras": ["#FF8FB8", "#FFC8DD", "#BDE0FE", "#CDB4DB"],
   "fondos":  ["gingham", "cuaderno", "femboy", "crema", "algodon"],
   "arte":    ["licencia", "feliz", "clik", "yap"],
-  "rangos":  { "rotSt": [-8, 7], "rotTit": [-4, 3], "escala": [85, 115], "washi": [12, 18], "brillitos": [5, null] } }
+  "escala":  [85, 115] }
 ```
-The ranges are generated from `tokens.json` → `antirreglas` at build time, so there is only one source of truth (FR-E9). `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
+The other ranges are derived from `tokens.json` → `antirreglas`, so there is only one source of truth (FR-E9): `rotSt` ← `rotacion_stickers_grados`, `rotTit` ← `rotacion_titulares_grados`, `washi` ← `washi.grados`, `brillitos` ← `brillitos.por_cara` (the editor also caps it at the face's sparkle count). The sticker scale has no anti-rule, so it lives in `editor.json`. Every accent and shadow must be one of the style's `color` tokens. `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
 
 ### 3.4 Variant manifest
 As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). Names are catalog keys (`variant.licencia.name`).
@@ -183,11 +183,12 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 
 ## 7. Build-time validation `[FR-B3, FR-I5]`
 `npm run validate` runs before the build and in CI. It fails on any of these:
-- An invalid schema (`tokens`, `variant`, `editor`).
-- A `data-ed` on or inside a `.qr`, `.arroba`, contact URL or code-cat canvas.
-- A face missing the main QR or `@KoboTheWolf`, or with either inside a `data-parte`.
-- More than 4 font families declared per face.
+- Data that doesn't match its schema in `schemas/` (`tokens`, `editor`, `variant`), or editor colors that aren't style color tokens, or anti-rules missing for a derived range.
+- A `data-ed` on or inside a `.qr`, `.arroba`, `.url` or `<canvas>`, or on an element whose text is contact data (`@KoboTheWolf`, `t.me/`, `kobothewolf.com`).
+- A **back** face (`-r`) without exactly one main QR (a `.qr` outside any `data-parte`) and an `@KoboTheWolf` outside any `data-parte`. The site QR lives inside its optional `data-parte` block.
 - A catalog key missing in any language.
+
+Face rules read `styles/*/variantes/*/caras.html` with parse5 and are unit-tested on fixtures; they apply to real faces once M3 adds them. The **≤ 4 fonts per face** limit is not checked here: shared CSS rules make a static count unreliable. It is checked on the fonts actually rendered, by an E2E test once faces exist (M3) and by `check-exports` (FR-B2).
 
 ## 8. Security model `[NFR-4, NFR-5]`
 The site is static with no server state. What needs protecting is visitors' browsers, users' images, and the domain and repo.
@@ -234,7 +235,8 @@ The site is static with no server state. What needs protecting is visitors' brow
 | vite, typescript | dev | build |
 | vitest | dev | unit tests |
 | @playwright/test, @axe-core/playwright | dev | E2E, visual, accessibility, CLI rendering |
-| ajv | dev | compiles schemas into standalone validators at build time, so there is no runtime dependency |
+| ajv | dev | compiles schemas into standalone validators at build time, so there is no runtime dependency. Its one runtime helper (`ucs2length`, code-point string length) is replaced by a local function, and generation fails if any other import appears |
+| parse5 | dev | parses face HTML in `validate` (Node has no DOM) |
 | jsqr, fontkit | dev | export checks |
 | tsx | dev | runs the CLI |
 

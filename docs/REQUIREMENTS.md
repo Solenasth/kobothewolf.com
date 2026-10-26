@@ -1,6 +1,6 @@
 # Requirements: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 6: FR-P8 inquiry form, #30; rev. 5: FR-P1 contact, #4; rev. 4: FR-R6 preserve-history, #24)
+**Status:** Approved 2026-10-26 (rev. 7: FR-B3 contact rule applies to back faces, #5; rev. 6: FR-P8, #30; rev. 5: FR-P1, #4; rev. 4: FR-R6, #24)
 **Companion:** [DESIGN.md](DESIGN.md) · decisions in [decisions/](decisions/)
 **Inputs** (historical, superseded by this document; redacted copies go in `docs/origin/`, FR-R2):
 - **GP:** "Port the variant editor to GitHub Pages", the minimal single-file port.
@@ -97,7 +97,7 @@ The site is a freelance showcase on two levels:
 |---|---|
 | FR-B1 | A CLI command produces a **vector PDF** (embedded subset fonts, selectable text) from a `.kobo.json`. It runs locally and in CI, not on the site. `[EV §5.2]` |
 | FR-B2 | A CLI command checks exports: size, dpi, QR decode, nothing overlapping the QRs, fonts, glyph coverage, and at most 4 fonts per face. `[EV §5.3]` |
-| FR-B3 | The build fails when any of these hold: a token, variant or document schema is invalid; a locked element carries `data-ed`; a face lacks the main QR or `@KoboTheWolf`; the main QR or `@KoboTheWolf` sits inside a `data-parte`; or a catalog is missing a key (FR-I5). `[EV FR-9, §3.3]` |
+| FR-B3 | The build fails when any of these hold: a token, variant or document schema is invalid; a locked element carries `data-ed`; a **back** face lacks the main QR or `@KoboTheWolf` (any front can pair with any back, so every back carries the contact; fronts may omit it, as in P8); the main QR or `@KoboTheWolf` sits inside a `data-parte`; or a catalog is missing a key (FR-I5). `[EV FR-9, §3.3]` |
 
 ### 5.5 Deployment (FR-D)
 | ID | Requirement |

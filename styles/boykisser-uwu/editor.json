@@ -1,0 +1,7 @@
+{
+  "acentos": ["#FF8FB8", "#8EC5FF", "#CDB4DB", "#E5484D"],
+  "sombras": ["#FF8FB8", "#FFC8DD", "#BDE0FE", "#CDB4DB"],
+  "fondos": ["gingham", "cuaderno", "femboy", "crema", "algodon"],
+  "arte": ["licencia", "feliz", "clik", "yap"],
+  "escala": [85, 115]
+}

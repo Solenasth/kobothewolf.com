@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kobothewolf.com/schemas/variant.schema.json",
+  "title": "Variant manifest",
+  "description": "EV §3.4; the display name is the catalog key variant.<id>.name (DESIGN §3.4).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "caras", "fondo", "archivo", "controles"],
+  "properties": {
+    "id": { "$ref": "#/$defs/key" },
+    "caras": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["frente", "reverso"],
+      "properties": {
+        "frente": { "type": "string", "pattern": "^[a-z0-9]+-f$" },
+        "reverso": { "type": "string", "pattern": "^[a-z0-9]+-r$" }
+      }
+    },
+    "fondo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["frente", "reverso"],
+      "properties": { "frente": { "$ref": "#/$defs/key" }, "reverso": { "$ref": "#/$defs/key" } }
+    },
+    "archivo": { "$ref": "#/$defs/key" },
+    "controles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["textos", "arte", "fondo", "acento", "rotSt", "rotTit", "brillitos", "washi", "lazo", "escala", "sombra"] }
+    },
+    "verificar": { "type": "array", "uniqueItems": true, "items": { "enum": ["qr", "contacto", "max_fuentes"] } },
+    "montar": { "type": "string", "pattern": "^[a-z0-9-]+\\.ts$" }
+  },
+  "$defs": {
+    "key": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 }
+  }
+}
