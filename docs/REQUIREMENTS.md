@@ -1,6 +1,6 @@
 # Requirements: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 5: FR-P1 contact and profile copy, #4; rev. 4: FR-R6 preserve-history, #24)
+**Status:** Approved 2026-10-26 (rev. 6: FR-P8 inquiry form, #30; rev. 5: FR-P1 contact, #4; rev. 4: FR-R6 preserve-history, #24)
 **Companion:** [DESIGN.md](DESIGN.md) · decisions in [decisions/](decisions/)
 **Inputs** (historical, superseded by this document; redacted copies go in `docs/origin/`, FR-R2):
 - **GP:** "Port the variant editor to GitHub Pages", the minimal single-file port.
@@ -55,6 +55,7 @@ The site is a freelance showcase on two levels:
 | FR-P5 | The page has a `<title>`, `<meta name="description">`, `<html lang>`, a favicon, and Open Graph tags (title, description, image). |
 | FR-P6 | Contact details and the profile are readable even if the editor's JavaScript fails to load. |
 | FR-P7 | The profile uses the editor's boykisser-uwu UI style (palette, fonts, buttons), not a separate neutral style. |
+| FR-P8 | An inquiry / quote form (name, reply email, type, message) composes an email to `contact@kobothewolf.com` in the active language and opens it in the visitor's email app. Nothing is sent or stored by the site. The address stays visible, and a "Copy message" button covers visitors without an email app. Without JavaScript the form is hidden and the email link remains. |
 
 ### 5.2 Languages (FR-I)
 | ID | Requirement |
