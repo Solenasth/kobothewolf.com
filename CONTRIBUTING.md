@@ -71,6 +71,7 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 [`private-by-default`](policies/private-by-default.md)
 - New repositories, artifacts and shares start private. Making anything public takes the maintainer's explicit OK for that specific item. This repo and its site were approved as public in [decision 0003](docs/decisions/0003-public-repo-and-art.md).
 - Never commit secrets, local paths, personal or household details, or internal-only notes. gitleaks runs in CI.
+- Images are committed with their metadata stripped (`node scripts/strip-png.ts <file.png>`), and every asset is listed in [`CREDITS.md`](CREDITS.md) or has a license file next to it. `npm run validate` enforces both.
 - Per-machine notes go in `CLAUDE.local.md`, which is ignored.
 
 ## 10. Authorship (hard)
@@ -101,7 +102,7 @@ npm ci                       # install exactly what the lockfile pins
 npx playwright install       # once: Chromium, Firefox and WebKit for E2E
 npm run dev                  # dev server
 npm run typecheck            # TypeScript, browser and Node configs
-npm run validate             # build-time checks: schemas, style data, face rules, catalogs; also runs before build
+npm run validate             # build-time checks: schemas, style data, face rules, catalogs, assets; also runs before build
 npm run gen                  # regenerate src/core/generated/ from schemas/ (runs automatically before dev, test, typecheck, validate)
 npm test                     # unit tests (vitest)
 npm run test:e2e             # builds, serves and runs E2E in all three browsers
