@@ -4,7 +4,7 @@ My site and a live demo of my freelance work: a short profile and the **KOBO.EXE
 
 **Live:** https://kobothewolf.com
 
-> Work in progress: v0.1.0 has the profile and the inquiry form; the card editor arrives over milestones M2–M7. See [CHANGELOG.md](CHANGELOG.md).
+> Work in progress: v0.1.0 has the profile and the inquiry form, and v0.2.0 adds the editor's core (no UI yet). The card editor UI arrives over milestones M3–M7. See [CHANGELOG.md](CHANGELOG.md).
 
 ## How this is built
 This repo is a showcase of the process as much as the product.
