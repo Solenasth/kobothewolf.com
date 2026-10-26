@@ -57,3 +57,9 @@ describe('FR-B3 locked elements are never editable', () => {
     expect(check(back(`${QR}${AT}<p data-ed="X">${txt}</p>`))).toEqual([expect.stringContaining('contact data editable')]);
   });
 });
+
+describe('FR-E4 data-parte names do not collide with built-in pieces', () => {
+  it.each(['arte', 'lazo', 'washi-2'])('rejects data-parte=%j', (name) => {
+    expect(check(back(`${QR}${AT}<div data-parte="${name}"></div>`))).toEqual([expect.stringContaining('built-in piece key')]);
+  });
+});
