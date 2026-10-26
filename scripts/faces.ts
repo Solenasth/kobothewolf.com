@@ -1,12 +1,10 @@
 // Face rules for `validate` (FR-B3, DESIGN §7). Faces are trusted build-time
 // HTML; parse5 gives Node the tree a browser would build.
 import { parse, type DefaultTreeAdapterMap } from 'parse5';
+import { BUILTIN_PIECES, CONTACT_TEXT, LOCKED_CLASSES } from '../src/core/marks.ts';
 
 type Node = DefaultTreeAdapterMap['node'];
 type Element = DefaultTreeAdapterMap['element'];
-
-const LOCKED_CLASSES = ['qr', 'arroba', 'url'];
-const CONTACT_TEXT = /@KoboTheWolf|t\.me\/|kobothewolf\.com/i;
 
 const isElement = (node: Node): node is Element => 'tagName' in node;
 const attr = (el: Element, name: string) => el.attrs.find((a) => a.name === name)?.value;
@@ -26,7 +24,9 @@ function text(node: Node): string {
   return ('childNodes' in node ? node.childNodes : []).map(text).join('');
 }
 
-const isLocked = (el: Element) => el.tagName === 'canvas' || classes(el).some((c) => LOCKED_CLASSES.includes(c));
+const isLocked = (el: Element) =>
+  el.tagName === 'canvas' || classes(el).some((c) => (LOCKED_CLASSES as readonly string[]).includes(c));
+const isBuiltinPiece = (name: string) => (BUILTIN_PIECES as readonly string[]).includes(name) || /^washi-\d+$/.test(name);
 const hasParte = (el: Element) => attr(el, 'data-parte') !== undefined;
 
 /** Returns the faces in a caras.html: elements with data-cara="<id>". */
@@ -52,6 +52,8 @@ export function checkFace(file: string, id: string, face: Element): string[] {
       if (chain.some(isLocked)) errors.push(`${where}: data-ed="${ed}" is on or inside a locked element`);
       else if (CONTACT_TEXT.test(text(el))) errors.push(`${where}: data-ed="${ed}" makes contact data editable`);
     }
+    const parte = attr(el, 'data-parte');
+    if (parte !== undefined && isBuiltinPiece(parte)) errors.push(`${where}: data-parte="${parte}" reuses a built-in piece key`);
     const inParte = chain.some(hasParte);
     if (classes(el).includes('qr') && !inParte) mainQr++;
     if (!inParte && [...el.childNodes].some((n) => n.nodeName === '#text' && 'value' in n && n.value.includes('@KoboTheWolf'))) {

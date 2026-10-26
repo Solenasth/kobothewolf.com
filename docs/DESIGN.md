@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 8: §3.3 ranges, §7 rules, §11 validators, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 9: §3.2 marks parser, §7 piece keys, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -71,7 +71,9 @@ EV §3 is adopted as written: style ──< variant ──< face, with tokens, s
 | Site QR | ~10 mm framed, version 2, ECC M |
 
 ### 3.2 Marks contract (EV §3.3, kept verbatim)
-`data-ed`, `data-bote` + `data-cls`, `data-arte`, `data-rot="st|tit"`, `data-lazo`, `data-parte`, `.washi` and `.spark` keep their P8 meanings. Unmarked elements can't be edited. This is documented in `docs/marcas.md`.
+`data-ed`, `data-bote` + `data-cls`, `data-arte`, `data-rot="st|tit"`, `data-lazo`, `data-parte`, `.washi` and `.spark` keep their P8 meanings. Unmarked elements can't be edited. This is documented in [`docs/marcas.md`](marcas.md).
+
+`readMarks(face)` (`src/core/marks.ts`) is the one implementation. It takes a minimal element interface (`tagName`, `getAttribute`, `children`, `textContent`) that DOM elements satisfy, so the browser passes real faces and unit tests pass parse5 trees. Built-in pieces have stable keys (`arte`, `lazo`, `washi-<n>`) and UI-catalog labels; `data-parte` keys get style-catalog labels.
 
 **i18n note:** the values of `data-ed` and `data-parte` (e.g. `"Emisor"`, `"Sitio (QR + texto)"`) are **stable keys**, not display text. Their labels come from the style catalogs (§4). This keeps the contract compatible with the design source, which uses Spanish labels as values: in `es.json` those keys map to themselves.
 
@@ -186,6 +188,7 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 - Data that doesn't match its schema in `schemas/` (`tokens`, `editor`, `variant`), or editor colors that aren't style color tokens, or anti-rules missing for a derived range.
 - A `data-ed` on or inside a `.qr`, `.arroba`, `.url` or `<canvas>`, or on an element whose text is contact data (`@KoboTheWolf`, `t.me/`, `kobothewolf.com`).
 - A **back** face (`-r`) without exactly one main QR (a `.qr` outside any `data-parte`) and an `@KoboTheWolf` outside any `data-parte`. The site QR lives inside its optional `data-parte` block.
+- A `data-parte` key equal to a built-in piece key (`arte`, `lazo`, `washi-<n>`).
 - A catalog key missing in any language.
 
 Face rules read `styles/*/variantes/*/caras.html` with parse5 and are unit-tested on fixtures; they apply to real faces once M3 adds them. The **≤ 4 fonts per face** limit is not checked here: shared CSS rules make a static count unreliable. It is checked on the fonts actually rendered, by an E2E test once faces exist (M3) and by `check-exports` (FR-B2).
