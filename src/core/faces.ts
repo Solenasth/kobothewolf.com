@@ -16,3 +16,22 @@ export function parseFaces(html: string, doc: Document = document): Map<string, 
   }
   return faces;
 }
+
+const ASSET_ATTRIBUTES = ['src', 'data-mask'] as const;
+
+/**
+ * Points a face's `assets/<file>` references (images, the code-cat mask) at
+ * their built URLs (DESIGN §3.4). Call it before the face is inserted, so
+ * nothing loads from the unresolved path. An unknown file is an error.
+ */
+export function resolveAssets(face: Element, urls: Readonly<Record<string, string>>): void {
+  for (const name of ASSET_ATTRIBUTES) {
+    for (const el of face.querySelectorAll(`[${name}]`)) {
+      const value = el.getAttribute(name)!;
+      const file = /^assets\/([^/]+)$/.exec(value)?.[1];
+      const url = file === undefined ? undefined : urls[file];
+      if (url === undefined) throw new Error(`face "${face.getAttribute('data-cara')}": unknown asset ${name}="${value}"`);
+      el.setAttribute(name, url);
+    }
+  }
+}

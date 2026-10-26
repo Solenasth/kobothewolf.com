@@ -1,0 +1,9 @@
+{
+  "id": "nueva",
+  "orden": 0,
+  "caras": { "frente": "nue-f", "reverso": "nue-r" },
+  "fondo": { "frente": "crema", "reverso": "cuaderno" },
+  "archivo": "new-card",
+  "controles": ["textos", "arte", "fondo"],
+  "verificar": ["qr", "contacto", "max_fuentes"]
+}
