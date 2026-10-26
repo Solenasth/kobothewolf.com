@@ -11,6 +11,7 @@
     "e2e"
   ],
   "exclude": [
-    "e2e/fixtures/scoping"
+    "e2e/fixtures/scoping",
+    "e2e/fixtures/caras"
   ]
 }
