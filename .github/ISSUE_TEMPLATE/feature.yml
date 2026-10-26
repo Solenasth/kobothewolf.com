@@ -1,0 +1,20 @@
+name: Feature / task
+description: A unit of work backed by docs/REQUIREMENTS.md
+title: "<type>(<scope>): <summary>"
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: Problem, description: What is missing or wrong, and why it matters. }
+    validations: { required: true }
+  - type: input
+    id: reqs
+    attributes: { label: Requirements, description: "IDs this covers, e.g. FR-E14, NFR-4", placeholder: "FR-…" }
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes: { label: Scope, description: What is in and out of this issue. }
+    validations: { required: true }
+  - type: textarea
+    id: acceptance
+    attributes: { label: Acceptance criteria, description: Checkable statements; each maps to a test. }
+    validations: { required: true }
