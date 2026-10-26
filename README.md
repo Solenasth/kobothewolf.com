@@ -17,7 +17,19 @@ This repo is a showcase of the process as much as the product.
 TypeScript · Vite · Preact · html-to-image · jsPDF · Playwright (Chromium, Firefox, WebKit) · vitest · GitHub Actions → GitHub Pages.
 
 ## Run locally
-*(Added by the first implementation issue.)*
+See [Local setup](CONTRIBUTING.md#local-setup) in CONTRIBUTING.
+
+## Hosting and DNS
+GitHub Pages, deployed by [`deploy.yml`](.github/workflows/deploy.yml) after CI passes on `main`. The custom domain is set in **Settings → Pages** (Actions deploys ignore a `CNAME` file) and verified at the account level against takeovers.
+
+| Host | Type | Value |
+|---|---|---|
+| `kobothewolf.com` | `A` | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` |
+| `kobothewolf.com` | `AAAA` | `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153` |
+| `www.kobothewolf.com` | `CNAME` | `solenasth.github.io` |
+| `_github-pages-challenge-solenasth.kobothewolf.com` | `TXT` | account-level domain verification code |
+
+No other `A`, `AAAA`, `ALIAS` or `CNAME` records exist on these hosts. HTTPS is enforced, and `www` redirects to the apex.
 
 ## License
 Code: MIT (see `LICENSE`). Fonts: OFL, each license next to its file. Meme-template art is credited on the cards and in `CREDITS.md`; rights stay with their holders.
