@@ -7,7 +7,10 @@ Identifiers stay in Spanish, as in the design source (NFR-12). Values are **stab
 ## Face root
 | Mark | Meaning |
 |---|---|
-| `data-cara="<id>"` | The face root. Ids end in `-f` (front) or `-r` (back), e.g. `lic-f`, `lic-r`. Variant CSS is scoped under this attribute (DESIGN §5.1). |
+| `data-cara="<id>"` | The face root: the 960 × 560 canvas with bleed. Ids end in `-f` (front) or `-r` (back), e.g. `lic-f`, `lic-r`. Variant CSS is scoped under this attribute (DESIGN §5.1). |
+| `.card` | The first child of the root: the 900 × 500 cut, placed at (30, 30). |
+
+The editor adds `fondo-<key>` (the background) to the root and may set `--acento` and `--sombra` on it. Images and the code-cat mask point at the style's assets as `assets/<file>`; a `data-arte` image shows `assets/st-<key>.png` for one of the style's art keys (DESIGN §3.4).
 
 ## Marks
 | Mark | Meaning | Editor control | Label |
@@ -37,5 +40,6 @@ A `data-parte` block may contain locked elements; it then shows or hides **as a 
 - No `data-ed` on or inside a locked element, and none on contact text.
 - No `data-parte` key equal to a built-in piece key (`arte`, `lazo`, `washi-<n>`).
 - Each face id in a variant's `variant.json` exists in its `caras.html`.
+- Every `assets/` path exists, and every key above has a label in each language of the style catalogs.
 
 The **≤ 4 fonts per face** limit is checked on rendered faces, not here (DESIGN §7).
