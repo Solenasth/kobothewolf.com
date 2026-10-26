@@ -85,4 +85,16 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - Each milestone ends in a SemVer tag (`v0.1.0` = M1, …), a GitHub release, and a `CHANGELOG.md` entry grouped by commit type.
 
 ## Local setup
-To be filled in by the bootstrap issue: Node version, `npm ci`, `npm run dev`, `npm test`, and the Playwright browsers.
+Requires the Node version in [`.nvmrc`](.nvmrc) (`nvm use`).
+
+```sh
+npm ci                       # install exactly what the lockfile pins
+npx playwright install       # once: Chromium, Firefox and WebKit for E2E
+npm run dev                  # dev server
+npm run typecheck            # TypeScript, browser and Node configs
+npm test                     # unit tests (vitest)
+npm run test:e2e             # builds, serves and runs E2E in all three browsers
+npm run build                # production build in dist/
+```
+
+Package install scripts are off unless approved in `allowScripts` (`npm install-scripts ls`).
