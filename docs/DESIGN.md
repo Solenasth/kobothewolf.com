@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -15,7 +15,7 @@
   │ src/i18n    catalogs en/es + t() + language store             │
   │ src/core    framework-free logic ◄──────── cli/ (Node)        │
   │ styles/<estilo>/  tokens, faces, CSS, labels, assets          │
-  │ fonts/ schemas/ tests/ docs/ .github/                         │
+  │ schemas/ tests/ docs/ .github/                                │
   └───────────────┬───────────────────────────────────────────────┘
                   │ PR → CI → merge commit → deploy.yml
                   ▼
@@ -47,8 +47,8 @@
 │   ├── i18n/{en,es}.json        labels: fields, pieces, variants, backgrounds, colors, art
 │   ├── variantes/{certificado,licencia,codigo,socks}/
 │   │     variant.json  caras.html  caras.css  [montar.ts]
-│   └── assets/                  stickers, QR, masks (PNG files)
-├── fonts/  schemas/  cli/  tests/
+│   └── assets/                  stickers, QR, masks (PNG files, metadata stripped)
+├── schemas/  cli/  tests/       (fonts: src/theme/fonts/, each with its OFL license)
 ├── docs/   REQUIREMENTS.md  DESIGN.md  decisions/  origin/  marcas.md  agregar-variante.md
 ├── .github/ workflows/{ci,deploy}.yml  ISSUE_TEMPLATE/  pull_request_template.md
 ├── README.md  CONTRIBUTING.md  CHANGELOG.md  CREDITS.md  LICENSE (MIT)
@@ -194,13 +194,16 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 - **Send:** validation (required fields, a basic email shape) sets `aria-invalid` and per-field messages and focuses the first invalid field. A valid form opens the `mailto:` URL through a temporary link. "Copy message" writes the recipient, subject and body to the clipboard. Status messages use the page's polite live region.
 - **Security:** the CSP is unchanged. The form never submits (`form-action 'none'` stays), and opening `mailto:` is a navigation, not a request. No data leaves the browser except through the visitor's own email app.
 
-## 7. Build-time validation `[FR-B3, FR-I5]`
+## 7. Build-time validation `[FR-B3, FR-I5, NFR-5, NFR-9]`
 `npm run validate` runs before the build and in CI. It fails on any of these:
 - Data that doesn't match its schema in `schemas/` (`tokens`, `editor`, `variant`), or editor colors that aren't style color tokens, or anti-rules missing for a derived range.
 - A `data-ed` on or inside a `.qr`, `.arroba`, `.url` or `<canvas>`, or on an element whose text is contact data (`@KoboTheWolf`, `t.me/`, `kobothewolf.com`).
 - A **back** face (`-r`) without exactly one main QR (a `.qr` outside any `data-parte`) and an `@KoboTheWolf` outside any `data-parte`. The site QR lives inside its optional `data-parte` block.
 - A `data-parte` key equal to a built-in piece key (`arte`, `lazo`, `washi-<n>`).
 - A catalog key missing in any language.
+- An asset file (under `styles/*/assets/`, `src/theme/fonts/` or `public/`) that is neither listed by path in `CREDITS.md` nor has a `LICENSE-<name>.txt` next to it.
+- A committed PNG with any chunk besides `IHDR`, `PLTE`, `tRNS`, `IDAT` and `IEND`. Text, EXIF and C2PA (`caBX`) metadata can carry personal details or tool credentials. Only pixel data is published.
+- A style file (`.css`, `.html`, `.json` under `styles/`) or app stylesheet that references an absolute or protocol-relative URL in `url()`, `@import`, `src` or `srcset`. Assets load from the origin only, which the CSP also enforces at runtime (T-SEC-4).
 
 Face rules read `styles/*/variantes/*/caras.html` with parse5 and are unit-tested on fixtures; they apply to real faces once M3 adds them. The **≤ 4 fonts per face** limit is not checked here: shared CSS rules make a static count unreliable. It is checked on the fonts actually rendered, by an E2E test once faces exist (M3) and by `check-exports` (FR-B2).
 
