@@ -1,0 +1,9 @@
+{
+  "id": "licencia",
+  "orden": 2,
+  "caras": { "frente": "lic-f", "reverso": "lic-r" },
+  "fondo": { "frente": "gingham", "reverso": "cuaderno" },
+  "archivo": "boykisser-license",
+  "controles": ["textos", "arte", "fondo", "acento", "rotSt", "rotTit", "brillitos", "washi", "lazo", "escala"],
+  "verificar": ["qr", "contacto", "max_fuentes"]
+}

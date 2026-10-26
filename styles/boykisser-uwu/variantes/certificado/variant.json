@@ -1,0 +1,9 @@
+{
+  "id": "certificado",
+  "orden": 1,
+  "caras": { "frente": "cer-f", "reverso": "cer-r" },
+  "fondo": { "frente": "gingham", "reverso": "gingham" },
+  "archivo": "certified-bug-nuzzler",
+  "controles": ["textos", "arte", "fondo", "acento", "rotSt", "rotTit", "brillitos", "washi", "lazo", "escala", "sombra"],
+  "verificar": ["qr", "contacto", "max_fuentes"]
+}

@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -38,9 +38,10 @@
 │   ├── i18n/
 │   │   ├── en.json  es.json     UI and profile strings
 │   │   └── i18n.ts              t(), plurals, lang detection and persistence
-│   ├── theme/ui.css             boykisser-uwu UI tokens (--ui-*), shared by profile and editor
+│   ├── styles.ts                finds every style's variants, CSS and assets (Vite globs)
+│   ├── theme/ui.css  fonts.css  boykisser-uwu UI tokens (--ui-*); @font-face for UI and faces
 │   └── core/
-│       ├── marks.ts  store.ts  document.ts  sticker.ts  faces.ts
+│       ├── marks.ts  store.ts  document.ts  sticker.ts  faces.ts  variants.ts
 │       └── export/{png,pdf,shadows,save}.ts
 ├── styles/boykisser-uwu/
 │   ├── tokens.json  STYLE.md  caras.css  editor.json
@@ -88,8 +89,19 @@ These are the lists P8 hard-coded. They hold keys only; display names come from 
 ```
 The other ranges are derived from `tokens.json` → `antirreglas`, so there is only one source of truth (FR-E9): `rotSt` ← `rotacion_stickers_grados`, `rotTit` ← `rotacion_titulares_grados`, `washi` ← `washi.grados`, `brillitos` ← `brillitos.por_cara` (the editor also caps it at the face's sparkle count). The sticker scale has no anti-rule, so it lives in `editor.json`. Every accent and shadow must be one of the style's `color` tokens. `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
 
-### 3.4 Variant manifest
-As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). Names are catalog keys (`variant.licencia.name`).
+### 3.4 Variant manifest and faces
+As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). Names are catalog keys (`variant.licencia.name`). Two more fields:
+- `orden` (integer, optional): position in the variant tabs. Variants sort by `orden`, then by `id`, so adding one never means editing a list elsewhere (FR-E18).
+- There is no `nombre`: the label is `variant.<id>.name` in the style catalogs.
+
+**Faces (`caras.html`):**
+- Each face root carries `data-cara` and is the 960 × 560 canvas with bleed. Inside it, `.card` is the 900 × 500 cut at (30, 30) (§3.1).
+- The editor puts the background class `fondo-<key>` on the root, from `variant.json` → `fondo` and later the user's choice. It may set `--acento` and `--sombra` inline on the root; the style's `caras.css` gives their defaults.
+- Images point at style assets as `assets/<file>` (`src`, and `data-mask` for the code cat). `src/styles.ts` resolves them to built URLs through a Vite `?url` glob before a face is inserted; an unknown path is an error.
+- Art key `k` is the file `assets/st-<k>.png`. A face's default art is the key its `data-arte` image shows; `"feliz"` replaces P8's `"sueter"` (decision 0003).
+- Variant CSS needs no id prefixes (`#lic-f .foto` in P8 is `.foto` here): the build scopes it to the variant's two faces (§5.1).
+
+**Loading:** `src/core/variants.ts` `collectVariants(files)` turns the globbed files (manifests, faces HTML) into the list of styles and their variants, sorted as above, and rejects a variant with a missing file. It is pure, so a unit test feeds it a fixture variant and shows the editor needs no change to pick one up (FR-E18).
 
 ### 3.5 Document (`.kobo.json`), version 1
 EV §3.5 with these changes:
@@ -104,7 +116,7 @@ Documents store keys, never labels, so they're language-independent.
 ## 4. Internationalization `[FR-I1–I6, NFR-12]`
 - **Catalogs:**
   - `src/i18n/{en,es}.json` hold UI and profile strings.
-  - `styles/<estilo>/i18n/{en,es}.json` hold style labels: `ed.<key>`, `parte.<key>`, `variant.<id>.name`, `face.<id>.name`, `fondo.<key>`, `color.<hex>`, `arte.<key>`.
+  - `styles/<estilo>/i18n/{en,es}.json` hold style labels: `ed.<key>`, `parte.<key>`, `variant.<id>.name`, `face.<id>.name`, `fondo.<key>`, `color.<hex>`, `arte.<key>`. `<hex>` is the color in lowercase without `#` (`color.ff8fb8`).
   - Keys are flat and dot-separated. Interpolation uses `{name}`; plurals use `Intl.PluralRules`.
 - **`t(key, params)`** returns the active language's string. If the key is missing it falls back to English, then to the key itself. A missing key logs a warning in development; in CI it is a build error.
 - **Language store:**
@@ -205,11 +217,14 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 - A **back** face (`-r`) without exactly one main QR (a `.qr` outside any `data-parte`) and an `@KoboTheWolf` outside any `data-parte`. The site QR lives inside its optional `data-parte` block.
 - A `data-parte` key equal to a built-in piece key (`arte`, `lazo`, `washi-<n>`).
 - A catalog key missing in any language.
+- A style label missing for a key the style uses: every `data-ed` and `data-parte` value, variant and face id, and `editor.json` background, color and art. A label for a key nothing uses is also an error, so catalogs don't go stale.
+- A variant whose default backgrounds aren't in `editor.json` → `fondos`.
+- A face image or mask path that isn't `assets/<file>` of an existing file in the style, a `data-arte` image that isn't `assets/st-<key>.png` for an `editor.json` art key, or an art key without its file.
 - An asset file (under `styles/*/assets/`, `src/theme/fonts/` or `public/`) that is neither listed by path in `CREDITS.md` nor has a `LICENSE-<name>.txt` next to it.
 - A committed PNG with any chunk besides `IHDR`, `PLTE`, `tRNS`, `IDAT` and `IEND`. Text, EXIF and C2PA (`caBX`) metadata can carry personal details or tool credentials. Only pixel data is published.
 - A style file (`.css`, `.html`, `.json` under `styles/`) or app stylesheet that references an absolute or protocol-relative URL in `url()`, `@import`, `src` or `srcset`. Assets load from the origin only, which the CSP also enforces at runtime (T-SEC-4).
 
-Face rules read `styles/*/variantes/*/caras.html` with parse5 and are unit-tested on fixtures; they apply to real faces once M3 adds them. The **≤ 4 fonts per face** limit is not checked here: shared CSS rules make a static count unreliable. It is checked on the fonts actually rendered, by an E2E test once faces exist (M3) and by `check-exports` (FR-B2).
+Face rules read `styles/*/variantes/*/caras.html` with parse5 and are unit-tested on fixtures. The **≤ 4 fonts per face** limit (`tokens.json` → `tipografia.max_fuentes_por_cara`) is not checked here: shared CSS rules make a static count unreliable. It is checked on the fonts actually rendered, by the faces fixture page (§10) and later by `check-exports` (FR-B2). P8's Programming socks back used 5; its "hewwo~" greeting moved from Lazo to Burbuja to meet the rule (#12).
 
 ## 8. Security model `[NFR-4, NFR-5]`
 The site is static with no server state. What needs protecting is visitors' browsers, users' images, and the domain and repo.
@@ -246,6 +261,8 @@ The site is static with no server state. What needs protecting is visitors' brow
 - **E2E environment:** the E2E jobs run in Microsoft's Playwright image (`mcr.microsoft.com/playwright:v<version>-resolute`), pinned by digest, with browsers and system packages preinstalled. This avoids a slow `apt` step and gives the visual baselines the same fonts and libraries on every run. The tag must equal `@playwright/test`, and CI checks it.
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.
 - **Fixture pages:** behavior that needs a real browser but must not ship, such as CSS scoping with deliberately conflicting variants, is tested on fixture pages under `e2e/fixtures/`. They're built by their own Vite config with the same plugins and served by a second Playwright web server, so the production build stays unchanged.
+  - `scoping/`: two conflicting demo variants (§5.1).
+  - `caras/`: every real face from every style, mounted through `src/styles.ts` with its default background. Each face is 960 × 560, every image loads from the origin, no console errors, and each face renders at most `max_fuentes_por_cara` fonts. The visual baselines against P8 come with the editor preview (#14).
 - Tests name their requirement IDs.
 
 ## 11. Dependencies `[NFR-10]`

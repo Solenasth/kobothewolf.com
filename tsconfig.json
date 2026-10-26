@@ -26,6 +26,7 @@
   },
   "include": [
     "src",
-    "e2e/fixtures/scoping"
+    "e2e/fixtures/scoping",
+    "e2e/fixtures/caras"
   ]
 }

@@ -27,7 +27,7 @@ export default defineConfig({
     },
     {
       command: `npx vite build --config ${fixtureConfig} && npx vite preview --config ${fixtureConfig} --port ${fixturePort} --strictPort`,
-      url: `http://localhost:${fixturePort}`,
+      url: `http://localhost:${fixturePort}/caras/`,
       reuseExistingServer: !process.env.CI,
     },
   ],

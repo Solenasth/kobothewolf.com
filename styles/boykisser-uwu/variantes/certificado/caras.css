@@ -1,0 +1,39 @@
+/* Certificado (cer-f / cer-r), ported from P8. Scoped to these two faces at build time. */
+
+/* Front */
+.papel { position: absolute; left: 34px; top: 28px; width: 828px; height: 440px; background: var(--blanco); border-radius: 18px; box-shadow: 0 0 0 3.5px var(--tinta), 8px 9px 0 3.5px var(--sombra); }
+.papel::before { content: ""; position: absolute; inset: 11px; border: 2.5px dashed var(--acento); border-radius: 11px; }
+.arte { position: absolute; left: 40px; top: 66px; width: 250px; }
+.arte img { display: block; width: 100%; }
+.cuerpo { position: absolute; left: 300px; top: 36px; width: 500px; }
+.consejo { font: 12.5px Silk; letter-spacing: 1px; color: var(--tinta2); }
+.certifica { font: 21px Plumon; margin-top: 4px; }
+.nombre { font: 44px/1.15 Lazo; color: var(--acento); margin: 0 0 2px; white-space: nowrap; }
+.esun { font: 21px Plumon; }
+.titular { display: block; font: 46px/1 Burbuja; color: var(--tinta); transform-origin: 0 50%; margin: 2px 0 12px; white-space: nowrap; }
+.frase { font: 21px/1.25 Plumon; max-width: 480px; }
+.campos { display: flex; gap: 26px; margin-top: 14px; }
+.campos b { display: block; font: 400 11.5px Silk; letter-spacing: .8px; color: var(--tinta2); }
+.campos span { font: 20px Plumon; }
+.firma { position: absolute; left: 330px; top: 330px; width: 260px; }
+.firma .f1 { font: 30px Lazo; color: var(--acento); transform: rotate(-4deg); margin-left: 14px; line-height: 1; }
+.firma .f2 { border-top: 3px solid var(--tinta); margin-top: 4px; padding-top: 3px; font: 11px Silk; letter-spacing: .8px; color: var(--tinta2); }
+.sello { position: absolute; left: 640px; top: 288px; width: 140px; height: 150px; }
+.sello svg { position: absolute; inset: 0; }
+.sello .disco { position: absolute; left: 20px; top: 2px; width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#FFC8DD, #CDB4DB, #BDE0FE, #FFE58F, #FFC8DD); box-shadow: 0 0 0 3px var(--tinta); display: grid; place-items: center; text-align: center; font: 15px/1 Burbuja; color: var(--tinta); transform: rotate(-12deg); }
+.lazo { position: absolute; right: -14px; top: -12px; width: 120px; transform: rotate(14deg); }
+
+/* Back */
+.tit-r { position: absolute; left: 40px; top: 36px; font: 36px Burbuja; transform-origin: 0 50%; white-space: nowrap; }
+.tit-r em { font: 30px Lazo; color: var(--acento); font-style: normal; }
+.terminos { position: absolute; left: 44px; top: 96px; width: 520px; margin: 0; padding: 0; list-style: none; font: 19px/1.4 Plumon; }
+.terminos li { padding-left: 26px; position: relative; }
+.terminos li::before { content: ""; position: absolute; left: 0; top: .3em; width: .85em; height: .78em; background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 86C22 66 6 50 6 31 6 16 17 6 30 6c9 0 16 6 20 13 4-7 11-13 20-13 13 0 24 10 24 25 0 19-16 35-44 55z' fill='%23FF8FB8' stroke='%232B2233' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.globo { position: absolute; left: 44px; top: 300px; width: 330px; background: var(--blanco); padding: 10px 14px; border-radius: 18px; font: 19px/1.25 Plumon; box-shadow: 0 0 0 3px var(--tinta), 6px 7px 0 3px var(--sombra); transform: rotate(1.5deg); }
+.globo::after { content: ""; position: absolute; right: -28px; top: 26px; border: 11px solid transparent; border-left: 18px solid var(--tinta); }
+.arte-r { position: absolute; left: 400px; top: 262px; width: 190px; }
+.contacto { position: absolute; left: 630px; top: 58px; width: 240px; z-index: 40; }
+.contacto .qr { position: static; width: 180px; }
+.contacto .arroba { margin-top: 14px; letter-spacing: .3px; }
+.contacto .tme { font: 16px Plumon; color: var(--tinta2); }
+.cred2 { position: absolute; left: 44px; top: 466px; font: 10.5px Silk; letter-spacing: .4px; color: var(--tinta2); }

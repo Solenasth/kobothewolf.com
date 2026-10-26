@@ -10,7 +10,7 @@ const style = (page: Page, selector: string, property: string) =>
   page.locator(selector).evaluate((el, p) => getComputedStyle(el).getPropertyValue(p), property);
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/scoping/');
   await expect(page.locator('#caras')).toHaveAttribute('data-ready', 'true');
 });
 

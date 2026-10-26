@@ -24,6 +24,7 @@ const style = (over: Partial<StyleData> = {}): StyleData => ({
   tokens: clone(tokens),
   editor: clone(editor),
   variants: [{ dir: 'styles/boykisser-uwu/variantes/licencia', manifest: clone(manifest), html }],
+  assets: ['st-licencia.png', 'st-feliz.png', 'st-clik.png', 'st-yap.png'],
   ...over,
 });
 
@@ -61,6 +62,13 @@ describe('FR-B3 schemas reject bad data', () => {
       expect.stringContaining('/caras/reverso'),
     );
   });
+
+  it('accepts a tab position and rejects one that is not a whole number', () => {
+    const v = (orden: unknown) => [{ dir: 'v/licencia', manifest: { ...clone(manifest), orden }, html }];
+    expect(checkStyle(ajv, style({ variants: v(2) }))).toEqual([]);
+    expect(checkStyle(ajv, style({ variants: v(1.5) }))).toContainEqual(expect.stringContaining('/orden must be integer'));
+    expect(checkStyle(ajv, style({ variants: v(-1) }))).toContainEqual(expect.stringContaining('/orden must be >= 0'));
+  });
 });
 
 describe('FR-E8 FR-E9 cross-file rules', () => {
@@ -89,6 +97,26 @@ describe('FR-E8 FR-E9 cross-file rules', () => {
     const only = '<div data-cara="lic-f"></div>';
     expect(checkStyle(ajv, style({ variants: [{ dir: 'v/licencia', manifest: clone(manifest), html: only }] }))).toEqual([
       expect.stringContaining('face "lic-r" from variant.json is missing'),
+    ]);
+  });
+
+  it('rejects a default background that is not in editor.json fondos', () => {
+    const m = { ...clone(manifest), fondo: { frente: 'gingham', reverso: 'lunares' } };
+    expect(checkStyle(ajv, style({ variants: [{ dir: 'v/licencia', manifest: m, html }] }))).toEqual([
+      'v/licencia/variant.json: fondo.reverso "lunares" is not in editor.json fondos',
+    ]);
+  });
+
+  it('rejects an art key without its sticker file', () => {
+    expect(checkStyle(ajv, style({ assets: ['st-licencia.png', 'st-feliz.png', 'st-clik.png'] }))).toEqual([
+      'styles/boykisser-uwu/editor.json: art "yap" has no assets/st-yap.png',
+    ]);
+  });
+
+  it('checks face image paths against the style assets', () => {
+    const withImg = html.replace('<p data-ed="T">hi</p>', '<img src="assets/st-none.png">');
+    expect(checkStyle(ajv, style({ variants: [{ dir: 'v/licencia', manifest: clone(manifest), html: withImg }] }))).toEqual([
+      expect.stringContaining('src="assets/st-none.png" does not exist'),
     ]);
   });
 

@@ -1,0 +1,9 @@
+/* Fonts for the UI and the card faces (DESIGN §5.1: face CSS can't declare
+   fonts). OFL, each with its license next to it in ./fonts; aliases as in the
+   style's tokens.json → tipografia. */
+
+@font-face { font-family: Burbuja; src: url('./fonts/cherry-bomb-one-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Plumon; src: url('./fonts/gochi-hand-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Lazo; src: url('./fonts/pacifico-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Silk; src: url('./fonts/silkscreen-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Code; src: url('./fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2'); font-weight: 500; font-display: swap; }

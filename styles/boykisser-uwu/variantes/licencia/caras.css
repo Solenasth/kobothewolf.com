@@ -1,0 +1,20 @@
+/* Licencia (lic-f / lic-r), ported from P8. Scoped to these two faces at build time. */
+
+/* Front */
+.doc-in { position: absolute; inset: 34px 40px 40px 34px; background: var(--blanco); border-radius: 22px; box-shadow: 0 0 0 3.5px var(--tinta), 8px 9px 0 3.5px var(--chicle); }
+.foto { position: absolute; left: 30px; top: 30px; width: 300px; height: 300px; background: var(--algodon); overflow: hidden; }
+.foto img { position: absolute; left: 12px; top: 10px; width: 276px; }
+.titulo { position: absolute; left: 360px; top: 20px; font: 52px/1 Burbuja; color: var(--tinta); transform: rotate(-2deg); }
+.titulo .uwu { color: var(--chicle); }
+.campos { position: absolute; left: 366px; top: 150px; font: 21px/1.32 Plumon; }
+.campos b { font-weight: 400; color: var(--tinta2); display: inline-block; width: 118px; }
+.exp { position: absolute; left: 34px; bottom: 14px; font: 30px Plumon; }
+.exp span { font: 30px Lazo; color: var(--chicle); margin-left: 6px; }
+.sello { position: absolute; right: 28px; bottom: 20px; width: 112px; height: 112px; border-radius: 50%; background: conic-gradient(var(--rosa), var(--lila), var(--azul), var(--brillo), var(--rosa)); display: grid; place-items: center; text-align: center; font: 18px/1 Burbuja; color: var(--tinta); transform: rotate(-12deg); box-shadow: 0 0 0 3px var(--tinta); }
+
+/* Back */
+.lista { position: absolute; left: 52px; top: 96px; width: 520px; font: 20px/1.4 Plumon; }
+.lista li { list-style: none; padding-left: 26px; position: relative; }
+.lista li::before { content: ""; position: absolute; left: 0; top: .32em; width: .8em; height: .74em; background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 86C22 66 6 50 6 31 6 16 17 6 30 6c9 0 16 6 20 13 4-7 11-13 20-13 13 0 24 10 24 25 0 19-16 35-44 55z' fill='%23FF8FB8' stroke='%232B2233' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+h2 { position: absolute; left: 52px; top: 36px; font: 36px Burbuja; color: var(--tinta); transform: rotate(-1.5deg); }
+h2 em { font: 32px Lazo; color: var(--chicle); font-style: normal; }

@@ -1,5 +1,5 @@
-// Test helper: adapts a parse5 tree to MarkElement, so the marks parser can be
-// unit-tested in Node exactly as it runs on DOM elements in the browser.
+// Adapts a parse5 tree to MarkElement, so the marks parser runs in Node (unit
+// tests and `validate`) exactly as it runs on DOM elements in the browser.
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5';
 import type { MarkElement } from './marks';
 
@@ -39,8 +39,11 @@ export class FakeElement {
   readonly attributes = new Map<string, string>();
   children: FakeElement[] = [];
   private text: string | null = null;
+  readonly tagName: string;
 
-  constructor(readonly tagName: string) {}
+  constructor(tagName: string) {
+    this.tagName = tagName;
+  }
 
   getAttribute(name: string) {
     return this.attributes.get(name) ?? null;
