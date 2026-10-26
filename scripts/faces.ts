@@ -68,6 +68,35 @@ export function checkFace(file: string, id: string, face: Element): string[] {
   return errors;
 }
 
+const ASSET = /^assets\/([^/]+)$/;
+
+/**
+ * Face images and masks must be `assets/<file>` of an existing style asset, and a
+ * `data-arte` image must show `assets/st-<key>.png` for one of the style's art keys.
+ */
+export function checkAssetRefs(file: string, html: string, assets: ReadonlySet<string>, artKeys: readonly string[]): string[] {
+  const errors: string[] = [];
+  for (const { id, el: face } of findFaces(html)) {
+    const where = `${file} [data-cara="${id}"]`;
+    for (const { el } of walk(face)) {
+      for (const name of ['src', 'data-mask']) {
+        const value = attr(el, name);
+        if (value === undefined) continue;
+        const match = ASSET.exec(value);
+        if (!match) errors.push(`${where}: ${name}="${value}" must be assets/<file>`);
+        else if (!assets.has(match[1]!)) errors.push(`${where}: ${name}="${value}" does not exist in the style's assets`);
+      }
+      if (attr(el, 'data-arte') !== undefined) {
+        const key = /^assets\/st-(.+)\.png$/.exec(attr(el, 'src') ?? '')?.[1];
+        if (key === undefined || !artKeys.includes(key)) {
+          errors.push(`${where}: data-arte image must be assets/st-<key>.png for an art key in editor.json (${artKeys.join(', ')})`);
+        }
+      }
+    }
+  }
+  return errors;
+}
+
 export function checkFacesHtml(file: string, html: string): string[] {
   const faces = findFaces(html);
   if (faces.length === 0) return [`${file}: no [data-cara] faces found`];

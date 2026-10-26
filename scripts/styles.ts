@@ -1,7 +1,7 @@
 // Style data rules for `validate` (FR-B3, FR-E8, FR-E9, DESIGN §7).
 import type Ajv from 'ajv';
 import { deriveRanges, type Range } from '../src/core/ranges.ts';
-import { checkFacesHtml, findFaces } from './faces.ts';
+import { checkAssetRefs, checkFacesHtml, findFaces } from './faces.ts';
 import { formatErrors, schemaId, type SchemaName } from './schemas.ts';
 
 export interface VariantData {
@@ -15,6 +15,16 @@ export interface StyleData {
   tokens: unknown;
   editor: unknown;
   variants: VariantData[];
+  /** File names in the style's assets/ folder. */
+  assets: readonly string[];
+}
+
+interface EditorLists {
+  acentos: string[];
+  sombras: string[];
+  fondos: string[];
+  arte: string[];
+  escala: Range;
 }
 
 type Ajv2020 = Pick<Ajv, 'getSchema'>;
@@ -33,7 +43,7 @@ export function checkStyle(ajv: Ajv2020, style: StyleData): string[] {
   if (errors.length > 0) return errors;
 
   const tokens = style.tokens as { estilo: string; color: Record<string, string>; antirreglas: Record<string, unknown> };
-  const editor = style.editor as { acentos: string[]; sombras: string[]; escala: Range };
+  const editor = style.editor as EditorLists;
 
   if (tokens.estilo !== name) errors.push(`${style.dir}/tokens.json: estilo "${tokens.estilo}" must match the folder "${name}"`);
 
@@ -50,17 +60,26 @@ export function checkStyle(ajv: Ajv2020, style: StyleData): string[] {
     errors.push(`${style.dir}/tokens.json: ${(error as Error).message}`);
   }
 
-  for (const variant of style.variants) errors.push(...checkVariant(ajv, variant));
+  const assets = new Set(style.assets);
+  for (const key of editor.arte) {
+    if (!assets.has(`st-${key}.png`)) errors.push(`${style.dir}/editor.json: art "${key}" has no assets/st-${key}.png`);
+  }
+
+  for (const variant of style.variants) errors.push(...checkVariant(ajv, variant, editor, assets));
   return errors;
 }
 
-function checkVariant(ajv: Ajv2020, variant: VariantData): string[] {
+function checkVariant(ajv: Ajv2020, variant: VariantData, editor: EditorLists, assets: ReadonlySet<string>): string[] {
   const id = variant.dir.split('/').pop()!;
   const errors = check(ajv, 'variant', `${variant.dir}/variant.json`, variant.manifest);
   if (errors.length > 0) return errors;
 
-  const manifest = variant.manifest as { id: string; caras: { frente: string; reverso: string } };
+  const manifest = variant.manifest as { id: string; caras: { frente: string; reverso: string }; fondo: { frente: string; reverso: string } };
   if (manifest.id !== id) errors.push(`${variant.dir}/variant.json: id "${manifest.id}" must match the folder "${id}"`);
+  for (const side of ['frente', 'reverso'] as const) {
+    const fondo = manifest.fondo[side];
+    if (!editor.fondos.includes(fondo)) errors.push(`${variant.dir}/variant.json: fondo.${side} "${fondo}" is not in editor.json fondos`);
+  }
   if (variant.html === undefined) return [...errors, `${variant.dir}/caras.html: missing`];
 
   const file = `${variant.dir}/caras.html`;
@@ -68,5 +87,5 @@ function checkVariant(ajv: Ajv2020, variant: VariantData): string[] {
   for (const face of [manifest.caras.frente, manifest.caras.reverso]) {
     if (!faceIds.includes(face)) errors.push(`${file}: face "${face}" from variant.json is missing`);
   }
-  return [...errors, ...checkFacesHtml(file, variant.html)];
+  return [...errors, ...checkFacesHtml(file, variant.html), ...checkAssetRefs(file, variant.html, assets, editor.arte)];
 }

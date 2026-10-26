@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkFacesHtml } from './faces.ts';
+import { checkAssetRefs, checkFacesHtml } from './faces.ts';
 
 const back = (inner: string, id = 'x-r') => `<div class="bleed" data-cara="${id}"><div class="card">${inner}</div></div>`;
 const QR = '<div class="qr"><img alt="QR"></div>';
@@ -61,5 +61,27 @@ describe('FR-B3 locked elements are never editable', () => {
 describe('FR-E4 data-parte names do not collide with built-in pieces', () => {
   it.each(['arte', 'lazo', 'washi-2'])('rejects data-parte=%j', (name) => {
     expect(check(back(`${QR}${AT}<div data-parte="${name}"></div>`))).toEqual([expect.stringContaining('built-in piece key')]);
+  });
+});
+
+describe('FR-E5 NFR-5 face images point at existing style assets', () => {
+  const assets = new Set(['st-feliz.png', 'qr.png', 'mask.png']);
+  const refs = (inner: string) => checkAssetRefs('f.html', back(inner, 'x-f'), assets, ['feliz', 'yap']);
+
+  it('accepts assets/<file> images, masks and art', () => {
+    expect(refs('<img src="assets/qr.png"><canvas data-mask="assets/mask.png"></canvas><img data-arte="frente" src="assets/st-feliz.png">')).toEqual([]);
+  });
+
+  it('rejects paths outside assets/ and files that do not exist', () => {
+    expect(refs('<img src="../assets/qr.png"><img src="assets/nope.png"><canvas data-mask="/x/mask.png"></canvas>')).toEqual([
+      'f.html [data-cara="x-f"]: src="../assets/qr.png" must be assets/<file>',
+      'f.html [data-cara="x-f"]: src="assets/nope.png" does not exist in the style\'s assets',
+      'f.html [data-cara="x-f"]: data-mask="/x/mask.png" must be assets/<file>',
+    ]);
+  });
+
+  it('rejects art that is not one of the style art keys', () => {
+    expect(refs('<img data-arte="frente" src="assets/qr.png">')).toEqual([expect.stringContaining('data-arte image must be assets/st-<key>.png')]);
+    expect(refs('<img data-arte="frente" src="assets/st-yap.png">')).toEqual([expect.stringContaining('does not exist')]);
   });
 });
