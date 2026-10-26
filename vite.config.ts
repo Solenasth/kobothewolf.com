@@ -8,6 +8,6 @@ export default defineConfig({
     target: 'es2022',
   },
   test: {
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.ts'],
   },
 });
