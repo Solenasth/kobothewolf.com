@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { crc32 as zlibCrc32 } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
-import { crc32, dpiToPixelsPerMetre, setDpi } from '../src/core/phys';
+import { dpiToPixelsPerMetre, setDpi } from '../src/core/phys';
+import { crc32 } from '../src/core/png';
 import { readPng } from './png';
 
 const FIXTURE = 'tests/fixtures/sticker/filled-blob.sticker.png';
