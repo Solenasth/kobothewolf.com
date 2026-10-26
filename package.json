@@ -10,6 +10,8 @@
   },
   "scripts": {
     "dev": "vite",
+    "validate": "node scripts/validate.ts",
+    "prebuild": "npm run validate",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
