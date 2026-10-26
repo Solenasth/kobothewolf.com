@@ -24,6 +24,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run check:playwright-image
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
@@ -33,6 +34,12 @@ jobs:
     name: e2e (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Browsers and their system packages come preinstalled, so the job skips
+    # apt and the browser download (#26). The tag must equal @playwright/test;
+    # `npm run check:playwright-image` enforces it.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-resolute@sha256:d89d0e4a7058330a8334306a5aef1e00807863d31af27cf11348eed696d6e0ba
+      options: --user 1001
     strategy:
       fail-fast: false
       matrix:
@@ -44,7 +51,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps ${{ matrix.browser }}
       - run: npx playwright test --project=${{ matrix.browser }}
       - if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
