@@ -19,12 +19,12 @@
       "node"
     ],
     "allowImportingTsExtensions": true,
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "resolveJsonModule": true
   },
   "include": [
     "vite.config.ts",
     "playwright.config.ts",
-    "e2e",
     "scripts"
   ]
 }
