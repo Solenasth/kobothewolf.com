@@ -1,6 +1,6 @@
 # Requirements: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-25 (rev. 3)
+**Status:** Approved 2026-10-26 (rev. 4: FR-R6 adopts the preserve-history policy, #24)
 **Companion:** [DESIGN.md](DESIGN.md) · decisions in [decisions/](decisions/)
 **Inputs** (historical, superseded by this document; redacted copies go in `docs/origin/`, FR-R2):
 - **GP:** "Port the variant editor to GitHub Pages", the minimal single-file port.
@@ -113,7 +113,7 @@ The site is a freelance showcase on two levels:
 | FR-R3 | All work after bootstrap flows issue → branch `<n>-<slug>` → PR → green CI → merge by Kobo. PRs link their issue, list the requirement IDs covered, and include a "Verified" section. |
 | FR-R4 | Issue templates (feature, bug) and a PR template enforce FR-R3's fields. GitHub milestones mirror the delivery plan. |
 | FR-R5 | `main` is protected by a ruleset: PR required, status checks required, signed commits required, no force-push, no deletion. Merged branches are deleted. |
-| FR-R6 | Commits follow Conventional Commits, reference their issue, are signed (GitHub shows them as Verified), and carry no AI attribution. A branch's commits are curated before review (one logical change each, no "wip" or "fix typo" commits). PRs land with a **merge commit** whose message is the conventional PR title, so `main` keeps both the per-PR merge and the individual commits. |
+| FR-R6 | Commits follow Conventional Commits, reference their issue, are signed (GitHub shows them as Verified), and carry no AI attribution. Commits are tidied **before their first push** (one logical change each, no "wip" or "fix typo" commits). Pushed commits are never rewritten: mistakes are undone with revert or fix commits, and nothing is force-pushed (`preserve-history` policy). PRs land with a **merge commit** whose message is the conventional PR title, so `main` keeps both the per-PR merge and the individual commits. |
 | FR-R7 | Each delivery milestone ends in a SemVer tag and a GitHub release. `CHANGELOG.md` is updated from the conventional commits. |
 | FR-R8 | Nothing private is committed: no secrets (gitleaks in CI), no local paths, no internal-only notes. A per-machine `CLAUDE.local.md` and the internal `.specs/` stay ignored. |
 | FR-R9 | The AI-assisted, policy-driven workflow is public: `CLAUDE.md` and `policies/` are committed. `CONTRIBUTING.md` compiles the policies into human-readable contribution rules. |
