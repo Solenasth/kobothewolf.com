@@ -14,4 +14,5 @@ Required (copied for the record, loaded globally): `policies/no-attribution.md`,
 @policies/tests-required.md
 @policies/dependency-hygiene.md
 @policies/conventional-commits.md
+@policies/preserve-history.md
 @policies/decision-records.md

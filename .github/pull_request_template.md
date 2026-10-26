@@ -14,7 +14,7 @@ Closes #
 <!-- Commands run and their results; what failed; what couldn't be verified and why. -->
 
 ## Checklist
-- [ ] Commits are conventional, signed, curated, and reference the issue
+- [ ] Commits are conventional, signed, tidied before first push (no rewritten history), and reference the issue
 - [ ] Tests name the requirement IDs they cover
 - [ ] New dependencies are justified above; `npm audit` is clean
 - [ ] Docs updated first if scope changed

@@ -1,6 +1,6 @@
 # Contributing
 
-This repo is built spec-first, through a visible issue → PR → release flow. These rules compile the engineering policies in [`policies/`](policies/). The policy files are the source of truth, and each section below links to its policy.
+This repo is built spec-first, through a visible issue → PR → release flow. These rules compile the 11 engineering policies in [`policies/`](policies/). The policy files are the source of truth, and each section below links to its policy.
 
 **Enforcement:**
 - **Hard** rules are not negotiable: work that breaks one is rejected.
@@ -37,7 +37,7 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - The summary is imperative, ≤ 72 characters, with no trailing period. The body explains *why* when that isn't obvious.
 - Footer: `Refs #n`.
 - Breaking changes take `!` and a `BREAKING CHANGE:` footer.
-- **Curate before review:** each commit is one logical change, and fixups are folded in with `git rebase --autosquash`. A branch may be force-pushed only before review starts; after that, changes go in as new commits.
+- **Tidy before the first push:** each commit is one logical change, and local fixups are folded in with `git rebase --autosquash` before pushing. Once pushed, commits are final (see §11).
 - **Signed:** every commit is signed (SSH signing), so GitHub shows it as Verified.
 
 ## 5. Tests (hard)
@@ -77,6 +77,14 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - The maintainer is the sole author of record. Commits use the maintainer's git identity.
 - Commits, PRs, tags, release notes and file headers carry no AI or tool attribution: no `Co-Authored-By` trailers for tools and no "generated with" lines.
 - AI assistance is part of this repo's workflow and is documented openly in [`CLAUDE.md`](CLAUDE.md) and `policies/`. It just isn't credited as an author.
+
+## 11. Preserve history (hard)
+[`preserve-history`](policies/preserve-history.md)
+- Pushed commits are never rewritten, on any branch: no amend, rebase, reset or force-push after a push.
+- Undo a pushed commit with `git revert <sha>`. The message keeps the commit format, and its body says `This reverts commit <sha>.` and why.
+- If a branch needs `main`'s changes, merge `main` into it; don't rebase.
+- PRs land with merge commits, so every branch commit stays on `main`.
+- Exception: a leaked secret. Rotate it first; rewriting history then needs the maintainer's explicit OK.
 
 ---
 

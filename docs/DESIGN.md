@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-25 (rev. 3)
+**Status:** Approved 2026-10-26 (rev. 4: §12 history shape follows the preserve-history policy, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -232,7 +232,7 @@ There's no i18n library: catalogs plus `Intl` cover two languages, and a library
 ## 12. Repository workflow `[FR-R1–R8]`
 - **Bootstrap** (the one direct commit to `main`, per pr-only): README skeleton, LICENSE (MIT), CONTRIBUTING, CLAUDE.md, policies, `.gitignore`, approved docs, decision records, `docs/origin/` (redacted) and issue/PR templates. Then `gh repo create kobothewolf.com --public` (approved in decision 0003), a visibility check, repo settings and the ruleset (FR-R5). The CI skeleton is issue #1, the first PR.
 - **Flow:** issue (problem, scope, acceptance criteria, FR IDs) → branch `<n>-<slug>` → signed conventional commits with `Refs #n` → PR (template: summary, `Closes #n`, FRs covered, Verified) → green CI → Kobo merges with a **merge commit** → branch auto-deleted.
-- **History shape:** before review, a branch is rebased onto `main` and its commits curated (fixups folded in with `git rebase --autosquash`). It is force-pushed only while still unreviewed. After review starts, changes go in as new commits.
+- **History shape** (`preserve-history`): commits are tidied locally **before their first push** (`git commit --fixup` plus a local `git rebase --autosquash`). Once pushed, a commit is final: mistakes are undone with `git revert` (body: `This reverts commit <sha>.` and why) or a fix commit, and nothing is force-pushed on any branch. A branch is never rebased onto `main` after pushing; if it needs `main`'s changes, `main` is merged into it.
 - **Repo settings:** merge commits on, squash and rebase off. The default merge-commit message is "Pull request title and description", so the merge commit on `main` reads e.g. `feat(editor): export PNG at 300 dpi (#14)`. Branches are auto-deleted after merge.
 - **Ruleset on `main`:** require a PR, require the CI checks, require signed commits, block force-push and deletion. Linear history is **not** required, since it would forbid merge commits. Merges done in the GitHub UI are signed by GitHub, so they show as Verified too.
 - **Signing:** SSH commit signing with Kobo's existing key (`gpg.format ssh`, `commit.gpgsign true`), registered on GitHub as a signing key.
