@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -123,11 +123,15 @@ Documents store keys, never labels, so they're language-independent.
 This deviates from EV §6.1, which proposed **Shadow DOM**. html-to-image doesn't carry shadow-root styles, so every export would need a clone-out step, with extra code and fidelity risk.
 
 **Instead:**
-- Each variant's CSS is scoped at build time with native nesting under `[data-cara="<id>"]`. Lightning CSS (bundled with Vite) flattens it.
+- Face CSS is scoped at build time by the `kobo:scope-css` Vite plugin (`scripts/scope-css.ts`). It wraps each file in native nesting and Lightning CSS (bundled with Vite) flattens it:
+  - `styles/<estilo>/caras.css`, the style's shared face CSS, goes under `[data-cara]`: every face, never the page.
+  - `styles/<estilo>/variantes/<v>/caras.css` goes under `:is([data-cara="<frente>"], [data-cara="<reverso>"])`, with the ids read from that variant's `variant.json`.
+- Face CSS writes `&` for the face root. Build errors: any at-rule except `@media`, `@supports`, `@container` and `@starting-style` (so no `@font-face`, `@keyframes`, `@import`, `@layer`, `@property`, `@page` or `@scope`), and `:root`, `:host`, `:scope`, `html` or `body` in a selector. Fonts are declared outside face CSS.
+- After flattening, the plugin re-parses its output and fails the build if any style rule doesn't start with its scope.
 - Faces mount in the normal DOM, and export works as it did in P8.
-- `caras.html` is imported as a string (`?raw`) and parsed with a `<template>`. These are trusted, build-time files; user input never travels this path.
+- `caras.html` is imported as a string (`?raw`) and parsed with a `<template>` by `src/core/faces.ts` `parseFaces()`. These are trusted, build-time files; user input never travels this path. Template content is inert: no scripts run and nothing loads until a face is inserted.
 
-Recorded in `0006-css-scoping-not-shadow-dom.md` once approved.
+Recorded in [`0006-css-scoping-not-shadow-dom.md`](decisions/0006-css-scoping-not-shadow-dom.md).
 
 ### 5.2 State `[FR-E3–E13, FR-E16]`
 - A single store holds the document. Each face has **one state object for the whole session**. Controls and rendering read and write that same object through store actions, and nothing rebuilds a face object on read (the P8 v5 bug, EV §10).
@@ -241,6 +245,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 - **`ci.yml`** runs on every PR: `npm ci` → typecheck → validate → unit → build → E2E matrix → export checks → rustc → `npm audit` → gitleaks. Exports are uploaded as workflow artifacts.
 - **E2E environment:** the E2E jobs run in Microsoft's Playwright image (`mcr.microsoft.com/playwright:v<version>-resolute`), pinned by digest, with browsers and system packages preinstalled. This avoids a slow `apt` step and gives the visual baselines the same fonts and libraries on every run. The tag must equal `@playwright/test`, and CI checks it.
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.
+- **Fixture pages:** behavior that needs a real browser but must not ship, such as CSS scoping with deliberately conflicting variants, is tested on fixture pages under `e2e/fixtures/`. They're built by their own Vite config with the same plugins and served by a second Playwright web server, so the production build stays unchanged.
 - Tests name their requirement IDs.
 
 ## 11. Dependencies `[NFR-10]`
@@ -254,6 +259,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 | @playwright/test, @axe-core/playwright | dev | E2E, visual, accessibility, CLI rendering |
 | ajv | dev | compiles schemas into standalone validators at build time, so there is no runtime dependency. Its one runtime helper (`ucs2length`, code-point string length) is replaced by a local function, and generation fails if any other import appears |
 | parse5 | dev | parses face HTML in `validate` (Node has no DOM) |
+| lightningcss | dev | scopes and flattens face CSS (§5.1). Vite 8 already installs it; it's declared, pinned to Vite's version, because the build imports it directly |
 | jsqr, fontkit | dev | export checks |
 | tsx | dev | runs the CLI |
 

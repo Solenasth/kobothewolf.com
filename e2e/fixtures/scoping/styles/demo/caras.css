@@ -1,0 +1,8 @@
+/* Style-level sheet: every face, never the page. */
+& {
+  --tinta: rgb(1, 2, 3);
+  display: block;
+}
+.card {
+  border: 3px solid var(--tinta);
+}

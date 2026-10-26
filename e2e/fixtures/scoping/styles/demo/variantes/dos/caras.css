@@ -1,0 +1,16 @@
+/* Same selectors as uno, different values, plus a class only dos styles. */
+& {
+  --acento: rgb(0, 0, 200);
+}
+.titulo {
+  color: var(--acento);
+  font-size: 17px;
+}
+.solo-dos {
+  text-decoration: underline;
+}
+@media (min-width: 1px) {
+  .titulo {
+    letter-spacing: 3px;
+  }
+}

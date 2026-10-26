@@ -9,5 +9,8 @@
   },
   "include": [
     "e2e"
+  ],
+  "exclude": [
+    "e2e/fixtures/scoping"
   ]
 }

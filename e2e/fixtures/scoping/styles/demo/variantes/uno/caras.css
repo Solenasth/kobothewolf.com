@@ -1,0 +1,7 @@
+& {
+  --acento: rgb(200, 0, 0);
+}
+.titulo {
+  color: var(--acento);
+  font-size: 31px;
+}
