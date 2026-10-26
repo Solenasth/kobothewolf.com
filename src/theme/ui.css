@@ -1,0 +1,88 @@
+/* boykisser-uwu UI theme, shared by the profile and the editor (FR-P7).
+   Palette from styles/boykisser-uwu/tokens.json; fonts are OFL, each with its
+   license next to it in ./fonts. */
+
+@font-face { font-family: Burbuja; src: url('./fonts/cherry-bomb-one-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Plumon; src: url('./fonts/gochi-hand-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Lazo; src: url('./fonts/pacifico-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: Silk; src: url('./fonts/silkscreen-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+
+:root {
+  color-scheme: light;
+  --crema: #FFF8EE; --blanco: #FFFFFF; --algodon: #FFE4EE; --rosa: #FFC8DD; --chicle: #FF8FB8; --rubor: #E5484D;
+  --azul: #BDE0FE; --cielo: #8EC5FF; --lila: #CDB4DB; --brillo: #FFE58F; --tinta: #2B2233; --tinta2: #6B5B73;
+  --ui-bg: #F6F1F7; --ui-panel: #FFFFFF; --ui-line: #E4D9E7; --ui-text: #2B2233; --ui-muted: #6B5B73; --ui-focus: #E0559B;
+  /* --ui-focus is 3.5:1 on white: fine for focus rings, too light for text. */
+  --ui-accent-text: #BF3A7E;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font: 17px/1.45 Plumon, 'Comic Sans MS', system-ui, sans-serif;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+
+a { color: var(--tinta); text-decoration-color: var(--chicle); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { color: var(--ui-accent-text); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; border-radius: 6px; }
+
+.skip { position: absolute; left: 8px; top: -48px; background: var(--blanco); padding: 6px 12px; border: 2.5px solid var(--tinta); border-radius: 12px; }
+.skip:focus { top: 8px; }
+
+/* Header: name, language switch, jump to the editor */
+.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.lang { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; font: 13px Silk, monospace; letter-spacing: .6px; }
+.lang a { display: inline-block; padding: 5px 12px; border: 2.5px solid var(--ui-line); border-radius: 999px; background: var(--blanco); text-decoration: none; }
+.lang a[aria-current='true'] { border-color: var(--tinta); background: var(--algodon); box-shadow: 3px 4px 0 0 var(--rosa); }
+
+.btn {
+  display: inline-block; font: inherit; font-size: 17px; text-decoration: none; cursor: pointer;
+  border: 2.5px solid var(--tinta); border-radius: 12px; padding: 6px 14px;
+  background: var(--chicle); color: var(--tinta); box-shadow: 3px 4px 0 0 var(--rosa);
+}
+.btn:hover { color: var(--tinta); background: var(--rosa); }
+
+/* Profile card */
+.profile {
+  position: relative;
+  background: var(--ui-panel);
+  border: 2px solid var(--ui-line);
+  border-radius: 22px;
+  box-shadow: 0 0 0 3.5px var(--tinta), 8px 9px 0 3.5px var(--chicle);
+  padding: 28px clamp(18px, 4vw, 40px) 30px;
+  margin: 8px 6px 40px 0;
+}
+.profile h1 { margin: 0; font: 400 clamp(36px, 7vw, 56px)/1.05 Burbuja, system-ui, sans-serif; color: var(--tinta); text-wrap: balance; }
+.pitch { margin: 6px 0 0; font: 400 clamp(20px, 3.4vw, 26px)/1.3 Lazo, cursive; color: var(--ui-accent-text); }
+.experience { margin: 14px 0 0; color: var(--ui-muted); max-width: 62ch; }
+
+.label { margin: 22px 0 8px; font: 13px Silk, monospace; letter-spacing: .6px; color: var(--ui-accent-text); }
+.contact { display: flex; flex-wrap: wrap; gap: 10px 14px; margin: 0; padding: 0; list-style: none; }
+.contact a {
+  display: inline-flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; padding: 6px 14px;
+  border: 2.5px solid var(--tinta); border-radius: 12px; background: var(--crema);
+  text-decoration: none; box-shadow: 3px 4px 0 0 var(--rosa); max-width: 100%;
+}
+.contact .k { font: 12px Silk, monospace; color: var(--ui-muted); white-space: nowrap; }
+.contact .v { white-space: nowrap; }
+
+/* Editor section (placeholder until M4) */
+.editor { border-top: 2px dashed var(--ui-line); padding-top: 24px; }
+.editor h2 { margin: 0 0 8px; font: 400 28px Burbuja, system-ui, sans-serif; }
+.editor p { margin: 0; color: var(--ui-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
