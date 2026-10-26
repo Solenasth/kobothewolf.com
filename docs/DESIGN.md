@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 6: §6 static profile and language switch, #4; rev. 5: §10 Playwright container, #26; rev. 4: §12 history shape, #24)
+**Status:** Approved 2026-10-26 (rev. 7: §6.1 inquiry form, #30; rev. 6: §6 static profile, #4; rev. 5: §10 Playwright container, #26; rev. 4: §12 history shape, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -174,6 +174,12 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 - **CSP and build-only tags:** the CSP `<meta>` (§8) is injected at build time only, because the dev server needs inline scripts and a WebSocket.
 - **404:** `404.html` is a second Vite entry with both languages side by side and a link home, so it needs no JavaScript.
 - **Open Graph image:** a 1200 × 630 PNG rendered by CI from the default card.
+
+### 6.1 Inquiry form `[FR-P8, NFR-3, NFR-4, NFR-5]`
+- **Markup:** a `<form>` in `index.html` with no `action`, hidden until JavaScript removes `hidden` (progressive enhancement). Labels, options and messages are `data-i18n` keys.
+- **Composition** (`src/contact/mailto.ts`, pure): the recipient is a constant. Single-line fields (name, email) have CR/LF removed and are capped (name 100, email 254 characters). The message is capped at 1,500 characters so the URL stays within what email apps accept. Subject and body are built from catalog templates, line breaks become CRLF, and both go through `encodeURIComponent`. Nothing typed can add headers (`&`, `?`, `%0A` are all encoded).
+- **Send:** validation (required fields, a basic email shape) sets `aria-invalid` and per-field messages and focuses the first invalid field. A valid form opens the `mailto:` URL through a temporary link. "Copy message" writes the recipient, subject and body to the clipboard. Status messages use the page's polite live region.
+- **Security:** the CSP is unchanged. The form never submits (`form-action 'none'` stays), and opening `mailto:` is a navigation, not a request. No data leaves the browser except through the visitor's own email app.
 
 ## 7. Build-time validation `[FR-B3, FR-I5]`
 `npm run validate` runs before the build and in CI. It fails on any of these:

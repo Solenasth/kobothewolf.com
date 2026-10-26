@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { App } from './app';
+import { setUpInquiryForm } from './contact/form';
 import { getLanguage, initLanguage, onLanguageChange, setLanguage, t, type MessageKey } from './i18n';
 import { isLang } from './i18n/languages';
 import { applyStatic } from './i18n/static';
@@ -30,6 +31,9 @@ onLanguageChange(() => {
 });
 
 initLanguage();
+
+const inquiry = document.querySelector<HTMLFormElement>('#inquiry');
+if (inquiry) setUpInquiryForm(inquiry);
 
 const root = document.getElementById('editor-root');
 if (root) {

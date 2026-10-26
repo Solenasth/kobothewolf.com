@@ -75,6 +75,25 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--ui-focus); outl
 .contact .k { font: 12px Silk, monospace; color: var(--ui-muted); white-space: nowrap; }
 .contact .v { white-space: nowrap; }
 
+/* Inquiry form (FR-P8) */
+.inquiry { margin-top: 26px; border-top: 2px dashed var(--ui-line); }
+.inquiry .hint { margin: 0 0 12px; color: var(--ui-muted); font-size: 15px; max-width: 62ch; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 6px 16px; }
+.f { display: grid; gap: 3px; align-content: start; min-width: 0; }
+.f.wide { grid-column: 1 / -1; }
+.f label { font-size: 15px; color: var(--ui-muted); }
+.f input, .f select, .f textarea {
+  font: inherit; font-size: 17px; color: var(--tinta); background: var(--crema);
+  border: 2px solid var(--ui-line); border-radius: 10px; padding: 6px 10px; width: 100%; min-width: 0;
+}
+.f textarea { resize: vertical; min-height: 7em; }
+.f input:focus-visible, .f select:focus-visible, .f textarea:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+.f [aria-invalid='true'] { border-color: var(--rubor); }
+.err { margin: 0; font-size: 14px; color: #B42318; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.btn.alt { background: var(--blanco); }
+.status { min-height: 1.4em; margin: 10px 0 0; color: var(--ui-muted); font-size: 15px; }
+
 /* Editor section (placeholder until M4) */
 .editor { border-top: 2px dashed var(--ui-line); padding-top: 24px; }
 .editor h2 { margin: 0 0 8px; font: 400 28px Burbuja, system-ui, sans-serif; }

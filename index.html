@@ -39,6 +39,40 @@
             <li><a href="https://t.me/KoboTheWolf" rel="me noopener"><span class="k">Telegram</span> <span class="v">@KoboTheWolf</span></a></li>
             <li><a href="mailto:contact@kobothewolf.com"><span class="k" data-i18n="profile.email"></span> <span class="v">contact@kobothewolf.com</span></a></li>
           </ul>
+
+          <form id="inquiry" class="inquiry" novalidate hidden aria-labelledby="inquiry-title">
+            <h2 id="inquiry-title" class="label" data-i18n="form.title"></h2>
+            <p class="hint" data-i18n="form.intro"></p>
+            <div class="fields">
+              <div class="f">
+                <label for="f-name" data-i18n="form.name"></label>
+                <input id="f-name" name="name" autocomplete="name" maxlength="100" required aria-describedby="e-name" />
+                <p id="e-name" class="err" hidden></p>
+              </div>
+              <div class="f">
+                <label for="f-email" data-i18n="form.email"></label>
+                <input id="f-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="e-email" />
+                <p id="e-email" class="err" hidden></p>
+              </div>
+              <div class="f">
+                <label for="f-type" data-i18n="form.type"></label>
+                <select id="f-type" name="type">
+                  <option value="inquiry" data-i18n="form.type.inquiry"></option>
+                  <option value="quote" data-i18n="form.type.quote"></option>
+                </select>
+              </div>
+              <div class="f wide">
+                <label for="f-message" data-i18n="form.message"></label>
+                <textarea id="f-message" name="message" rows="5" maxlength="1500" required aria-describedby="e-message"></textarea>
+                <p id="e-message" class="err" hidden></p>
+              </div>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn" data-i18n="form.send"></button>
+              <button type="button" class="btn alt" data-action="copy" data-i18n="form.copy"></button>
+            </div>
+            <p class="status" role="status" aria-live="polite"></p>
+          </form>
         </section>
 
         <section id="editor" class="editor" aria-labelledby="editor-title">
