@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -162,6 +162,7 @@ await faces ready ─► sombrasADivs(face) ─► htmlToImage.toPng(face, {960�
                  ─► undo shadows ─► insert pHYs (11811 px/m) ─► Blob ─► Saver.save()
 PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob ─► Saver.save()
 ```
+- **pHYs:** `src/core/phys.ts` `setDpi(png, 300)` works on the PNG bytes alone (no DOM), so it's unit-tested in Node. It removes every existing `pHYs` chunk and writes one right after `IHDR` (before any `IDAT`, as the PNG spec requires) with its CRC-32. 300 dpi is stored as 11811 px/m, the nearest integer, which readers report as 300 dpi. Bytes that aren't a well-formed PNG (bad signature, `IHDR` not first, truncated chunk, bad CRC) are rejected with a typed error, not passed through.
 - `sombrasADivs()` is kept as is. It's the WebKit `box-shadow` fix (EV §10).
 - `fontEmbedCSS` is computed once and reused (NFR-2).
 - **Saver interface** `{ save({filename, data: Blob}) → {status} }`. The browser implementation creates an object URL, clicks an `<a download>`, then revokes it after 10 s (GP §1). Other host runtimes can plug in through the same interface.
