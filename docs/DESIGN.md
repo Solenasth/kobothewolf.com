@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 10: §5.2 store, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -142,10 +142,14 @@ Recorded in `0006-css-scoping-not-shadow-dom.md` once approved.
   - `paintFace()` hides with the `data-oculto` / `data-oculto-pieza` attributes, styled `display:none !important` as in P8, which also works on SVG bows. Bounce text gets letter `<span>`s built by the caller.
 
 ### 5.3 Sticker from the user's image `[FR-E6]`
-- The EV §6.3 algorithm is ported from P8 into typed, pure functions over `Uint8Array` masks.
-- The shadow color comes from tokens.
-- **Optional:** run it in a Worker with `OffscreenCanvas` when every target browser supports it.
-- **Parity:** fixtures from the private Python tooling are committed, and unit tests compare against them within a tolerance.
+- The EV §6.3 algorithm is ported from P8 into typed, pure functions over RGBA buffers and `Uint8Array` masks (`src/core/sticker.ts`): `figureMask`, `dilate`, `fillHoles`, `whiteFill`, `makeSticker`. There's no DOM and no network.
+- **Parameters** come from `tokens.json` → `efectos_imagen`: threshold and closing from `silueta`; border, shadow color, alpha and offset from `sticker`. The shadow alpha is the token's 150/255, where P8 hard-coded 0.6.
+- **Typed errors:** `invalid-pixels`, `too-large` (over 700 px a side; the caller scales first) and `no-figure`. Decoding a file, and rejecting one that isn't an image, happen in the browser adapter (#16).
+- **Parity:** synthetic fixtures processed by the private Python tooling are committed in `tests/fixtures/sticker/`. The port keeps P8's square dilation and round border where Python uses a cross and a blurred square. The tolerance is therefore stated as edge distance:
+  - figure masks agree within 2 px both ways (IoU ≥ 0.97);
+  - the sticker never extends past Python's by more than 1 px;
+  - Python's squarer corners are within 4 px.
+- **Worker:** OffscreenCanvas 2D is available in every NFR-8 target, including Safari from 16.4, so the browser adapter (#16) runs decode, scale and `makeSticker` in a Worker. The core functions are already Worker-safe.
 
 ### 5.4 Code-cat face `[FR-E19, FR-E20]`
 P8's `gato()` moves to `variantes/codigo/montar.ts`, exporting `async function montar(cara: HTMLElement): Promise<void>`.
@@ -297,4 +301,4 @@ There's no i18n library: catalogs plus `Intl` cover two languages, and a library
 | iOS opens a preview instead of downloading | accepted (NFR-8); noted in help text |
 | Visual parity after CSS scoping | baselines from P8; mechanical port first, refactors after the tests are green |
 | Long Spanish labels break the panel layout | E2E at 360 px in both languages |
-| Sticker processing in a Worker in v1? | yes if `OffscreenCanvas` 2D works on all targets; otherwise main thread |
+| Sticker processing in a Worker in v1? | yes: OffscreenCanvas 2D is in all targets (§5.3); wired in #16 |
