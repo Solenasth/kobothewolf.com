@@ -1,6 +1,6 @@
 # Requirements: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 4: FR-R6 adopts the preserve-history policy, #24)
+**Status:** Approved 2026-10-26 (rev. 5: FR-P1 contact and profile copy, #4; rev. 4: FR-R6 preserve-history, #24)
 **Companion:** [DESIGN.md](DESIGN.md) · decisions in [decisions/](decisions/)
 **Inputs** (historical, superseded by this document; redacted copies go in `docs/origin/`, FR-R2):
 - **GP:** "Port the variant editor to GitHub Pages", the minimal single-file port.
@@ -48,7 +48,7 @@ The site is a freelance showcase on two levels:
 ### 5.1 Page and profile (FR-P)
 | ID | Requirement |
 |---|---|
-| FR-P1 | `https://kobothewolf.com/` is a single page. The **profile** sits on top: name, a one-line pitch, a short and deliberately general experience summary, and contact (Telegram `@KoboTheWolf`, `https://t.me/KoboTheWolf`). The **editor** sits below. Final copy will be polished later; v1 copy is provisional. |
+| FR-P1 | `https://kobothewolf.com/` is a single page. The **profile** sits on top: name, a one-line pitch, a short and deliberately general experience summary (13+ years), and contact: Telegram `@KoboTheWolf` (`https://t.me/KoboTheWolf`) and `contact@kobothewolf.com`. No other email address is ever published. The **editor** sits below. Final copy will be polished later; v1 copy is provisional, and the pitch is a placeholder. |
 | FR-P2 | The profile includes a "Make your card" link that jumps to the editor (`#editor`). |
 | FR-P3 | A short "How this was built" line links to the public repo and its spec documents. |
 | FR-P4 | A custom 404 page links back to the page. |
