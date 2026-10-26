@@ -53,6 +53,7 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - Exact versions only (`save-exact`), the lockfile is committed, and CI installs with `npm ci`.
 - `npm audit` must be clean, or each exception is documented.
 - Prefer well-maintained packages with few transitive dependencies. GitHub Actions are pinned to a commit SHA.
+- CI's E2E jobs run in the official Playwright container, pinned by digest. Its tag must equal the `@playwright/test` version (`npm run check:playwright-image` fails otherwise). To upgrade Playwright, bump the package, then update the tag and digest in `ci.yml` in the same commit.
 
 ## 7. Decision records (soft)
 [`decision-records`](policies/decision-records.md)
