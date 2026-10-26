@@ -105,7 +105,7 @@ npm run typecheck            # TypeScript, browser and Node configs
 npm run validate             # build-time checks: schemas, style data, face rules, catalogs, assets; also runs before build
 npm run gen                  # regenerate src/core/generated/ from schemas/ (runs automatically before dev, test, typecheck, validate)
 npm test                     # unit tests (vitest)
-npm run test:e2e             # builds, serves and runs E2E in all three browsers
+npm run test:e2e             # builds and serves the site and the fixture pages (e2e/fixtures/, into dist-e2e/), runs E2E in all three browsers
 npm run build                # production build in dist/
 ```
 

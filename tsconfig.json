@@ -25,6 +25,7 @@
     "resolveJsonModule": true
   },
   "include": [
-    "src"
+    "src",
+    "e2e/fixtures/scoping"
   ]
 }
