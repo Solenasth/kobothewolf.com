@@ -40,8 +40,9 @@ test('NFR-2 the editor code loads after the page and its largest paint', async (
   expect(timing.editor).toHaveLength(1);
   expect(timing.editor[0]!).toBeGreaterThanOrEqual(timing.load);
   // The profile's first largest paint comes before the editor is fetched. (A later
-  // entry can follow a web-font swap; it isn't caused by the editor.)
-  if (timing.lcp.length) expect(timing.editor[0]!).toBeGreaterThan(timing.lcp[0]!);
+  // entry can follow a web-font swap; it isn't caused by the editor.) Firefox gives
+  // both times in whole milliseconds, so the two can tie (#18).
+  if (timing.lcp.length) expect(timing.editor[0]!).toBeGreaterThanOrEqual(timing.lcp[0]!);
   expect(problems).toEqual([]);
 });
 

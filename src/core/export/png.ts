@@ -80,7 +80,8 @@ export function prepareFace(face: HTMLElement): Promise<void> {
   });
 }
 
-export function renderFace(face: HTMLElement): Promise<Blob> {
+/** A face's PNG bytes with the 300 dpi pHYs chunk. */
+export function renderFacePng(face: HTMLElement): Promise<Uint8Array> {
   return queued(async () => {
     // WebKit draws an image inside the SVG only once it has loaded there, so a
     // render right after a change (new art, say) can miss it. The first pass
@@ -88,6 +89,10 @@ export function renderFace(face: HTMLElement): Promise<Blob> {
     await render(face);
     const result = setDpi(bytesOf(await render(face)), DPI);
     if (!result.ok) throw new Error(`export: the rendered PNG was not valid (${result.error.code})`);
-    return new Blob([result.png as Uint8Array<ArrayBuffer>], { type: 'image/png' });
+    return result.png;
   });
+}
+
+export async function renderFace(face: HTMLElement): Promise<Blob> {
+  return new Blob([(await renderFacePng(face)) as Uint8Array<ArrayBuffer>], { type: 'image/png' });
 }

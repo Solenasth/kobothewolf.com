@@ -64,7 +64,7 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
           </select>
         </div>
       )}
-      <ExportBar session={session} say={say} />
+      <ExportBar session={session} say={say} label={label} />
       <Tabs session={session} label={label} />
       <p class="status" role="status" aria-live="polite">
         {status ? t(status.key, status.params) : ''}

@@ -1,7 +1,9 @@
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import { readPdf } from '../tests/pdf-read';
+import { readPng } from '../tests/png';
 
-// PNG export (FR-E14, FR-E15, NFR-2, DESIGN §5.5).
+// PNG and PDF export (FR-E14, FR-E15, NFR-2, DESIGN §5.5).
 
 let problems: string[];
 
@@ -35,6 +37,20 @@ async function download(page: Page, button: string) {
   const [file] = await Promise.all([page.waitForEvent('download'), page.locator(button).click()]);
   const path = await file.path();
   return { name: file.suggestedFilename(), bytes: readFileSync(path), ms: Date.now() - started };
+}
+
+/** Writes an export time where CI adds it to the job summary (NFR-2 asks for it to be reported). */
+function reportTime(browserName: string, name: string, ms: number) {
+  test.info().annotations.push({ type: 'export time', description: `${name}: ${ms} ms` });
+  mkdirSync('test-results/export-times', { recursive: true });
+  appendFileSync(`test-results/export-times/${browserName}.txt`, `- ${browserName}, ${name}: ${ms} ms\n`);
+}
+
+/** Share of pixels whose RGB differs by more than 8 in any channel, between an RGB image and an RGBA one of the same size. */
+function differing(rgb: Uint8Array, rgba: Uint8ClampedArray): number {
+  let off = 0;
+  for (let i = 0, j = 0; i < rgb.length; i += 3, j += 4) if ([0, 1, 2].some((c) => Math.abs(rgb[i + c]! - rgba[j + c]!) > 8)) off++;
+  return off / (rgb.length / 3);
 }
 
 /** Pixel colors at points given in face coordinates (960 × 560), decoded in the page. */
@@ -83,10 +99,7 @@ test('FR-E14 NFR-2 each face downloads as a 1134 × 661 PNG at 300 dpi, quickly'
     expect([info.width, info.height]).toEqual([1134, 661]);
     expect(info.phys).toEqual({ x: 11811, y: 11811, unit: 1 }); // 300 dpi
     await expect(page.locator('#editor [role="status"]')).toHaveText(`Saved ${name}.`);
-    test.info().annotations.push({ type: 'export time', description: `${name}: ${file.ms} ms` });
-    // CI adds these to the job summary (NFR-2 asks for the time to be reported).
-    mkdirSync('test-results/export-times', { recursive: true });
-    appendFileSync(`test-results/export-times/${browserName}.txt`, `- ${browserName}, ${name}: ${file.ms} ms\n`);
+    reportTime(browserName, name, file.ms);
     expect(file.ms, 'NFR-2: one face in under 3 s').toBeLessThan(3000);
   }
   expect(problems).toEqual([]);
@@ -148,6 +161,71 @@ test('FR-E14 the export shows what the face shows: hidden pieces, the drawn code
   expect(problems).toEqual([]);
 });
 
+test('FR-E14 NFR-2 the print PDF has both faces on two 96 × 56 mm pages at 300 ppi', async ({ page, browserName }) => {
+  await open(page);
+  const front = readPng((await download(page, '#ed-png-frente')).bytes);
+  const back = readPng((await download(page, '#ed-png-reverso')).bytes);
+  const file = await download(page, '#ed-pdf');
+  expect(file.name).toBe('certified-bug-nuzzler-print-96x56mm.pdf');
+  await expect(page.locator('#editor [role="status"]')).toHaveText(`Saved ${file.name}.`);
+  reportTime(browserName, file.name, file.ms);
+  expect(file.ms, 'NFR-2: both faces in under 6 s').toBeLessThan(6000);
+
+  const pdf = readPdf(file.bytes);
+  expect(pdf.pages.map((p) => [p.width.toFixed(2), p.height.toFixed(2)])).toEqual([
+    ['272.13', '158.74'],
+    ['272.13', '158.74'],
+  ]);
+  expect(pdf.fonts, 'the text is in the images').toBe(0);
+  expect(pdf.info).toMatchObject({ Title: 'Certificate + Certificate · terms · KOBO.EXE boykisser-uwu', Creator: 'kobothewolf.com' });
+  const [one, two] = pdf.pages.map((p) => {
+    expect(p.images).toHaveLength(1);
+    return p.images[0]!;
+  });
+  // 1134 px over 96 mm is 300 ppi.
+  expect([one!.width, one!.height, two!.width, two!.height]).toEqual([1134, 661, 1134, 661]);
+  // Page 1 is the front and page 2 the back: each matches that face's PNG export.
+  expect(differing(one!.pixels, front.data), 'page 1 = front').toBeLessThan(0.005);
+  expect(differing(two!.pixels, back.data), 'page 2 = back').toBeLessThan(0.005);
+  expect(differing(one!.pixels, back.data), 'the faces differ').toBeGreaterThan(0.2);
+  expect(problems).toEqual([]);
+});
+
+test('FR-E14 the PDF name joins two variants and follows the language', async ({ page }) => {
+  await open(page, 'es');
+  await page.locator('#ed-frente').selectOption('lic-f');
+  await page.locator('#ed-reverso').selectOption('soc-r');
+  const file = await download(page, '#ed-pdf');
+  expect(file.name).toBe('boykisser-license+programming-socks-imprenta-96x56mm.pdf');
+  expect(readPdf(file.bytes).info.Title).toBe('Licencia + Programming socks · nuzzles · KOBO.EXE boykisser-uwu');
+  await expect(page.locator('#editor [role="status"]')).toHaveText(`Guardado: ${file.name}.`);
+  await expect(page.locator('#ed-pdf')).toHaveText('PDF de imprenta (2 págs.)');
+});
+
+test('FR-E15 if the PDF code is blocked, only the PDF button stays disabled', async ({ page }) => {
+  await page.route(/\/assets\/pdf-[\w-]+\.js$/, (route) => route.abort());
+  await page.goto('/?lang=en#editor');
+  await expect(page.locator('#editor [role="status"]')).toHaveText("Export isn't available: its code didn't load. Reload the page to try again.");
+  await expect(page.locator('#ed-png-frente')).toBeEnabled();
+  await expect(page.locator('#ed-pdf')).toBeDisabled();
+});
+
+test('NFR-2 the page, the editor and the export code transfer under 3 MB', async ({ page }) => {
+  await page.goto('/?lang=en#editor');
+  await expect(page.locator('#ed-pdf')).toBeEnabled();
+  await page.waitForLoadState('networkidle');
+  // Response bodies as sent (encodedBodySize), from the page's own resource timing.
+  const sizes = await page.evaluate(() =>
+    (performance.getEntriesByType('navigation') as PerformanceResourceTiming[])
+      .concat(performance.getEntriesByType('resource') as PerformanceResourceTiming[])
+      .map((e) => ({ name: e.name, bytes: e.encodedBodySize })),
+  );
+  const bytes = sizes.reduce((sum, e) => sum + e.bytes, 0);
+  test.info().annotations.push({ type: 'transfer', description: `${bytes} bytes in ${sizes.length} responses` });
+  expect(sizes.some((e) => /\/assets\/pdf-[\w-]+\.js$/.test(e.name) && e.bytes > 100_000), 'the PDF chunk is counted').toBe(true);
+  expect(bytes).toBeLessThan(3_000_000);
+});
+
 test('FR-E15 if the export code is blocked, the buttons stay disabled and say why', async ({ page }) => {
   await page.route(/\/assets\/export-[\w-]+\.js$/, (route) => route.abort());
   await page.goto('/?lang=en#editor');
@@ -155,6 +233,7 @@ test('FR-E15 if the export code is blocked, the buttons stay disabled and say wh
   await expect(page.locator('#editor [role="status"]')).toHaveText("Export isn't available: its code didn't load. Reload the page to try again.");
   await expect(page.locator('#ed-png-frente')).toBeDisabled();
   await expect(page.locator('#ed-png-reverso')).toBeDisabled();
+  await expect(page.locator('#ed-pdf')).toBeDisabled();
   // The rest of the editor still works.
   await page.getByRole('tab', { name: 'License', exact: true }).click();
   await expect(page.locator('.ed-visor [data-cara="lic-f"]')).toHaveCount(1);

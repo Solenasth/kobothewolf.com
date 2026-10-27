@@ -83,6 +83,8 @@
   "export.png.back": "PNG back · 300 dpi",
   "export.file.front": "{file}-front-300dpi.png",
   "export.file.back": "{file}-back-300dpi.png",
+  "export.pdf": "Print PDF (2 pages)",
+  "export.file.pdf": "{file}-print-96x56mm.pdf",
   "export.making": "Making {file}…",
   "export.saved": "Saved {file}.",
   "export.failed": "Couldn't make {file}. Please try again.",
