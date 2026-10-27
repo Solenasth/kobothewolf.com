@@ -31,8 +31,26 @@ test.describe('FR-P6 without JavaScript', () => {
     await expect(page.getByText('13+ years of experience.')).toBeVisible();
     await expect(page.getByRole('link', { name: /contact@kobothewolf\.com/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Make your card ↓' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Source on GitHub' })).toBeVisible();
   });
 });
+
+const REPO = 'https://github.com/Solenasth/kobothewolf.com';
+const BUILT = {
+  en: { title: 'How this was built', links: ['Source on GitHub', 'Requirements', 'Design', 'Decisions'] },
+  es: { title: 'Cómo está hecho', links: ['Código en GitHub', 'Requisitos', 'Diseño', 'Decisiones'] },
+};
+
+for (const lang of LANGS) {
+  test(`FR-P3 ${lang}: "How this was built" links the repo and its spec documents`, async ({ page }) => {
+    await page.goto(`/?lang=${lang}`);
+    await expect(page.getByRole('heading', { name: BUILT[lang].title })).toBeVisible();
+    const hrefs = [`${REPO}`, `${REPO}/blob/main/docs/REQUIREMENTS.md`, `${REPO}/blob/main/docs/DESIGN.md`, `${REPO}/tree/main/docs/decisions`];
+    for (const [i, name] of BUILT[lang].links.entries()) {
+      await expect(page.locator('.built').getByRole('link', { name, exact: true })).toHaveAttribute('href', hrefs[i]!);
+    }
+  });
+}
 
 test('FR-I2 the switch changes language in place and is remembered', async ({ page }) => {
   await page.goto('/?lang=en');
@@ -73,6 +91,26 @@ test('FR-P5 metadata and favicon', async ({ page, request }) => {
   await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', /freelance work/);
   const icon = await page.locator('link[rel="icon"]').getAttribute('href');
   expect((await request.get(icon!)).status()).toBe(200);
+});
+
+test('FR-P5 the Open Graph image is a same-origin 1200 × 630 PNG, described in each language', async ({ page, request }) => {
+  await page.goto('/?lang=en');
+  const meta = (property: string) => page.locator(`meta[property="${property}"]`);
+  const url = new URL((await meta('og:image').getAttribute('content'))!);
+  // Open Graph needs an absolute URL; it's the site's own origin.
+  expect(url.href).toBe('https://kobothewolf.com/og-image.png');
+  await expect(meta('og:image:width')).toHaveAttribute('content', '1200');
+  await expect(meta('og:image:height')).toHaveAttribute('content', '630');
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+  await expect(meta('og:image:alt')).toHaveAttribute('content', /KOBO\.EXE boykisser certificate card/);
+  // The same path on this build serves the image.
+  const response = await request.get(url.pathname);
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toBe('image/png');
+  const png = await response.body();
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1200, 630]);
+  await page.locator('a[data-lang="es"]').first().click();
+  await expect(meta('og:image:alt')).toHaveAttribute('content', /tarjeta certificado boykisser/);
 });
 
 async function trackViolations(page: Page) {
