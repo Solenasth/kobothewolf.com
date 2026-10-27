@@ -1,10 +1,11 @@
+import { readPng } from '../cli/png.ts';
 import { describe, expect, it } from 'vitest';
 import {
   PROGRAMA,
   acomodar,
   dibujar,
   relleno,
-  tamanoLetra,
+  ajustar,
   texto,
   tramos,
   unidades,
@@ -166,13 +167,40 @@ describe('FR-E20 tokens and filler', () => {
     expect(words.filter((u) => /\/\*|\*\/|"/.test(u.t))).toEqual([]);
   });
 
-  it('sizes the font between 5.5 and 11 px', () => {
-    expect(tamanoLetra(0, programa)).toBe(5.5);
-    expect(tamanoLetra(1e9, programa)).toBe(11);
-    expect(tamanoLetra(110_000, programa)).toBeGreaterThan(5.5);
-  });
 });
 
 function* take<T>(it: Iterator<T>, n: number): Generator<T> {
   for (let i = 0; i < n; i++) yield it.next().value as T;
 }
+
+describe('FR-E20 #75 the code is as large as the style allows', () => {
+  // The License cat mask at the card's canvas size, fitted and centered as montar does.
+  const mask = readPng('styles/boykisser-uwu/assets/mascara-licencia.png');
+  const [ancho, alto] = [460, 456];
+  const k = Math.min(ancho / mask.width, alto / mask.height);
+  const [ox, oy] = [(ancho - mask.width * k) / 2, (alto - mask.height * k) / 2];
+  const dentro = (x: number, y: number) => {
+    const [mx, my] = [Math.floor((x - ox) / k), Math.floor((y - oy) / k)];
+    return mx >= 0 && my >= 0 && mx < mask.width && my < mask.height && mask.data[(my * mask.width + mx) * 4]! > 128;
+  };
+  // JetBrains Mono's advance is 0.6 em.
+  const avance = (fs: number) => fs * 0.6;
+
+  it('uses 10 px, the top of the range, on the real cat, with the whole program in it', () => {
+    const { fs, colocados } = ajustar(dentro, ancho, alto, programa, [8, 10], avance);
+    expect(fs).toBe(10);
+    const placed = colocados.filter((c) => c.origen === 'programa').map((c) => c.t).join('');
+    expect(placed).toBe(programa.filter((u) => u.t !== ' ').map((u) => u.t).join(''));
+  });
+
+  it('steps down a quarter pixel at a time when the top of the range is too big', () => {
+    // The cat's top half alone holds the program at 9 px, not at 10.
+    const half = (x: number, y: number) => dentro(x, y) && y < alto * 0.5;
+    expect(ajustar(half, ancho, alto, programa, [8, 10], avance).fs).toBe(9);
+  });
+
+  it('fails rather than drawing outside the style\'s range', () => {
+    const tiny = (x: number, y: number) => dentro(x, y) && y < alto * 0.35;
+    expect(() => ajustar(tiny, ancho, alto, programa, [8, 10], avance)).toThrow('does not fit at any size from 8 to 10 px');
+  });
+});
