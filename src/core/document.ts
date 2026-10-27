@@ -40,8 +40,10 @@ export interface KoboDocument {
 }
 
 class ForbiddenKey extends Error {
-  constructor(readonly key: string) {
+  readonly key: string;
+  constructor(key: string) {
     super(key);
+    this.key = key;
   }
 }
 
