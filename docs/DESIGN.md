@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -157,7 +157,7 @@ Recorded in [`0006-css-scoping-not-shadow-dom.md`](decisions/0006-css-scoping-no
   - Saved state is parsed like an imported file. If it's invalid, the editor starts fresh.
   - Notices: `storage-unavailable`, `storage-full`, `sticker-not-saved`, `saved-state-invalid`.
   - `paintFace()` hides with the `data-oculto` / `data-oculto-pieza` attributes, styled `display:none !important` as in P8, which also works on SVG bows. Bounce text gets letter `<span>`s built by the caller.
-  - `paintLook()` applies the rest of a face's state, as P8's `pintar()` did: the `fondo-<key>` class, `--acento` and `--sombra` on the root, the art image, the sticker's rotation and scale, the headline rotation, each washi's angle (keeping its authored sign) and how many sparkles show. It comes with the preview (#14), so default faces render as in P8 before their controls exist (#16). The art placeholder and the user's sticker are painted with the art control (#16).
+  - `paintLook()` applies the rest of a face's state, as P8's `pintar()` did: the `fondo-<key>` class, `--acento` and `--sombra` on the root, the art image, the sticker's rotation and scale, the headline rotation, each washi's angle (keeping its authored sign) and how many sparkles show. It comes with the preview (#14), so default faces render as in P8 before their controls exist (#16). The art key maps to an image: a style sticker's built URL, the placeholder, or the user's sticker; `"ninguno"` (backs only) hides the art with a `data-sin-arte` attribute, styled `display:none !important` in the shared face CSS.
 
 ### 5.3 Sticker from the user's image `[FR-E6]`
 - The EV §6.3 algorithm is ported from P8 into typed, pure functions over RGBA buffers and `Uint8Array` masks (`src/core/sticker.ts`): `figureMask`, `dilate`, `fillHoles`, `whiteFill`, `makeSticker`. There's no DOM and no network.
@@ -168,6 +168,8 @@ Recorded in [`0006-css-scoping-not-shadow-dom.md`](decisions/0006-css-scoping-no
   - the sticker never extends past Python's by more than 1 px;
   - Python's squarer corners are within 4 px.
 - **Worker:** OffscreenCanvas 2D is available in every NFR-8 target, including Safari from 16.4, so the browser adapter (#16) runs decode, scale and `makeSticker` in a Worker. The core functions are already Worker-safe.
+- **Browser adapter (`src/editor/sticker.worker.ts`, `src/editor/stickers.ts`):** the Worker decodes the file with `createImageBitmap` (a file that doesn't decode is `not-image`), scales it to ≤ 700 px a side, runs `makeSticker` with the style's `efectos_imagen`, and returns a PNG data URI. The same Worker re-encodes any untrusted PNG data URI for the store (`reencode`, NFR-4): decoded and drawn again, so only pixels survive. Nothing is sent anywhere; the file never leaves the browser.
+- After an upload the sticker is stored as `artePropio`, and each shown face that has art switches to `"propio"`, as in P8. Toggling "cut off at the bottom" reprocesses the last file. Progress and errors (`not-image`, `no-figure`) go to the status region.
 
 ### 5.4 Code-cat face `[FR-E19, FR-E20]`
 P8's `gato()` moves to `variantes/codigo/montar.ts`, exporting `async function montar(cara: HTMLElement): Promise<void>`.
@@ -206,6 +208,11 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
   - Texts: one row per field in document order, labeled `ed.<key>`, with a show checkbox and a text box capped at 90 characters. Changes apply as you type, through `textContent` only.
   - Pieces: one show checkbox per piece. `data-parte` groups are labeled `parte.<key>` from the style catalog; the sticker, the bow and each washi tape use app labels. An optional contact block is one piece, so it shows or hides as a whole, while its own texts stay in the text list. Locked elements have no control, since the marks never list them.
   - "Restore" resets texts and pieces on the two faces shown and says so in the status region.
+- **Art, background and ranges (FR-E5–E9):** a face shows only the controls its variant lists in `variant.json` → `controles` and that apply to it.
+  - Per face, in its group: the art `<select>` (style stickers labeled `arte.<key>`, the localized placeholder, "your image" once one exists, and "none" on backs), sticker rotation, background (`fondo.<key>`) and sparkles (from the range minimum, or the face's count if lower, to the face's count).
+  - Shared, in their own group: accent and flat shadow as `<select>`s of the style's colors (`color.<hex>`), shown when either face's variant lists them, and headline rotation, sticker scale and washi angle ranges. Every range comes from `tokens.json` (`editor.json` for scale), and each shows its value.
+  - Upload: a file input for PNG, JPEG or WebP with a drop zone, and the "cut off at the bottom" checkbox (§5.3).
+  - The placeholder is drawn on a canvas in the face font (Plumon) with the localized "[ your kitty here ]", so it exports like any image and follows the language.
 - Native controls. Labels are app catalog keys (`editor.*`) and style catalog keys (§4), so a language switch relabels the editor without touching its state.
 - **Test hook:** P8's `window.__bk` becomes `window.__kobo`: the store, `ready()`, the face elements and their bound marks. It exists only in builds made with `VITE_TEST_HOOK=1` and only when the URL has `?test`. The E2E web server builds with the flag; the deploy build doesn't, and CI checks that `dist/` has no trace of it.
 
