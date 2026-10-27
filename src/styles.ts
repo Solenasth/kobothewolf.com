@@ -4,6 +4,7 @@
 // the same specificity.
 import { parseFaces, resolveAssets } from './core/faces';
 import { collectVariants, type Variant } from './core/variants';
+import type { Efectos } from './editor/stickers';
 
 import.meta.glob('../styles/*/caras.css', { eager: true });
 import.meta.glob('../styles/*/variantes/*/caras.css', { eager: true });
@@ -50,11 +51,11 @@ export async function montar(variant: Variant, face: HTMLElement): Promise<void>
 }
 
 /** A style's editor lists and anti-rules, checked by `validate` at build time. */
-export function styleData(estilo: string): { editor: EditorData; antirreglas: Record<string, unknown> } {
+export function styleData(estilo: string): { editor: EditorData; antirreglas: Record<string, unknown>; efectos: Efectos } {
   const editor = editors[`../styles/${estilo}/editor.json`] as EditorData | undefined;
-  const style = tokens[`../styles/${estilo}/tokens.json`] as { antirreglas: Record<string, unknown> } | undefined;
+  const style = tokens[`../styles/${estilo}/tokens.json`] as { antirreglas: Record<string, unknown>; efectos_imagen: Efectos } | undefined;
   if (!editor || !style) throw new Error(`style ${estilo}: editor.json or tokens.json is missing`);
-  return { editor, antirreglas: style.antirreglas };
+  return { editor, antirreglas: style.antirreglas, efectos: style.efectos_imagen };
 }
 
 export interface EditorData {
