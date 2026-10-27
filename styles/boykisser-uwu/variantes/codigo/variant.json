@@ -5,5 +5,6 @@
   "fondo": { "frente": "crema", "reverso": "gingham" },
   "archivo": "code-cat",
   "controles": ["textos", "arte", "fondo", "acento", "rotSt", "rotTit", "brillitos", "washi", "escala"],
-  "verificar": ["qr", "contacto", "max_fuentes"]
+  "verificar": ["qr", "contacto", "max_fuentes"],
+  "montar": "montar.ts"
 }

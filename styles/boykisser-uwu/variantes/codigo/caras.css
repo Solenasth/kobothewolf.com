@@ -1,5 +1,5 @@
 /* Gatito de código (cod-f / cod-r), ported from P8. Scoped to these two faces at build time.
-   The cat is drawn on the canvas by montar.ts (#13). */
+   The cat is drawn on the canvas by montar.ts. */
 
 /* Front */
 canvas { position: absolute; left: 28px; top: 22px; }
