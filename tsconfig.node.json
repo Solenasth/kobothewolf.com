@@ -25,7 +25,9 @@
   "include": [
     "vite.config.ts",
     "playwright.config.ts",
+    "playwright.exports.config.ts",
     "scripts",
+    "cli",
     "tests"
   ]
 }

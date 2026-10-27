@@ -22,7 +22,9 @@
     "pretest": "npm run gen",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "check:playwright-image": "node scripts/check-playwright-image.ts"
+    "check:playwright-image": "node scripts/check-playwright-image.ts",
+    "kobo": "node cli/kobo.ts",
+    "exports:render": "playwright test -c playwright.exports.config.ts"
   },
   "dependencies": {
     "html-to-image": "1.11.13",
@@ -34,6 +36,7 @@
     "@playwright/test": "1.64.1",
     "@types/node": "24.19.2",
     "ajv": "8.20.0",
+    "jsqr": "1.4.0",
     "lightningcss": "1.33.0",
     "parse5": "8.0.1",
     "typescript": "7.0.2",

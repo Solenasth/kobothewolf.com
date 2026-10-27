@@ -13,6 +13,8 @@ export interface MarkElement {
 export const LOCKED_CLASSES = ['qr', 'arroba', 'url'] as const;
 /** Text that is contact data and therefore locked, wherever it appears. */
 export const CONTACT_TEXT = /@KoboTheWolf|t\.me\/|kobothewolf\.com/i;
+/** What each QR must decode to, exactly (FR-B2, EV §5.3): the main one on every back, and the site block's. */
+export const QR_CONTENTS = { main: 'https://t.me/KoboTheWolf', site: 'https://kobothewolf.com' } as const;
 /** Built-in piece keys; data-parte names must not reuse them. */
 export const BUILTIN_PIECES = ['arte', 'lazo'] as const;
 

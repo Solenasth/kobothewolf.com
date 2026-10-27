@@ -81,6 +81,69 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  export:
+    name: export (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # FR-B2, DESIGN §9, §10: every variant's PNGs and PDF, exported through the
+    # editor in this browser, with their manifests, for the check-exports job.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-resolute@sha256:d89d0e4a7058330a8334306a5aef1e00807863d31af27cf11348eed696d6e0ba
+      options: --user 1001
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run exports:render -- --project=${{ matrix.browser }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: exports-${{ matrix.browser }}
+          path: exports/
+          if-no-files-found: error
+          retention-days: 14
+
+  check-exports:
+    name: check-exports
+    needs: export
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Runs outside the Playwright image, whose user can't install poppler.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Install poppler
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends poppler-utils
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: exports-*
+          merge-multiple: true
+          path: exports
+      - name: Check the exports
+        run: |
+          set -o pipefail
+          npm run -s kobo -- check-exports exports | tee check-exports.txt
+      - name: Report
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f check-exports.txt ]; then
+            { echo '### check-exports'; echo '```'; cat check-exports.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      # The check's own tests, with poppler required so the PDF cases can't skip.
+      - run: npm run gen && npx vitest run tests/check-exports.test.ts tests/font-cmap.test.ts
+        env:
+          KOBO_REQUIRE_POPPLER: 1
+
   rustc:
     name: rustc (code cat)
     needs: e2e

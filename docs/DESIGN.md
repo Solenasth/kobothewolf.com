@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-27 (rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-27 (rev. 22: §9, §10, §11 check-exports and the export CI jobs, #19; rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -280,10 +280,35 @@ The site is static with no server state. What needs protecting is visitors' brow
 | Clickjacking | not mitigable on Pages (no `frame-ancestors` in meta). There are no authenticated actions, so the risk is accepted | — |
 
 ## 9. CLI `[FR-B1, FR-B2]`
-`cli/kobo.ts` (run with `tsx`, using Playwright's browsers):
-- `pdf-vector doc.kobo.json`: EV §5.2, `@page{size:96mm 56mm;margin:0}` with `preferCSSPageSize`.
-- `check-exports dir/`: EV §5.3. Uses poppler `pdfinfo` / `pdfimages` / `pdffonts` (apt in CI), `jsqr` and `fontkit`.
-- `validate`: §7.
+`cli/kobo.ts`, run by Node 24 directly (`npm run kobo -- <command>`), as the repo's other scripts are. tsx isn't needed.
+- `pdf-vector doc.kobo.json`: EV §5.2, `@page{size:96mm 56mm;margin:0}` with `preferCSSPageSize` (M6).
+- `check-exports dir/`: EV §5.3, below.
+- `validate`: §7 (`npm run validate`).
+
+**`check-exports dir/` (FR-B2).** Some checks need what a file can't tell, such as where the QRs are and which font drew each text. So the files come with a manifest.
+- **Renderer:** `e2e/exports/render.ts`, run by `playwright.exports.config.ts` in Chromium and WebKit (`npm run exports:render`).
+  - It exports every variant through the editor's own buttons, in its default state.
+  - For each browser it writes `exports/<browser>/`:
+    - each face's PNG and each variant's PDF;
+    - a manifest per face (`cli/manifest.ts`): the boxes of the main QR, the site block and its QR, the boxes of every sparkle, washi tape, sticker and line of text outside them, and every text run with its first font family after `text-transform`;
+    - an `index.json` that lists the faces and each PDF's pages.
+- **Checks:** `check-exports` reads that folder, plus the repo's fonts (`src/theme/fonts.css`) and the style's `tokens.json`. It finds every `index.json` under the folder and checks:
+
+  | Check | How | Criterion |
+  |---|---|---|
+  | PNG size and dpi | IHDR and pHYs | 1134 × 661 px, 11811 px/m (300 dpi) |
+  | QR | crop each QR's box from the PNG, `jsqr` | main: exactly `https://t.me/KoboTheWolf` at 300 dpi and at 150 dpi (the crop halved); site: exactly `https://kobothewolf.com` at 300 dpi |
+  | Nothing over the QRs | manifest boxes | no sparkle, tape, sticker or text box overlaps the main QR's box or the site block's |
+  | Fonts per face | manifest texts | at most `tipografia.max_fuentes_por_cara` families |
+  | Glyphs | each family's font file, `cli/font-cmap.ts` | every non-space character of a run is in its family's cmap, so nothing falls back to another font |
+  | PDF size and images | `pdfinfo`, `pdfimages -list` | 2 pages of 272.13 × 158.74 pt, one 1134 × 661 image per page at 300 × 300 ppi |
+  | PDF fonts | `pdffonts` | none: the text is in the images |
+  | PDF content | `pdfimages -png`, then the QR check | each page's image passes its face's QR checks, so page 2 is the back |
+
+- **Engines:** EV §5.3 also compares each export with a screenshot of the face. That isn't adopted. The WebKit bugs found so far (§5.5) have pixel checks in the E2E export test, and a whole-face comparison would need a tolerance wide enough to hide them: Firefox and WebKit draw export text 0.1 px smaller.
+- **Output:** one line per file with what failed, a summary, and exit code 1 on any failure. Poppler (`pdfinfo`, `pdfimages`, `pdffonts`, from `poppler-utils`) is required; without it the command fails rather than skipping the PDF checks.
+- **Expected QR contents** live next to the contact pattern the face rules use (`src/core/marks.ts`, §7), so the contact is defined in one file.
+- **Tests:** `tests/check-exports.test.ts` builds a good synthetic export set from the style's QR images and checks that it passes. Then each fault on its own must fail: wrong dpi, wrong size, an unreadable QR, a wrong QR, a sticker over a QR, 5 fonts on a face, a missing glyph (♡), a PDF with the wrong page size, and a PDF with a font. The PDF cases need poppler: they skip without it locally, and the `check-exports` CI job sets `KOBO_REQUIRE_POPPLER=1`, so there they fail instead.
 
 ## 10. Testing and CI `[NFR-11]`
 | Level | Tool | Covers |
@@ -292,11 +317,13 @@ The site is static with no server state. What needs protecting is visitors' brow
 | E2E | Playwright: Chromium, Firefox, WebKit | every variant: edit, switch, mix, export, reload persistence including the user's sticker, `.kobo.json` round-trip, **language switch keeps state**, 360 px with no horizontal scroll, zero console errors, CSP and requests (T-SEC-4), library blocked → buttons disabled, profile readable with JavaScript disabled (FR-P6) |
 | Controls | Playwright with real clicks | **every** text and piece checkbox on every face hides and restores its element; every select and range driven through the UI (EV §8). Runs in both languages, because labels change and keys must not |
 | Visual | Playwright screenshots | default faces in the editor against baselines generated from P8 with allowed art only (NFR-1) |
-| Export | `kobo check-exports` | PNG and PDF from every variant, rendered in Chromium **and WebKit** |
+| Export | `kobo check-exports` | PNG and PDF from every variant, rendered in Chromium **and WebKit** (§9) |
 | Code cat | `rustc --edition 2021 -D warnings`, Rust 1.99.1 | the text extracted in each browser compiles with no warnings and runs (§5.4) |
 | A11y | `@axe-core/playwright` | profile and panel, ES and EN: no serious or critical violations |
 
 - **`ci.yml`** runs on every PR: `npm ci` → typecheck → validate → unit → build → E2E matrix → export checks → rustc → `npm audit` → gitleaks. Exports are uploaded as workflow artifacts.
+  - **Export jobs:** `export (chromium)` and `export (webkit)` run the renderer in the Playwright image and upload `exports/<browser>/` as an artifact (kept 14 days).
+  - **`check-exports` job:** runs on the plain runner, because the image's user can't install packages. It installs `poppler-utils` with apt, downloads both artifacts, runs `kobo check-exports exports/`, adds the report to the job summary, and runs the check's unit tests with poppler required.
 - **E2E environment:** the E2E jobs run in Microsoft's Playwright image (`mcr.microsoft.com/playwright:v<version>-resolute`), pinned by digest, with browsers and system packages preinstalled. This avoids a slow `apt` step and gives the visual baselines the same fonts and libraries on every run. The tag must equal `@playwright/test`, and CI checks it.
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.
 - **Fixture pages:** behavior that needs a real browser but must not ship, such as CSS scoping with deliberately conflicting variants, is tested on fixture pages under `e2e/fixtures/`. They're built by their own Vite config with the same plugins and served by a second Playwright web server, so the production build stays unchanged.
@@ -317,10 +344,9 @@ The site is static with no server state. What needs protecting is visitors' brow
 | ajv | dev | compiles schemas into standalone validators at build time, so there is no runtime dependency. Its one runtime helper (`ucs2length`, code-point string length) is replaced by a local function, and generation fails if any other import appears |
 | parse5 | dev | parses face HTML in `validate` (Node has no DOM) |
 | lightningcss | dev | scopes and flattens face CSS (§5.1). Vite 8 already installs it; it's declared, pinned to Vite's version, because the build imports it directly |
-| jsqr, fontkit | dev | export checks |
-| tsx | dev | runs the CLI |
+| jsqr 1.4.0 | dev | decodes the QRs in `check-exports`. No dependencies |
 
-There's no i18n library: catalogs plus `Intl` cover two languages, and a library would be a dependency without a need. All versions are exact and the lockfile is committed. Each one is justified in the PR that adds it.
+Fonts are checked without fontkit: `cli/font-cmap.ts` reads only the cmap, uncompressing WOFF2 with Node's built-in brotli, which saves nine packages. It was compared with fontTools on every code point up to U+30000 of each of the site's five fonts, with identical results. There's no i18n library: catalogs plus `Intl` cover two languages, and a library would be a dependency without a need. All versions are exact and the lockfile is committed. Each one is justified in the PR that adds it.
 
 ## 12. Repository workflow `[FR-R1–R8]`
 - **Bootstrap** (the one direct commit to `main`, per pr-only): README skeleton, LICENSE (MIT), CONTRIBUTING, CLAUDE.md, policies, `.gitignore`, approved docs, decision records, `docs/origin/` (redacted) and issue/PR templates. Then `gh repo create kobothewolf.com --public` (approved in decision 0003), a visibility check, repo settings and the ruleset (FR-R5). The CI skeleton is issue #1, the first PR.

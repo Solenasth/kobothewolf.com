@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { buildPdf } from '../src/core/export/pdf';
 import { readPdf } from './pdf-read';
-import { readPng } from './png';
+import { readPng } from '../cli/png.ts';
 
 const FRONT = 'tests/fixtures/sticker/filled-blob.input.png'; // RGB, 220 × 180
 const BACK = 'tests/fixtures/sticker/cut-bottom.sticker.png'; // RGBA, 258 × 278

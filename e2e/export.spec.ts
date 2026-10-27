@@ -1,7 +1,7 @@
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { readPdf } from '../tests/pdf-read';
-import { readPng } from '../tests/png';
+import { readPng } from '../cli/png.ts';
 
 // PNG and PDF export (FR-E14, FR-E15, NFR-2, DESIGN §5.5).
 
