@@ -104,8 +104,10 @@ test.describe('FR-P8 inquiry form', () => {
     await capture(page);
     await page.goto('/?lang=en');
     await page.evaluate(() => document.fonts.ready);
-    // The editor loads after the page; let it finish so only the form is measured.
+    // The editor loads after the page, then warms up its export (fonts and images);
+    // let all of it finish so only the form is measured.
     await expect(page.locator('.ed-visor [data-cara]')).toHaveCount(2);
+    await expect(page.locator('#ed-png-frente')).toBeEnabled();
     await page.waitForLoadState('networkidle');
     const requests: string[] = [];
     page.on('request', (req) => requests.push(req.url()));
