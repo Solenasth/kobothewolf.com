@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -186,16 +186,24 @@ P8's `gato()` moves to `variantes/codigo/montar.ts`, exporting `async function m
 
 ### 5.5 Export pipeline `[FR-E14, FR-E15, NFR-2]`
 ```
-await faces ready ─► sombrasADivs(face) ─► htmlToImage.toPng(face, {960×560 → 1134×661, filter: no .guide, fontEmbedCSS})
+await faces ready ─► sombrasADivs(face) ─► htmlToImage.toPng(face, {960×560 → 1134×661, fontEmbedCSS})
                  ─► undo shadows ─► insert pHYs (11811 px/m) ─► Blob ─► Saver.save()
 PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob ─► Saver.save()
 ```
+- **Where the code lives:** `src/core/export/shadows.ts` (`sombrasADivs`), `png.ts` (render + pHYs) and `save.ts` (the Saver) form a separate chunk with html-to-image. The editor imports it with `import()` as soon as it mounts, so the page and the editor never wait for it.
+- **Export bar:** above the variant tabs, with "PNG front · 300 dpi" and "PNG back · 300 dpi" (the PDF button comes with #18). A face is rendered from its own element; the guides are outside it (§5.6), so nothing needs filtering out. The status region says which file is being made, then that it was saved, or what went wrong.
+- **File names** come from the face's variant (`variant.json` → `archivo`) through localized templates, e.g. `boykisser-license-front-300dpi.png` / `boykisser-license-frente-300dpi.png`.
 - **pHYs:** `src/core/phys.ts` `setDpi(png, 300)` works on the PNG bytes alone (no DOM), so it's unit-tested in Node. It removes every existing `pHYs` chunk and writes one right after `IHDR` (before any `IDAT`, as the PNG spec requires) with its CRC-32. 300 dpi is stored as 11811 px/m, the nearest integer, which readers report as 300 dpi. Bytes that aren't a well-formed PNG (bad signature, `IHDR` not first, truncated chunk, bad CRC) are rejected with a typed error, not passed through.
 - `sombrasADivs()` is kept as is. It's the WebKit `box-shadow` fix (EV §10).
-- `fontEmbedCSS` is computed once and reused (NFR-2).
+- `fontEmbedCSS` is computed once per face and reused (NFR-2). `src/core/export/fonts.ts` builds it from the page's own `@font-face` rules for the families the face uses, with each file inlined, resolving URLs against their stylesheet with `new URL()`. html-to-image's `getFontEmbedCSS()` isn't used: it sets a `<base>` element, which the CSP's `base-uri 'none'` blocks and reports.
+- **WebKit fixes found in #17:**
+  - Each export renders twice. WebKit draws an image inside the SVG only once it has loaded there, so a first render can miss the sticker, the code cat and background layers.
+  - html-to-image copies computed styles one property at a time in Firefox and WebKit. The list leaves out `corner-*-shape` (always the default here): with it, WebKit drops `border-radius` from the clone, and every rounded corner exports square.
+  - The E2E test checks the exported pixels for all three (the code cat's area, the gingham's three shades, a rounded corner).
 - **Saver interface** `{ save({filename, data: Blob}) → {status} }`. The browser implementation creates an object URL, clicks an `<a download>`, then revokes it after 10 s (GP §1). Other host runtimes can plug in through the same interface.
-- Buttons stay disabled until the libraries have loaded and the faces are ready. Otherwise the message `export.unavailable` shows (GP §2).
-- **Library versions change.** `npm audit` on 2026-10-25 reported the inputs' pinned **jsPDF 2.5.1: 1 critical, 1 high** (via dompurify). The plan moves to **jsPDF 4.2.1** and **html-to-image 1.11.13**, which audit clean together with Preact 11.0.2. M5 re-verifies output against the export checks (page size 272.13 × 158.74 pt, 300 ppi, QR decode). Recorded in `0007-export-library-versions.md`.
+- Buttons stay disabled until the export chunk has loaded and both shown faces are ready (`ready()`, including `montar`). If the chunk fails to load (for example, blocked), they stay disabled and the status region shows `export.unavailable` (GP §2).
+- **Time:** the E2E test measures one face's export and reports it; NFR-2 asks for under 3 s on a mid-range laptop.
+- **Library versions change.** `npm audit` on 2026-10-25 reported the inputs' pinned **jsPDF 2.5.1: 1 critical, 1 high** (via dompurify). The plan moves to **jsPDF 4.2.1** and **html-to-image 1.11.13**, which audit clean together with Preact 11.0.2. M5 re-verifies output against the export checks (page size 272.13 × 158.74 pt, 300 ppi, QR decode). Recorded in [`0007-export-library-versions.md`](decisions/0007-export-library-versions.md).
 
 ### 5.6 Editor UI `[FR-E1–E4, FR-E10, FR-E21, NFR-2, NFR-6, NFR-7]`
 - **Loading (NFR-2):** `src/main.tsx` imports `src/editor/` with `import()` after the page's `load` event, when the browser is idle. The editor chunk carries the face CSS, so the profile's first render never waits on it. Until it loads, `#editor` shows a short loading line, and a `<noscript>` line says the editor needs JavaScript.
