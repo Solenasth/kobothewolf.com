@@ -31,7 +31,7 @@
       "items": { "enum": ["textos", "arte", "fondo", "acento", "rotSt", "rotTit", "brillitos", "washi", "lazo", "escala", "sombra"] }
     },
     "verificar": { "type": "array", "uniqueItems": true, "items": { "enum": ["qr", "contacto", "max_fuentes"] } },
-    "montar": { "type": "string", "pattern": "^[a-z0-9-]+\\.ts$" }
+    "montar": { "const": "montar.ts", "description": "The variant's mount script; one fixed name, so the build finds every one with a single glob." }
   },
   "$defs": {
     "key": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 }

@@ -120,6 +120,22 @@ describe('FR-E8 FR-E9 cross-file rules', () => {
     ]);
   });
 
+  it('FR-E19 rejects a montar script missing from the variant folder', () => {
+    const m = { ...clone(manifest), montar: 'montar.ts' };
+    const v = (files: string[]) => [{ dir: 'v/licencia', manifest: m, html, files }];
+    expect(checkStyle(ajv, style({ variants: v(['variant.json', 'caras.html', 'montar.ts']) }))).toEqual([]);
+    expect(checkStyle(ajv, style({ variants: v(['variant.json', 'caras.html']) }))).toEqual([
+      'v/licencia/variant.json: montar "montar.ts" is not a file in the folder',
+    ]);
+  });
+
+  it('FR-E19 rejects a montar script with another name', () => {
+    const m = { ...clone(manifest), montar: 'dibujo.ts' };
+    expect(checkStyle(ajv, style({ variants: [{ dir: 'v/licencia', manifest: m, html, files: ['dibujo.ts'] }] }))).toContainEqual(
+      expect.stringContaining('/montar must be equal to constant'),
+    );
+  });
+
   it('rejects a variant without caras.html', () => {
     expect(checkStyle(ajv, style({ variants: [{ dir: 'v/licencia', manifest: clone(manifest) }] }))).toEqual([
       'v/licencia/caras.html: missing',
