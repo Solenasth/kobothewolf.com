@@ -1,11 +1,12 @@
-// The editor shell (FR-E1, FR-E2, FR-E10, FR-E13, FR-E21, DESIGN §5.6): variant
-// tabs, face selects, text and piece controls per face, the guides toggle,
-// restore, the two-face stage and the status region. Art and ranges: #16.
+// The editor shell (FR-E1–E13, FR-E21, DESIGN §5.6): variant tabs, face
+// selects, each face's controls, the shared palette, ranges and upload, the
+// guides toggle, restore, the two-face stage and the status region.
 import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'preact/hooks';
 import type { Notice } from '../core/store';
 import { getLanguage, onLanguageChange, t, type MessageKey } from '../i18n';
 import { styleLabel } from '../styles';
 import { FaceControls } from './FaceControls';
+import { SharedControls } from './SharedControls';
 import type { Session } from './session';
 
 const NOTICES: Record<Notice, MessageKey> = {
@@ -22,7 +23,15 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
   const [guias, setGuias] = useState(true);
   const [status, setStatus] = useState<MessageKey | null>(null);
 
-  useEffect(() => onLanguageChange(() => refresh(0)), []);
+  // The art placeholder is localized, so faces are repainted too.
+  useEffect(
+    () =>
+      onLanguageChange(() => {
+        session.paint();
+        refresh(0);
+      }),
+    [session],
+  );
   useEffect(() => {
     const offChange = session.store.subscribe(() => {
       session.paint();
@@ -85,6 +94,7 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
           </fieldset>
           <FaceControls session={session} id={frente} heading={t('editor.front')} label={label} />
           <FaceControls session={session} id={reverso} heading={t('editor.back')} label={label} />
+          <SharedControls session={session} label={label} say={setStatus} />
           <fieldset>
             <legend>{t('editor.view')}</legend>
             <label class="chk">

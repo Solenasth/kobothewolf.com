@@ -1,9 +1,11 @@
-// One face's text and piece controls (FR-E3, FR-E4, FR-E11, FR-E12, DESIGN
-// §5.6), built from its marks. Locked elements never appear: the marks don't
-// list them. Every change goes through the store, which paints the face.
+// One face's controls (FR-E3–E5, FR-E7, FR-E9, FR-E11, FR-E12, DESIGN §5.6),
+// built from its marks and its variant's `controles`. Locked elements never
+// appear: the marks don't list them. Every change goes through the store,
+// which checks the value against the style and paints the face.
 import { MAX_TEXT } from '../core/store';
 import type { Piece } from '../core/marks';
 import { t } from '../i18n';
+import { Range } from './Range';
 import type { Session } from './session';
 
 function pieceLabel(piece: Piece, label: (key: string) => string): string {
@@ -21,8 +23,19 @@ function pieceLabel(piece: Piece, label: (key: string) => string): string {
 
 export function FaceControls(props: { session: Session; id: string; heading: string; label: (key: string) => string }) {
   const { session, id, heading, label } = props;
-  const { marks } = session.faces.get(id)!;
+  const { marks, variant, side } = session.faces.get(id)!;
   const state = session.store.face(id);
+  const controls = new Set(variant.manifest.controles);
+  const hasArt = controls.has('arte') && marks.art !== undefined;
+  const rotates = controls.has('rotSt') && marks.rotations.some((r) => r.kind === 'st');
+  const [min, max] = session.ranges.brillitos;
+  const sparksMax = Math.min(max, marks.sparks);
+  const artOptions: [string, string, boolean?][] = [
+    ...session.lists.arte.map((key): [string, string] => [key, label(`arte.${key}`)]),
+    ['hueco', t('editor.art.placeholder')],
+    ['propio', t('editor.art.own'), !session.store.document.artePropio],
+    ...(side === 'reverso' ? [['ninguno', t('editor.art.none')] as [string, string]] : []),
+  ];
 
   return (
     <details class="ed-grupo" open data-face={id}>
@@ -72,6 +85,55 @@ export function FaceControls(props: { session: Session; id: string; heading: str
           ))}
         </fieldset>
       )}
+      <fieldset class="ed-look">
+        <legend>{t('editor.look')}</legend>
+        {hasArt && (
+          <div class="f">
+            <label for={`ed-arte-${id}`}>{t('editor.art')}</label>
+            <select id={`ed-arte-${id}`} value={state.arte} onChange={(e) => session.store.setFaceValue(id, 'arte', e.currentTarget.value)}>
+              {artOptions.map(([key, text, disabled]) => (
+                <option value={key} disabled={disabled}>
+                  {text}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {hasArt && rotates && (
+          <Range
+            id={`ed-rotst-${id}`}
+            label={t('editor.rotSt')}
+            min={session.ranges.rotSt[0]}
+            max={session.ranges.rotSt[1]}
+            step={0.5}
+            value={state.rotSt}
+            unit="°"
+            onInput={(v) => session.store.setFaceValue(id, 'rotSt', v)}
+          />
+        )}
+        {controls.has('fondo') && (
+          <div class="f">
+            <label for={`ed-fondo-${id}`}>{t('editor.background')}</label>
+            <select id={`ed-fondo-${id}`} value={state.fondo} onChange={(e) => session.store.setFaceValue(id, 'fondo', e.currentTarget.value)}>
+              {session.lists.fondos.map((key) => (
+                <option value={key}>{label(`fondo.${key}`)}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        {controls.has('brillitos') && marks.sparks > 0 && (
+          <Range
+            id={`ed-brillitos-${id}`}
+            label={t('editor.sparks', { n: String(sparksMax) })}
+            min={Math.min(min, sparksMax)}
+            max={sparksMax}
+            step={1}
+            value={state.brillitos}
+            unit=""
+            onInput={(v) => session.store.setFaceValue(id, 'brillitos', v)}
+          />
+        )}
+      </fieldset>
     </details>
   );
 }
