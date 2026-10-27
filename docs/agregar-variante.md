@@ -10,7 +10,7 @@ Create `styles/<estilo>/variantes/<v>/` with:
 | `variant.json` | The manifest ([`schemas/variant.schema.json`](../schemas/variant.schema.json), DESIGN §3.4): `id` (the folder name), `orden` (tab position), the two face ids, their default backgrounds, the export file prefix, the controls and the checks. |
 | `caras.html` | The two faces, each a `<div data-cara="<id>">` root with a `.card` inside, marked as in [`marcas.md`](marcas.md). |
 | `caras.css` | The variant's CSS. Write plain class selectors (`.foto`, not `#xx-f .foto`) and `&` for the face root: the build scopes the file to these two faces. No `@font-face`, `@keyframes`, `@import`, `:root`, `html` or `body` (DESIGN §5.1). |
-| `montar.ts` | Optional: an `async montar(cara)` step for faces drawn by code, named in `variant.json` → `montar` (DESIGN §5.4). |
+| `montar.ts` | Optional: `export async function montar(cara)`, for faces drawn by code, named in `variant.json` → `montar`. It's called for each of the variant's faces and resolves when that face is drawn (DESIGN §5.4). |
 
 Face ids are `<short>-f` and `<short>-r`, unique across the style.
 
