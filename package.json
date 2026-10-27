@@ -22,7 +22,8 @@
     "pretest": "npm run gen",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "check:playwright-image": "node scripts/check-playwright-image.ts"
+    "check:playwright-image": "node scripts/check-playwright-image.ts",
+    "kobo": "node cli/kobo.ts"
   },
   "dependencies": {
     "html-to-image": "1.11.13",
