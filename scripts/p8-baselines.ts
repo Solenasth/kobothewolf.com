@@ -97,9 +97,10 @@ for (const [name, type] of browsers) {
         return getComputedStyle(escala).transform === 'matrix(1, 0, 0, 1, 0, 0)';
       }, face.id);
       await bleed.evaluate((el) => Promise.all([...el.querySelectorAll('img')].map((img) => img.decode().catch(() => undefined))));
-      // Pin the viewer at (0, 0) with square corners, so the face lands on whole pixels, uncropped; the visual test does the same.
+      // Scroll to the top and pin the viewer at (0, 0) with square corners, so the face lands on whole pixels, uncropped; the visual test does the same.
       await bleed.evaluate((el) => {
         const visor = el.closest<HTMLElement>('.visor')!;
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         Object.assign(visor.style, { position: 'fixed', left: '0', top: '0', width: '960px', zIndex: '9999', borderRadius: '0' });
       });
       // WebKit keeps the reduced decode it made while the face was shown small; reloading
