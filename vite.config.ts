@@ -52,7 +52,7 @@ export default defineConfig({
   build: {
     target: 'es2022',
     rolldownOptions: {
-      input: { main: 'index.html', notFound: '404.html' },
+      input: { main: 'index.html', notFound: '404.html', how: 'how-it-works.html' },
     },
   },
   test: {
