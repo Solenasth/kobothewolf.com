@@ -4,6 +4,26 @@ All notable changes, grouped by conventional-commit type. One section per releas
 
 ## Unreleased
 
+## v0.6.0 (2026-10-27): vector PDF
+
+Milestone M6 (CLI): `npm run kobo -- pdf-vector card.kobo.json` makes a print PDF with real, selectable text and the site's fonts embedded as subsets, for print shops that ask for vector output. It runs locally and in CI, never on the site, and checks the document with the editor's own rules first. `kobo check-exports` now checks vector PDFs too. Chromium sets PDF page sizes in 1.2 pt steps, so pages come out 95.93 × 56.13 mm, inside the 3 mm bleed. The live site is unchanged.
+
+### Features
+- **cli:** `pdf-vector` prints a `.kobo.json` on two 96 × 56 mm pages with Chromium, through the editor's validated import; an invalid document is rejected with its validation messages before any browser starts ([#59](https://github.com/Solenasth/kobothewolf.com/pull/59), closes [#20](https://github.com/Solenasth/kobothewolf.com/issues/20))
+- **cli:** `check-exports` checks vector PDFs: page size within Chromium's step, embedded subsets of the site's fonts only, at most 4 fonts per page, and the document's texts present as real text ([#59](https://github.com/Solenasth/kobothewolf.com/pull/59))
+
+### Fixes
+- **cli:** generate the document validators before `kobo` runs, so it works on a fresh checkout ([#59](https://github.com/Solenasth/kobothewolf.com/pull/59))
+
+### Refactors
+- **core:** the document parser runs in Node as well as the browser ([#59](https://github.com/Solenasth/kobothewolf.com/pull/59))
+
+### Docs
+- design revision 23: the vector PDF command and Chromium's page-size step ([#59](https://github.com/Solenasth/kobothewolf.com/pull/59))
+
+### CI and tests
+- **ci:** the Chromium export job makes a vector PDF of a mixed card, and `check-exports` checks it with the other exports ([#59](https://github.com/Solenasth/kobothewolf.com/pull/59))
+
 ## v0.5.0 (2026-10-27): export
 
 Milestone M5 (export): the editor on the live site now saves your card for printing. Each face downloads as a 300 dpi PNG (1134 × 661 px, 96 × 56 mm with bleed), and both faces as a 2-page print PDF. Everything is made in your browser. CI renders every variant's exports in Chromium and WebKit and checks their size, dpi, QR codes, fonts and glyphs. The vector PDF arrives in M6.
