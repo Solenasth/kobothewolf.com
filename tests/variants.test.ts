@@ -18,6 +18,7 @@ function filesUnder(root: string): VariantFiles {
   return {
     manifests: Object.fromEntries(read('styles/*/variantes/*/variant.json').map(([p, t]) => [p, JSON.parse(t)])),
     faces: Object.fromEntries(read('styles/*/variantes/*/caras.html')),
+    scripts: Object.fromEntries(globSync('styles/*/variantes/*/montar.ts', { cwd: root }).map((p) => [`../${p}`, async () => p])),
   };
 }
 
@@ -50,6 +51,22 @@ describe('FR-E18 the variants are found from their files', () => {
     expect(() =>
       collectVariants({ manifests: { 'styles/s/variantes/a/variant.json': { id: 'b' } }, faces: { 'styles/s/variantes/a/caras.html': '' } }),
     ).toThrow('must match the folder "a"');
+  });
+
+  it('FR-E19 attaches the mount script a manifest names, and only that one', async () => {
+    const list = collectVariants(filesUnder('.')).get('boykisser-uwu')!;
+    const codigo = list.find((v) => v.manifest.id === 'codigo')!;
+    expect(await codigo.montar!()).toBe('styles/boykisser-uwu/variantes/codigo/montar.ts');
+    expect(list.filter((v) => v !== codigo).map((v) => v.montar)).toEqual([undefined, undefined, undefined]);
+  });
+
+  it('FR-E19 rejects a manifest naming a mount script that is missing', () => {
+    const files: VariantFiles = {
+      manifests: { 'styles/s/variantes/a/variant.json': { id: 'a', montar: 'montar.ts' } },
+      faces: { 'styles/s/variantes/a/caras.html': '' },
+    };
+    expect(() => collectVariants(files)).toThrow('montar file montar.ts is missing');
+    expect(collectVariants({ ...files, scripts: { 'styles/s/variantes/a/montar.ts': async () => 'm' } }).get('s')![0]!.montar).toBeTypeOf('function');
   });
 });
 

@@ -1,5 +1,5 @@
-// Finds every style's variants from their files (FR-E18, DESIGN §3.4). The
-// editor never lists variants in code: a folder with a variant.json and a
+// Finds every style's variants from their files (FR-E18, FR-E19, DESIGN §3.4).
+// The editor never lists variants in code: a folder with a variant.json and a
 // caras.html is a variant. Pure, so tests can feed it fixture files.
 
 export interface VariantManifest {
@@ -18,6 +18,8 @@ export interface Variant {
   manifest: VariantManifest;
   /** The variant's caras.html, parsed later with parseFaces(). */
   html: string;
+  /** Loads the module named by `manifest.montar`, which exports `montar(cara)`. */
+  montar?: () => Promise<unknown>;
 }
 
 export interface VariantFiles {
@@ -25,9 +27,11 @@ export interface VariantFiles {
   manifests: Readonly<Record<string, unknown>>;
   /** caras.html text by path. */
   faces: Readonly<Record<string, string>>;
+  /** Lazy loaders of the variants' montar.ts by path; used when the manifest names it. */
+  scripts?: Readonly<Record<string, () => Promise<unknown>>>;
 }
 
-const PATH = /(?:^|\/)styles\/([^/]+)\/variantes\/([^/]+)\/(?:variant\.json|caras\.html)$/;
+const PATH = /(?:^|\/)styles\/([^/]+)\/variantes\/([^/]+)\/(?:variant\.json|caras\.html|montar\.ts)$/;
 
 function where(path: string): { estilo: string; carpeta: string } {
   const match = PATH.exec(path);
@@ -42,6 +46,11 @@ export function collectVariants(files: VariantFiles): Map<string, Variant[]> {
     const { estilo, carpeta } = where(path);
     html.set(`${estilo}/${carpeta}`, text);
   }
+  const scripts = new Map<string, () => Promise<unknown>>();
+  for (const [path, load] of Object.entries(files.scripts ?? {})) {
+    const { estilo, carpeta } = where(path);
+    scripts.set(`${estilo}/${carpeta}/${path.slice(path.lastIndexOf('/') + 1)}`, load);
+  }
 
   const styles = new Map<string, Variant[]>();
   for (const [path, data] of Object.entries(files.manifests)) {
@@ -50,7 +59,13 @@ export function collectVariants(files: VariantFiles): Map<string, Variant[]> {
     if (manifest.id !== carpeta) throw new Error(`${path}: id "${manifest.id}" must match the folder "${carpeta}"`);
     const faces = html.get(`${estilo}/${carpeta}`);
     if (faces === undefined) throw new Error(`${path}: caras.html is missing`);
-    styles.set(estilo, [...(styles.get(estilo) ?? []), { estilo, manifest, html: faces }]);
+    const variant: Variant = { estilo, manifest, html: faces };
+    if (manifest.montar !== undefined) {
+      const load = scripts.get(`${estilo}/${carpeta}/${manifest.montar}`);
+      if (!load) throw new Error(`${path}: montar file ${manifest.montar} is missing`);
+      variant.montar = load;
+    }
+    styles.set(estilo, [...(styles.get(estilo) ?? []), variant]);
   }
 
   const orden = (v: Variant) => v.manifest.orden ?? Number.POSITIVE_INFINITY;
