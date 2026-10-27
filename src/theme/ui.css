@@ -70,6 +70,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--ui-focus); outl
 }
 .contact .k { font: 12px Silk, monospace; color: var(--ui-muted); white-space: nowrap; }
 .contact .v { white-space: nowrap; }
+.built { margin: 0; color: var(--ui-muted); max-width: 62ch; }
+.built a { color: var(--tinta); }
 
 /* Inquiry form (FR-P8) */
 .inquiry { margin-top: 26px; border-top: 2px dashed var(--ui-line); }
