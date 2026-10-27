@@ -49,7 +49,7 @@ test('FR-I2 the switch changes language in place and is remembered', async ({ pa
 
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es');
-  await expect(page.getByText('El editor de tarjetas KOBO.EXE viene en camino', { exact: false })).toBeVisible();
+  await expect(page.getByRole('tablist', { name: 'Variante' })).toBeVisible();
 });
 
 test('FR-P2 "Make your card" jumps to the editor', async ({ page }) => {

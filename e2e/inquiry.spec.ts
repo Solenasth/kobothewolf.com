@@ -43,7 +43,7 @@ test.describe('FR-P8 inquiry form', () => {
     await fill(page);
     await page.getByRole('button', { name: 'Open in my email app' }).click();
 
-    await expect(page.getByRole('status').filter({ hasText: 'Opening your email app' })).toBeVisible();
+    await expect(page.locator('#inquiry').getByRole('status').filter({ hasText: 'Opening your email app' })).toBeVisible();
     const { mailto } = await captured(page);
     expect(mailto).toHaveLength(1);
     const url = new URL(mailto[0]!);
@@ -72,7 +72,7 @@ test.describe('FR-P8 inquiry form', () => {
     await expect(page.locator('#f-name')).toHaveAttribute('aria-invalid', 'true');
     await expect(page.locator('#e-name')).toHaveText('This field is required.');
     await expect(page.locator('#e-email')).toHaveText('Enter an email address like name@example.com.');
-    await expect(page.getByRole('status')).toHaveText('Please check the highlighted fields.');
+    await expect(page.locator('#inquiry').getByRole('status')).toHaveText('Please check the highlighted fields.');
     expect((await captured(page)).mailto).toEqual([]);
 
     await page.getByRole('link', { name: 'ES', exact: true }).click();
@@ -86,7 +86,7 @@ test.describe('FR-P8 inquiry form', () => {
     await fill(page);
     await page.getByRole('button', { name: 'Copy message' }).click();
 
-    await expect(page.getByRole('status')).toHaveText('Copied. Paste it into an email to contact@kobothewolf.com.');
+    await expect(page.locator('#inquiry').getByRole('status')).toHaveText('Copied. Paste it into an email to contact@kobothewolf.com.');
     expect((await captured(page)).clipboard).toEqual([
       'To: contact@kobothewolf.com\nSubject: Quote request from Ana\n\nHello\nthere\n\n—\nAna · ana@example.com',
     ]);
@@ -97,20 +97,23 @@ test.describe('FR-P8 inquiry form', () => {
     await page.goto('/?lang=en');
     await fill(page);
     await page.getByRole('button', { name: 'Copy message' }).click();
-    await expect(page.getByRole('status')).toHaveText(/Couldn't copy/);
+    await expect(page.locator('#inquiry').getByRole('status')).toHaveText(/Couldn't copy/);
   });
 
   test('NFR-3 using the form makes no network requests', async ({ page }) => {
     await capture(page);
     await page.goto('/?lang=en');
     await page.evaluate(() => document.fonts.ready);
+    // The editor loads after the page; let it finish so only the form is measured.
+    await expect(page.locator('.ed-visor [data-cara]')).toHaveCount(2);
+    await page.waitForLoadState('networkidle');
     const requests: string[] = [];
     page.on('request', (req) => requests.push(req.url()));
 
     await fill(page);
     await page.getByRole('button', { name: 'Open in my email app' }).click();
     await page.getByRole('button', { name: 'Copy message' }).click();
-    await expect(page.getByRole('status')).toHaveText(/Copied/);
+    await expect(page.locator('#inquiry').getByRole('status')).toHaveText(/Copied/);
 
     expect(requests).toEqual([]);
   });
