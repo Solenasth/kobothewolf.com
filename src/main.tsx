@@ -2,6 +2,7 @@ import { setUpInquiryForm } from './contact/form';
 import { getLanguage, initLanguage, onLanguageChange, setLanguage, t, type MessageKey } from './i18n';
 import { isLang } from './i18n/languages';
 import { applyStatic } from './i18n/static';
+import { setUpExplainer } from './page/explainer';
 
 function markCurrent() {
   for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-lang]')) {
@@ -32,6 +33,9 @@ initLanguage();
 
 const inquiry = document.querySelector<HTMLFormElement>('#inquiry');
 if (inquiry) setUpInquiryForm(inquiry);
+
+const explainer = document.querySelector<HTMLDetailsElement>('#owo');
+if (explainer) setUpExplainer(explainer);
 
 // The editor loads after the page has loaded and painted a frame, when the
 // browser is idle, so the profile never waits for it (NFR-2, DESIGN §5.6). On a
