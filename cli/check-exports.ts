@@ -2,13 +2,14 @@
 // PDFs the export renderer wrote, with the manifests it wrote next to them.
 // Each check returns the problems it found; an empty list means it passed.
 import { execFileSync } from 'node:child_process';
-import { globSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, globSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import jsQR from 'jsqr';
 import { QR_CONTENTS } from '../src/core/marks.ts';
 import { readChunks } from '../src/core/png.ts';
-import { fontCoverage } from './font-cmap.ts';
+import { fontCoverage, postScriptName } from './font-cmap.ts';
+import type { KoboDocument } from '../src/core/document.ts';
 import type { Box, ExportIndex, FaceManifest } from './manifest.ts';
 import { readPng, type Decoded } from './png.ts';
 
@@ -18,11 +19,15 @@ export const PNG_SIZE = [1134, 661] as const;
 const PIXELS_PER_METRE = 11811;
 /** 96 × 56 mm in points, as pdfinfo prints them. */
 const PAGE_PT = [272.13, 158.74] as const;
+/** Chromium sets PDF page sizes in steps of 1.2 pt (DESIGN §9), so a vector page may be off by one. */
+const CHROMIUM_STEP_PT = 1.2;
 
 /** What the checks hold exports to: the site's fonts and each style's font limit. */
 export interface Rules {
   /** Font family → coverage test of its file. */
   fonts: Map<string, (codePoint: number) => boolean>;
+  /** The site fonts' PostScript names, as PDFs name embedded fonts. */
+  postScriptNames: Set<string>;
   maxFonts: (style: string) => number;
 }
 
@@ -30,11 +35,15 @@ export interface Rules {
 export function repoRules(root: string): Rules {
   const cssFile = join(root, 'src/theme/fonts.css');
   const fonts = new Map<string, (cp: number) => boolean>();
+  const postScriptNames = new Set<string>();
   for (const m of readFileSync(cssFile, 'utf8').matchAll(/@font-face\s*\{[^}]*?font-family:\s*['"]?([^;'"]+)['"]?;[^}]*?src:\s*url\(['"]?([^'")]+)['"]?\)/g)) {
-    fonts.set(m[1]!.trim(), fontCoverage(readFileSync(join(dirname(cssFile), m[2]!))));
+    const bytes = readFileSync(join(dirname(cssFile), m[2]!));
+    fonts.set(m[1]!.trim(), fontCoverage(bytes));
+    postScriptNames.add(postScriptName(bytes));
   }
   return {
     fonts,
+    postScriptNames,
     maxFonts: (style) => JSON.parse(readFileSync(join(root, 'styles', style, 'tokens.json'), 'utf8')).tipografia.max_fuentes_por_cara,
   };
 }
@@ -199,16 +208,87 @@ export function checkPdf(file: string, pages: FaceManifest[]): string[] {
   return problems;
 }
 
+/** The fonts pdffonts lists, for the whole file or one page. */
+function pdfFonts(file: string, page?: number): { name: string; embedded: boolean; subset: boolean }[] {
+  const args = page ? ['-f', String(page), '-l', String(page), file] : [file];
+  return run('pdffonts', args)
+    .split('\n')
+    .slice(2)
+    .filter((line) => line.trim())
+    .map((line) => {
+      const cols = line.trim().split(/\s+/);
+      // name type… encoding emb sub uni object generation
+      return { name: cols[0]!, embedded: cols.at(-5) === 'yes', subset: cols.at(-4) === 'yes' };
+    });
+}
+
+/** The texts a document changed on its two faces and doesn't hide. */
+export function changedTexts(doc: KoboDocument): string[] {
+  return [doc.frente, doc.reverso].flatMap((id) => {
+    const face = doc.caras[id];
+    return Object.entries(face?.textos ?? {})
+      .filter(([index]) => !face?.ocultosEd?.includes(Number(index)))
+      .map(([, text]) => text)
+      .filter((text) => text.trim());
+  });
+}
+
+const squeeze = (text: string) => text.replace(/\s/gu, '').toLowerCase();
+
+/** A pdf-vector PDF (FR-B1): two 96 × 56 mm pages within Chromium's step, embedded subsets of the site's fonts only, and the document's texts as real text. */
+export function checkVectorPdf(file: string, doc: KoboDocument, rules: Rules): string[] {
+  const problems: string[] = [];
+  const info = run('pdfinfo', ['-f', '1', '-l', '1000', file]);
+  const sizes = [...info.matchAll(/^Page\s+\d+ size:\s+([\d.]+) x ([\d.]+) pts/gm)].map((m) => [Number(m[1]), Number(m[2])]);
+  if (sizes.length !== 2) problems.push(`${sizes.length} pages, expected 2`);
+  sizes.forEach(([w, h], i) => {
+    if (Math.abs(w! - PAGE_PT[0]) > CHROMIUM_STEP_PT || Math.abs(h! - PAGE_PT[1]) > CHROMIUM_STEP_PT) {
+      problems.push(`page ${i + 1} is ${w} × ${h} pt, expected ${PAGE_PT.join(' × ')} (96 × 56 mm) within ${CHROMIUM_STEP_PT} pt`);
+    }
+  });
+  const fonts = pdfFonts(file);
+  if (!fonts.length) problems.push('no fonts, so no real text');
+  for (const font of fonts) {
+    const name = font.name.replace(/^[A-Z]{6}\+/, '');
+    if (!font.embedded) problems.push(`font ${name} isn't embedded`);
+    else if (!font.subset) problems.push(`font ${name} is embedded whole, not as a subset`);
+    if (!rules.postScriptNames.has(name)) problems.push(`font ${name} isn't one of the site's fonts`);
+  }
+  const max = rules.maxFonts(doc.estilo);
+  sizes.forEach((_, i) => {
+    const count = pdfFonts(file, i + 1).length;
+    if (count > max) problems.push(`page ${i + 1} has ${count} fonts, at most ${max}`);
+  });
+  const text = squeeze(run('pdftotext', [file, '-']));
+  for (const wanted of changedTexts(doc)) if (!text.includes(squeeze(wanted))) problems.push(`the text "${wanted}" isn't in the PDF as text`);
+  return problems;
+}
+
 export interface FileResult {
   file: string;
   problems: string[];
 }
 
-/** Every export under `dir`: each folder with an index.json the renderer wrote. */
+/**
+ * Every export under `dir`: each folder with an index.json the renderer wrote,
+ * and each vector PDF, found as `<name>.pdf` beside its `<name>.kobo.json`.
+ */
 export function checkExports(dir: string, rules: Rules): FileResult[] {
   const indexes = globSync('**/index.json', { cwd: dir }).sort();
-  if (!indexes.length) return [{ file: dir, problems: ['no index.json found: run the export renderer first (npm run exports:render)'] }];
+  const documents = globSync('**/*.kobo.json', { cwd: dir }).sort();
+  if (!indexes.length && !documents.length) {
+    return [{ file: dir, problems: ['nothing to check: run the export renderer (npm run exports:render) or pdf-vector first'] }];
+  }
   const results: FileResult[] = [];
+  for (const name of documents) {
+    const pdf = name.replace(/\.kobo\.json$/, '.pdf');
+    if (!existsSync(join(dir, pdf))) {
+      results.push({ file: pdf, problems: [`missing: no vector PDF beside ${name}`] });
+      continue;
+    }
+    const doc = JSON.parse(readFileSync(join(dir, name), 'utf8')) as KoboDocument;
+    results.push({ file: pdf, problems: checkVectorPdf(join(dir, pdf), doc, rules) });
+  }
   for (const indexFile of indexes) {
     const base = join(dir, dirname(indexFile));
     const index = JSON.parse(readFileSync(join(dir, indexFile), 'utf8')) as ExportIndex;

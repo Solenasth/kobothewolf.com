@@ -1,0 +1,13 @@
+{
+  "app": "kobo-exe-editor",
+  "version": 1,
+  "estilo": "boykisser-uwu",
+  "frente": "lic-f",
+  "reverso": "soc-r",
+  "caras": {
+    "lic-f": { "textos": { "0": "Kobo's print test" }, "ocultasPiezas": [] },
+    "soc-r": { "textos": { "0": "¡hola, imprenta!", "1": "vector text~" }, "ocultosEd": [], "fondo": "femboy" }
+  },
+  "rotTit": -3,
+  "anguloWashi": 16
+}
