@@ -77,5 +77,14 @@
   "mail.subject.quote": "Solicitud de cotización de {name}",
   "mail.signature": "{name} · {email}",
   "mail.to": "Para",
-  "mail.subjectLabel": "Asunto"
+  "mail.subjectLabel": "Asunto",
+  "export.label": "Exportar",
+  "export.png.front": "PNG frente · 300 dpi",
+  "export.png.back": "PNG reverso · 300 dpi",
+  "export.file.front": "{file}-frente-300dpi.png",
+  "export.file.back": "{file}-reverso-300dpi.png",
+  "export.making": "Generando {file}…",
+  "export.saved": "Guardado: {file}.",
+  "export.failed": "No se pudo generar {file}. Inténtalo de nuevo.",
+  "export.unavailable": "La exportación no está disponible: su código no se cargó. Recarga la página para intentarlo de nuevo."
 }

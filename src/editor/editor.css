@@ -5,6 +5,11 @@
 .kobo-editor .status { margin: 0 0 10px; }
 .ed-estilo { max-width: 320px; margin-bottom: 12px; }
 
+/* Export bar */
+.ed-export { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.ed-boton.prim { background: var(--chicle); box-shadow: 3px 4px 0 0 var(--rosa); font-size: 16px; padding: 6px 14px; }
+.ed-boton:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
 /* Variant tabs */
 .ed-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
 .ed-tab {

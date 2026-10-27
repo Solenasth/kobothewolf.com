@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'preact
 import type { Notice } from '../core/store';
 import { getLanguage, onLanguageChange, t, type MessageKey } from '../i18n';
 import { styleLabel } from '../styles';
+import { ExportBar, type Say } from './ExportBar';
 import { FaceControls } from './FaceControls';
 import { SharedControls } from './SharedControls';
 import type { Session } from './session';
@@ -21,7 +22,8 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
   const session = sessions.get(estilo)!;
   const [, refresh] = useReducer((n: number) => n + 1, 0);
   const [guias, setGuias] = useState(true);
-  const [status, setStatus] = useState<MessageKey | null>(null);
+  const [status, setStatus] = useState<{ key: MessageKey; params?: Record<string, string> } | null>(null);
+  const say: Say = (key, params) => setStatus({ key, ...(params ? { params } : {}) });
 
   // The art placeholder is localized, so faces are repainted too.
   useEffect(
@@ -37,8 +39,8 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
       session.paint();
       refresh(0);
     });
-    setStatus(session.notice && NOTICES[session.notice]);
-    const offNotice = session.onNotice((notice) => setStatus(NOTICES[notice]));
+    if (session.notice) say(NOTICES[session.notice]);
+    const offNotice = session.onNotice((notice) => say(NOTICES[notice]));
     return () => {
       offChange();
       offNotice();
@@ -62,9 +64,10 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
           </select>
         </div>
       )}
+      <ExportBar session={session} say={say} />
       <Tabs session={session} label={label} />
       <p class="status" role="status" aria-live="polite">
-        {status ? t(status) : ''}
+        {status ? t(status.key, status.params) : ''}
       </p>
       <div class="ed-layout" id="ed-layout">
         <form class="ed-panel" autocomplete="off" onSubmit={(e) => e.preventDefault()}>
@@ -94,7 +97,7 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
           </fieldset>
           <FaceControls session={session} id={frente} heading={t('editor.front')} label={label} />
           <FaceControls session={session} id={reverso} heading={t('editor.back')} label={label} />
-          <SharedControls session={session} label={label} say={setStatus} />
+          <SharedControls session={session} label={label} say={say} />
           <fieldset>
             <legend>{t('editor.view')}</legend>
             <label class="chk">
@@ -106,7 +109,7 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
               class="ed-boton"
               onClick={() => {
                 session.store.restore();
-                setStatus('editor.restored');
+                say('editor.restored');
               }}
             >
               {t('editor.restore')}

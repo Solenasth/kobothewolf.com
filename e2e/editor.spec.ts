@@ -69,6 +69,8 @@ test('FR-E1 front and back mix across variants, and the choice survives a reload
   await expect(page.locator('[role="tab"][aria-selected="true"]')).toHaveCount(0);
   // Saving is debounced; wait for it rather than relying on the unload flush.
   await page.waitForFunction(() => /"frente":"lic-f".*"reverso":"cod-r"/s.test(localStorage.getItem('kobo-editor-v1') ?? ''));
+  // Let the export warm-up finish first: leaving mid-render makes WebKit log aborted fetches.
+  await expect(page.locator('#ed-png-frente')).toBeEnabled();
   await page.reload();
   await expect(page.locator('.ed-visor [data-cara]')).toHaveCount(2);
   expect(await shown(page)).toEqual(['lic-f', 'cod-r']);

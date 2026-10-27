@@ -154,6 +154,8 @@ test('FR-E3 edits are saved and come back after a reload', async ({ page }) => {
   await page.locator('#ed-cer-f-2').fill('Saved Kobo');
   await page.locator('details[data-face="cer-f"] input[data-pieza="arte"]').uncheck();
   await page.waitForFunction(() => localStorage.getItem('kobo-editor-v1')?.includes('Saved Kobo'));
+  // Let the export warm-up finish first: leaving mid-render makes WebKit log aborted fetches.
+  await expect(page.locator('#ed-png-frente')).toBeEnabled();
   await page.reload();
   await expect(page.locator('.ed-visor [data-cara]')).toHaveCount(2);
   await expect(page.locator('#ed-cer-f-2')).toHaveValue('Saved Kobo');

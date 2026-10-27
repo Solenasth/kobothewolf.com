@@ -175,6 +175,8 @@ test('FR-E6 FR-E16 the user\'s sticker is made in the browser, shown on both fac
   expect(outgoing, 'the image never leaves the browser').toEqual([]);
 
   await page.waitForFunction(() => localStorage.getItem('kobo-editor-v1')?.includes('"artePropio"'));
+  // Let the export warm-up finish first: leaving mid-render makes WebKit log aborted fetches.
+  await expect(page.locator('#ed-png-frente')).toBeEnabled();
   await page.reload();
   await expect(page.locator('.ed-visor [data-cara]')).toHaveCount(2);
   await expect(page.locator('#ed-arte-cer-f')).toHaveValue('propio');
