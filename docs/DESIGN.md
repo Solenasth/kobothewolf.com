@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-27 (rev. 29: §6 "How it works" page, #66; rev. 28: §5.4, §10 larger code-cat text, #75; rev. 27: §6 "OwO wats dis?!" explainer, #65; rev. 26: §6, §7 Open Graph image, build line, README images, #22; rev. 25: §12 release PR text and branch name, #68; rev. 24: §12 releases with release-please, #48; rev. 23: §9, §10 vector PDF, #20; rev. 22: §9, §10, §11 check-exports and the export CI jobs, #19; rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-27 (rev. 30: §3.2, §3.3, §3.5, §5.1, §5.6, §7, §10 text size per section, #73; rev. 29: §6 "How it works" page, #66; rev. 28: §5.4, §10 larger code-cat text, #75; rev. 27: §6 "OwO wats dis?!" explainer, #65; rev. 26: §6, §7 Open Graph image, build line, README images, #22; rev. 25: §12 release PR text and branch name, #68; rev. 24: §12 releases with release-please, #48; rev. 23: §9, §10 vector PDF, #20; rev. 22: §9, §10, §11 check-exports and the export CI jobs, #19; rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -76,6 +76,19 @@ EV §3 is adopted as written: style ──< variant ──< face, with tokens, s
 
 `readMarks(face)` (`src/core/marks.ts`) is the one implementation. It takes a minimal element interface (`tagName`, `getAttribute`, `children`, `textContent`) that DOM elements satisfy, so the browser passes real faces and unit tests pass parse5 trees. Built-in pieces have stable keys (`arte`, `lazo`, `washi-<n>`) and UI-catalog labels; `data-parte` keys get style-catalog labels.
 
+**Sections (FR-E22, #73):** `data-seccion="<key>"` groups a face's texts for resizing. Several elements can share a key, as pieces do (the certificate's header is two lines; a back's site block contributes its question and invitation, not its QR or URL). Keys are lowercase slugs, labeled in the style catalogs as `seccion.<key>`. A section never contains a locked element (`.qr`, `.arroba`, `.url`, `<canvas>`) or contact text, and sections don't nest. `readMarks` lists each face's section keys in document order; `bindMarks` returns their elements.
+
+| Face | Sections |
+|---|---|
+| `cer-f` | `encabezado`, `nombre`, `titular`, `frase`, `campos`, `firma` |
+| `cer-r` | `titulo`, `terminos`, `globo`, `sitio` |
+| `lic-f` | `titular`, `campos`, `vigencia` |
+| `lic-r` | `titulo`, `terminos`, `firma`, `sitio` |
+| `cod-f` | `terminal`, `nombre`, `rol`, `ok` |
+| `cod-r` | `ventana`, `sitio` |
+| `soc-f` | `titular`, `checklist`, `globo` |
+| `soc-r` | `frase`, `commit`, `rol`, `saludo`, `sitio` |
+
 **i18n note:** the values of `data-ed` and `data-parte` (e.g. `"Emisor"`, `"Sitio (QR + texto)"`) are **stable keys**, not display text. Their labels come from the style catalogs (§4). This keeps the contract compatible with the design source, which uses Spanish labels as values: in `es.json` those keys map to themselves.
 
 ### 3.3 Style editor lists (`editor.json`)
@@ -88,7 +101,7 @@ These are the lists P8 hard-coded. They hold keys only; display names come from 
   "escala":  [85, 115],
   "inicial": { "rotTit": -2, "anguloWashi": 14, "brillitos": 7, "escala": 100 } }
 ```
-The other ranges are derived from `tokens.json` → `antirreglas`, so there is only one source of truth (FR-E9): `rotSt` ← `rotacion_stickers_grados`, `rotTit` ← `rotacion_titulares_grados`, `washi` ← `washi.grados`, `brillitos` ← `brillitos.por_cara` (the editor also caps it at the face's sparkle count). The sticker scale has no anti-rule, so it lives in `editor.json`. `inicial` holds the starting values of the shared ranges, P8's defaults, so the default faces match P8 (NFR-1); `validate` checks each is inside its range. A face's sticker rotation starts at its authored angle, and sparkles are also capped at the face's count. Every accent and shadow must be one of the style's `color` tokens. `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
+The other ranges are derived from `tokens.json` → `antirreglas`, so there is only one source of truth (FR-E9): `rotSt` ← `rotacion_stickers_grados`, `rotTit` ← `rotacion_titulares_grados`, `washi` ← `washi.grados`, `brillitos` ← `brillitos.por_cara` (the editor also caps it at the face's sparkle count), `tamano` ← `tamano_texto_pct` (text size per section, in percent, 85–115 for boykisser-uwu). The sticker scale has no anti-rule, so it lives in `editor.json`. `inicial` holds the starting values of the shared ranges, P8's defaults, so the default faces match P8 (NFR-1); `validate` checks each is inside its range. A face's sticker rotation starts at its authored angle, and sparkles are also capped at the face's count. Every accent and shadow must be one of the style's `color` tokens. `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
 
 ### 3.4 Variant manifest and faces
 As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). That is the only value it takes, so the build finds every mount script with one glob. Names are catalog keys (`variant.licencia.name`). Two more fields:
@@ -111,6 +124,8 @@ EV §3.5 with these changes:
 - Backs may use `"arte": "ninguno"` (FR-E5).
 - Unknown face IDs are dropped.
 - Migration fills only the missing keys and never replaces a face object (EV §6.5).
+
+- Each face may carry `tamanos`: section key → size in percent (FR-E22). The store keeps only the face's own sections and clamps each value into the style's range, like the other ranges; a missing section is 100 %.
 
 Documents store keys, never labels, so they're language-independent.
 
@@ -145,6 +160,8 @@ This deviates from EV §6.1, which proposed **Shadow DOM**. html-to-image doesn'
 - `caras.html` is imported as a string (`?raw`) and parsed with a `<template>` by `src/core/faces.ts` `parseFaces()`. These are trusted, build-time files; user input never travels this path. Template content is inert: no scripts run and nothing loads until a face is inserted.
 
 Recorded in [`0006-css-scoping-not-shadow-dom.md`](decisions/0006-css-scoping-not-shadow-dom.md).
+
+- **Text sizes (FR-E22):** every font size in face CSS and in `caras.html` inline styles becomes `calc(<size> * var(--tam, 1))`. `escalarFuentes()` (`src/core/fuentes.ts`, no DOM) does the rewrite. The face-CSS plugin runs it on stylesheets at build time, and `parseFaces` runs it on inline styles. The painter sets `--tam` on each section's elements, and their texts inherit it. Locked elements are never in a section, so they keep `--tam: 1`. At 100 % the computed sizes are unchanged, so default faces render exactly as before.
 
 ### 5.2 State `[FR-E3–E13, FR-E16]`
 - A single store holds the document. Each face has **one state object for the whole session**. Controls and rendering read and write that same object through store actions, and nothing rebuilds a face object on read (the P8 v5 bug, EV §10).
@@ -224,6 +241,7 @@ PDF: front PNG, back PNG ─► jsPDF {unit:'mm', format:[96,56], landscape, com
 - **Art, background and ranges (FR-E5–E9):** a face shows only the controls its variant lists in `variant.json` → `controles` and that apply to it.
   - Per face, in its group: the art `<select>` (style stickers labeled `arte.<key>`, the localized placeholder, "your image" once one exists, and "none" on backs), sticker rotation, background (`fondo.<key>`) and sparkles (from the range minimum, or the face's count if lower, to the face's count).
   - Shared, in their own group: accent and flat shadow as `<select>`s of the style's colors (`color.<hex>`), shown when either face's variant lists them, and headline rotation, sticker scale and washi angle ranges. Every range comes from `tokens.json` (`editor.json` for scale), and each shows its value.
+  - **Text size (FR-E22):** in each face's group, one range per section the face has, labeled `seccion.<key>`, in percent, with a "Reset sizes" button.
   - Upload: a file input for PNG, JPEG or WebP with a drop zone, and the "cut off at the bottom" checkbox (§5.3).
   - The placeholder is drawn on a canvas in the face font (Plumon) with the localized "[ your kitty here ]", so it exports like any image and follows the language.
 - Native controls. Labels are app catalog keys (`editor.*`) and style catalog keys (§4), so a language switch relabels the editor without touching its state.
@@ -272,6 +290,7 @@ PDF: front PNG, back PNG ─► jsPDF {unit:'mm', format:[96,56], landscape, com
 - A `data-parte` key equal to a built-in piece key (`arte`, `lazo`, `washi-<n>`).
 - A catalog key missing in any language.
 - A style label missing for a key the style uses: every `data-ed` and `data-parte` value, variant and face id, and `editor.json` background, color and art. A label for a key nothing uses is also an error, so catalogs don't go stale.
+- A `data-seccion` key that isn't a lowercase slug, a section on or containing a locked element or contact text, a section inside another section, or a section with no `data-ed` text (FR-E22). Its label is required like other style keys.
 - A variant whose default backgrounds aren't in `editor.json` → `fondos`.
 - A variant whose `montar` names a file that isn't in its folder.
 - A face image or mask path that isn't `assets/<file>` of an existing file in the style, a `data-arte` image that isn't `assets/st-<key>.png` for an `editor.json` art key, or an art key without its file.
@@ -350,7 +369,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 | A11y | `@axe-core/playwright` | profile and panel, ES and EN: no serious or critical violations |
 
 - **`ci.yml`** runs on every PR: `npm ci` → typecheck → validate → unit → build → E2E matrix → export checks → rustc → `npm audit` → gitleaks. Exports are uploaded as workflow artifacts.
-  - **Export jobs:** `export (chromium)` and `export (webkit)` run the renderer in the Playwright image and upload `exports/<browser>/` as an artifact (kept 14 days). The Chromium job also runs `pdf-vector` on `tests/fixtures/documents/mezcla.kobo.json`, a mixed card with changed texts, into `exports/chromium/vector/`.
+  - **Export jobs:** `export (chromium)` and `export (webkit)` run the renderer in the Playwright image. It exports every variant at the default sizes, and again with every section at the smallest and at the largest size (FR-E22), so check-exports covers both extremes. The jobs upload `exports/<browser>/` as an artifact (kept 14 days). The Chromium job also runs `pdf-vector` on `tests/fixtures/documents/mezcla.kobo.json`, a mixed card with changed texts, into `exports/chromium/vector/`.
   - **`check-exports` job:** runs on the plain runner, because the image's user can't install packages. It installs `poppler-utils` with apt, downloads both artifacts, runs `kobo check-exports exports/`, adds the report to the job summary, and runs the check's unit tests with poppler required.
 - **E2E environment:** the E2E jobs run in Microsoft's Playwright image (`mcr.microsoft.com/playwright:v<version>-resolute`), pinned by digest, with browsers and system packages preinstalled. This avoids a slow `apt` step and gives the visual baselines the same fonts and libraries on every run. The tag must equal `@playwright/test`, and CI checks it.
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.
