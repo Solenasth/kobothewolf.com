@@ -4,6 +4,7 @@
 // re-parsed and must have every style rule inside the scope.
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { escalarFuentes } from '../src/core/fuentes.ts';
 import { Features, transform, type Rule, type Selector, type SelectorComponent } from 'lightningcss';
 import type { Plugin } from 'vite';
 
@@ -153,7 +154,10 @@ export function scopeFor(file: string, readManifest = (path: string) => readFile
   return undefined;
 }
 
-/** Vite plugin: scopes `styles/<estilo>/caras.css` and `styles/<estilo>/variantes/<v>/caras.css`. */
+/**
+ * Vite plugin: scopes `styles/<estilo>/caras.css` and `styles/<estilo>/variantes/<v>/caras.css`,
+ * after making their font sizes follow each section's --tam (FR-E22).
+ */
 export function scopeFaceCss(): Plugin {
   return {
     name: 'kobo:scope-css',
@@ -164,7 +168,7 @@ export function scopeFaceCss(): Plugin {
       if (scope === undefined) return null;
       const manifest = scope === null ? [] : [join(dirname(file), 'variant.json')];
       for (const dep of manifest) this.addWatchFile(dep);
-      const result = scopeCss(code, scope, file);
+      const result = scopeCss(escalarFuentes(code), scope, file);
       if (!result.ok) this.error(result.errors.join('\n'));
       return { code: result.code, map: null };
     },

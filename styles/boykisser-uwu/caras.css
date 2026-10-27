@@ -25,6 +25,10 @@
 /* Hidden fields and pieces, and a back's art set to none (DESIGN §5.2); !important as in P8, so it also
    wins over inline display on SVG bows. */
 [data-oculto], [data-oculto-pieza], [data-sin-arte] { display: none !important; }
+/* Text size per section (FR-E22): a section with no font rule of its own
+   scales what it inherits. :where() keeps this below every explicit font rule,
+   which the build already multiplies by --tam, so nothing scales twice. */
+:where([data-seccion]) { font-size: calc(1em * var(--tam, 1)); }
 
 /* The card at the cut line: 900 × 500 at (30, 30). */
 .card { position: absolute; left: 30px; top: 30px; width: 900px; height: 500px; }
