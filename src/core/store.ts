@@ -72,6 +72,7 @@ export function createStore(options: StoreOptions) {
       fondo: defaults.fondo,
       rotSt: authoredRot(id),
       brillitos: Math.min(clamp(lists.inicial.brillitos, ranges.brillitos), maxSparks(id)),
+      tamanos: {},
     };
   }
 
@@ -107,6 +108,12 @@ export function createStore(options: StoreOptions) {
     }
   }
 
+  /** A section's text size, rounded and clamped to the style's range; undefined for an unknown section (FR-E22). */
+  function validSize(id: string, section: string, value: unknown): number | undefined {
+    if (!faces[id]!.marks.sections.includes(section) || typeof value !== 'number' || !Number.isFinite(value)) return undefined;
+    return clamp(Math.round(value), ranges.tamano);
+  }
+
   function validGlobal(key: GlobalKey, value: unknown): string | number | undefined {
     if (key === 'acento' || key === 'sombra') {
       const list = key === 'acento' ? lists.acentos : lists.sombras;
@@ -131,6 +138,11 @@ export function createStore(options: StoreOptions) {
     }
     target.ocultosEd.splice(0, Infinity, ...(source.ocultosEd ?? []).filter((i) => i < fieldCount));
     target.ocultasPiezas.splice(0, Infinity, ...(source.ocultasPiezas ?? []).filter((k) => pieceKeys.has(k)));
+    for (const k of Object.keys(target.tamanos)) delete target.tamanos[k];
+    for (const [section, value] of Object.entries(source.tamanos ?? {})) {
+      const size = validSize(id, section, value);
+      if (size !== undefined && size !== 100) target.tamanos[section] = size;
+    }
     const fresh = defaultFace(id);
     for (const key of ['arte', 'fondo', 'rotSt', 'brillitos'] as const) {
       (target as Record<FaceKey, unknown>)[key] = validFaceValue(id, key, source[key]) ?? fresh[key];
@@ -248,6 +260,23 @@ export function createStore(options: StoreOptions) {
       const valid = validFaceValue(id, key, value);
       if (valid === undefined) return;
       (doc.caras[id]! as Record<FaceKey, unknown>)[key] = valid;
+      changed();
+    },
+
+    /** One section's text size in percent; 100 % is the default and isn't stored (FR-E22). */
+    setSectionSize(id: string, section: string, value: number) {
+      const size = validSize(id, section, value);
+      if (size === undefined) return;
+      const sizes = doc.caras[id]!.tamanos;
+      if (size === 100) delete sizes[section];
+      else sizes[section] = size;
+      changed();
+    },
+
+    /** Every section of a face back to 100 % (FR-E22). */
+    resetSizes(id: string) {
+      const sizes = doc.caras[id]!.tamanos;
+      for (const k of Object.keys(sizes)) delete sizes[k];
       changed();
     },
 

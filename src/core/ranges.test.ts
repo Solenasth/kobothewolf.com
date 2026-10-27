@@ -10,6 +10,7 @@ describe('FR-E9 ranges come from tokens.json', () => {
       washi: [12, 18],
       brillitos: [5, 9],
       escala: [85, 115],
+      tamano: [85, 115],
     });
   });
 

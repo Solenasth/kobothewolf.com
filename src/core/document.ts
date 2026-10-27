@@ -22,6 +22,8 @@ export interface FaceState {
   fondo?: string;
   rotSt?: number;
   brillitos?: number;
+  /** Section key → text size in percent (FR-E22). */
+  tamanos?: Record<string, number>;
 }
 
 export interface KoboDocument {

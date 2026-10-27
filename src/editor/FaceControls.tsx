@@ -1,4 +1,4 @@
-// One face's controls (FR-E3–E5, FR-E7, FR-E9, FR-E11, FR-E12, DESIGN §5.6),
+// One face's controls (FR-E3–E5, FR-E7, FR-E9, FR-E11, FR-E12, FR-E22, DESIGN §5.6),
 // built from its marks and its variant's `controles`. Locked elements never
 // appear: the marks don't list them. Every change goes through the store,
 // which checks the value against the style and paints the face.
@@ -29,6 +29,7 @@ export function FaceControls(props: { session: Session; id: string; heading: str
   const hasArt = controls.has('arte') && marks.art !== undefined;
   const rotates = controls.has('rotSt') && marks.rotations.some((r) => r.kind === 'st');
   const [min, max] = session.ranges.brillitos;
+  const [sizeMin, sizeMax] = session.ranges.tamano;
   const sparksMax = Math.min(max, marks.sparks);
   const artOptions: [string, string, boolean?][] = [
     ...session.lists.arte.map((key): [string, string] => [key, label(`arte.${key}`)]),
@@ -134,6 +135,27 @@ export function FaceControls(props: { session: Session; id: string; heading: str
           />
         )}
       </fieldset>
+      {marks.sections.length > 0 && (
+        <fieldset class="ed-tamanos">
+          <legend>{t('editor.textSize')}</legend>
+          {marks.sections.map((section) => (
+            <Range
+              key={section}
+              id={`ed-tam-${id}-${section}`}
+              label={label(`seccion.${section}`)}
+              min={sizeMin}
+              max={sizeMax}
+              step={1}
+              value={state.tamanos[section] ?? 100}
+              unit=" %"
+              onInput={(v) => session.store.setSectionSize(id, section, v)}
+            />
+          ))}
+          <button type="button" class="ed-boton" id={`ed-tam-reset-${id}`} onClick={() => session.store.resetSizes(id)}>
+            {t('editor.textSize.reset')}
+          </button>
+        </fieldset>
+      )}
     </details>
   );
 }
