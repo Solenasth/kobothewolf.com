@@ -3,5 +3,6 @@
   "sombras": ["#FF8FB8", "#FFC8DD", "#BDE0FE", "#CDB4DB"],
   "fondos": ["gingham", "cuaderno", "femboy", "crema", "algodon"],
   "arte": ["licencia", "feliz", "clik", "yap"],
-  "escala": [85, 115]
+  "escala": [85, 115],
+  "inicial": { "rotTit": -2, "anguloWashi": 14, "brillitos": 7, "escala": 100 }
 }

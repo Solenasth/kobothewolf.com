@@ -7,6 +7,8 @@ const fixtureConfig = 'e2e/fixtures/vite.config.ts';
 
 export default defineConfig({
   testDir: 'e2e',
+  // Visual baselines made from P8 (DESIGN §10), one folder per browser.
+  snapshotPathTemplate: '{testDir}/baselines/{projectName}/{arg}{ext}',
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
@@ -21,7 +23,8 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `npm run build && npm run preview -- --port ${port} --strictPort`,
+      // The test hook is compiled in only for E2E (DESIGN §5.6); the deploy build has none.
+      command: `VITE_TEST_HOOK=1 npm run build && npm run preview -- --port ${port} --strictPort`,
       url: `http://localhost:${port}`,
       reuseExistingServer: !process.env.CI,
     },

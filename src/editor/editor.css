@@ -1,0 +1,51 @@
+/* Editor shell (DESIGN §5.6), ported from P8's layout. Faces carry their own
+   CSS; nothing here reaches inside a face except the viewer's scale. */
+
+.kobo-editor { margin-top: 12px; }
+.kobo-editor .status { margin: 0 0 10px; }
+.ed-estilo { max-width: 320px; margin-bottom: 12px; }
+
+/* Variant tabs */
+.ed-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+.ed-tab {
+  font: inherit; font-size: 16px; cursor: pointer; color: var(--tinta);
+  border: 2.5px solid var(--ui-line); background: var(--blanco); border-radius: 999px; padding: 5px 14px;
+}
+.ed-tab[aria-selected='true'] { border-color: var(--tinta); background: var(--algodon); box-shadow: 3px 4px 0 0 var(--rosa); }
+.ed-tab:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+
+/* Panel and stage: side by side, stacked on narrow screens */
+.ed-layout { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.ed-panel {
+  flex: 1 1 300px; max-width: 420px; min-width: 0;
+  background: var(--ui-panel); border: 2px solid var(--ui-line); border-radius: 16px; padding: 6px 16px 16px;
+}
+.ed-stage { flex: 999 1 560px; min-width: 0; display: grid; gap: 18px; }
+@media (min-width: 900px) { .ed-stage { position: sticky; top: 12px; } }
+
+.ed-panel fieldset { border: 0; border-top: 2px dashed var(--ui-line); margin: 0; padding: 12px 0 6px; min-width: 0; }
+.ed-panel fieldset:first-of-type { border-top: 0; }
+.ed-panel legend { font: 13px Silk, monospace; letter-spacing: .6px; color: var(--ui-accent-text); padding: 0 6px 0 0; }
+.ed-panel .f { margin: 6px 0 8px; }
+.ed-hint { margin: 2px 0 0; font-size: 14px; color: var(--ui-muted); }
+.chk { display: flex; gap: 8px; align-items: center; margin: 8px 0; font-size: 15px; }
+.chk input { accent-color: var(--ui-focus); width: 18px; height: 18px; flex: none; }
+.chk input:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+
+/* A face at scale: --k is the viewer width ÷ 960, set by a ResizeObserver */
+.ed-cara h3 {
+  margin: 0 0 6px; font: 13px Silk, monospace; letter-spacing: .6px; text-transform: uppercase; color: var(--ui-muted);
+  display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+}
+.ed-visor {
+  position: relative; width: 100%; aspect-ratio: 960 / 560; overflow: hidden;
+  border-radius: 6px; box-shadow: 0 6px 22px rgba(43, 34, 51, .14); background: #fff;
+}
+.ed-escala { position: absolute; left: 0; top: 0; width: 960px; height: 560px; transform-origin: 0 0; transform: scale(var(--k, .6)); }
+
+/* Cut (pink, dashed) and safe-zone (blue, dotted) guides, in % of the 960 × 560 face */
+.ed-guias { position: absolute; inset: 0; pointer-events: none; }
+.ed-guias[hidden] { display: none; }
+.ed-guias::before, .ed-guias::after { content: ''; position: absolute; }
+.ed-guias::before { left: 3.125%; top: 5.357%; width: 93.75%; height: 89.286%; outline: 1.5px dashed rgba(224, 85, 155, .9); }
+.ed-guias::after { left: 6.25%; top: 10.714%; width: 87.5%; height: 78.571%; outline: 1px dotted rgba(61, 139, 217, .8); }

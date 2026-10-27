@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -34,7 +34,7 @@
 ├── index.html  404.html  public/ (favicon, og-image, robots.txt)
 ├── src/
 │   ├── main.tsx                 hydrate profile, lazy-load editor
-│   ├── app/                     Profile, LangSwitch, Editor{Panel,Preview,Tabs,ExportBar}
+│   ├── editor/                  the lazy editor chunk: Editor, Tabs, Panel, Stage (ExportBar with #17)
 │   ├── i18n/
 │   │   ├── en.json  es.json     UI and profile strings
 │   │   └── i18n.ts              t(), plurals, lang detection and persistence
@@ -85,9 +85,10 @@ These are the lists P8 hard-coded. They hold keys only; display names come from 
   "sombras": ["#FF8FB8", "#FFC8DD", "#BDE0FE", "#CDB4DB"],
   "fondos":  ["gingham", "cuaderno", "femboy", "crema", "algodon"],
   "arte":    ["licencia", "feliz", "clik", "yap"],
-  "escala":  [85, 115] }
+  "escala":  [85, 115],
+  "inicial": { "rotTit": -2, "anguloWashi": 14, "brillitos": 7, "escala": 100 } }
 ```
-The other ranges are derived from `tokens.json` → `antirreglas`, so there is only one source of truth (FR-E9): `rotSt` ← `rotacion_stickers_grados`, `rotTit` ← `rotacion_titulares_grados`, `washi` ← `washi.grados`, `brillitos` ← `brillitos.por_cara` (the editor also caps it at the face's sparkle count). The sticker scale has no anti-rule, so it lives in `editor.json`. Every accent and shadow must be one of the style's `color` tokens. `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
+The other ranges are derived from `tokens.json` → `antirreglas`, so there is only one source of truth (FR-E9): `rotSt` ← `rotacion_stickers_grados`, `rotTit` ← `rotacion_titulares_grados`, `washi` ← `washi.grados`, `brillitos` ← `brillitos.por_cara` (the editor also caps it at the face's sparkle count). The sticker scale has no anti-rule, so it lives in `editor.json`. `inicial` holds the starting values of the shared ranges, P8's defaults, so the default faces match P8 (NFR-1); `validate` checks each is inside its range. A face's sticker rotation starts at its authored angle, and sparkles are also capped at the face's count. Every accent and shadow must be one of the style's `color` tokens. `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
 
 ### 3.4 Variant manifest and faces
 As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). That is the only value it takes, so the build finds every mount script with one glob. Names are catalog keys (`variant.licencia.name`). Two more fields:
@@ -156,6 +157,7 @@ Recorded in [`0006-css-scoping-not-shadow-dom.md`](decisions/0006-css-scoping-no
   - Saved state is parsed like an imported file. If it's invalid, the editor starts fresh.
   - Notices: `storage-unavailable`, `storage-full`, `sticker-not-saved`, `saved-state-invalid`.
   - `paintFace()` hides with the `data-oculto` / `data-oculto-pieza` attributes, styled `display:none !important` as in P8, which also works on SVG bows. Bounce text gets letter `<span>`s built by the caller.
+  - `paintLook()` applies the rest of a face's state, as P8's `pintar()` did: the `fondo-<key>` class, `--acento` and `--sombra` on the root, the art image, the sticker's rotation and scale, the headline rotation, each washi's angle (keeping its authored sign) and how many sparkles show. It comes with the preview (#14), so default faces render as in P8 before their controls exist (#16). The art placeholder and the user's sticker are painted with the art control (#16).
 
 ### 5.3 Sticker from the user's image `[FR-E6]`
 - The EV §6.3 algorithm is ported from P8 into typed, pure functions over RGBA buffers and `Uint8Array` masks (`src/core/sticker.ts`): `figureMask`, `dilate`, `fillHoles`, `whiteFill`, `makeSticker`. There's no DOM and no network.
@@ -193,10 +195,15 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 - Buttons stay disabled until the libraries have loaded and the faces are ready. Otherwise the message `export.unavailable` shows (GP §2).
 - **Library versions change.** `npm audit` on 2026-10-25 reported the inputs' pinned **jsPDF 2.5.1: 1 critical, 1 high** (via dompurify). The plan moves to **jsPDF 4.2.1** and **html-to-image 1.11.13**, which audit clean together with Preact 11.0.2. M5 re-verifies output against the export checks (page size 272.13 × 158.74 pt, 300 ppi, QR decode). Recorded in `0007-export-library-versions.md`.
 
-### 5.6 Editor UI `[FR-E1–E4, FR-E21, NFR-6, NFR-7]`
-- Layout as in P8: the panel and a stage that becomes sticky at 900 px and wider. On narrow screens they stack. Preview scale comes from a `ResizeObserver`.
-- Native controls. Tabs follow the ARIA tabs pattern. One `role="status"` region.
-- P8's `window.__bk` debug hook becomes a test-only hook, enabled with `?test` and stripped from production builds.
+### 5.6 Editor UI `[FR-E1–E4, FR-E10, FR-E21, NFR-2, NFR-6, NFR-7]`
+- **Loading (NFR-2):** `src/main.tsx` imports `src/editor/` with `import()` after the page's `load` event, when the browser is idle. The editor chunk carries the face CSS, so the profile's first render never waits on it. Until it loads, `#editor` shows a short loading line, and a `<noscript>` line says the editor needs JavaScript.
+- **Layout as in P8:** a row of variant tabs, then the panel and the stage. At 900 px and wider the stage is sticky; on narrow screens the two stack. Each face sits in a viewer whose scale (`--k` = viewer width ÷ 960) comes from a `ResizeObserver`.
+- **Faces (FR-E1, FR-E2):** every face of the style is parsed once per session and kept, with its bound marks. The two viewers show the selected front and back, and switching moves the face elements, so a face keeps its state and its drawn canvas. A face's `montar` runs the first time it's shown; `ready()` resolves when both shown faces have their images, fonts and `montar` done (export waits on it, #17).
+- **Choosing faces:** front and back `<select>`s list every face of the style, labeled from the style catalog. The variant tabs follow the ARIA tabs pattern: one tab stop with arrow keys, Home and End, and a tab shows as selected only when both faces are its variant. A style `<select>` appears only when more than one style exists.
+- **Guides (FR-E10):** the cut (pink, dashed) and safe-zone (blue, dotted) guides are an overlay in the viewer, outside the face element, so an export of the face can't include them. A checkbox toggles them; they start on and aren't saved.
+- **Status (FR-E21):** the editor has one polite `role="status"` region. Store notices and later progress messages go there.
+- Native controls. Labels are app catalog keys (`editor.*`) and style catalog keys (§4), so a language switch relabels the editor without touching its state.
+- **Test hook:** P8's `window.__bk` becomes `window.__kobo`: the store, `ready()` and the face elements. It exists only in builds made with `VITE_TEST_HOOK=1` and only when the URL has `?test`. The E2E web server builds with the flag; the deploy build doesn't, and CI checks that `dist/` has no trace of it.
 
 ## 6. Page and profile `[FR-P1–P7]`
 - **Order:**
@@ -215,12 +222,12 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 ### 6.1 Inquiry form `[FR-P8, NFR-3, NFR-4, NFR-5]`
 - **Markup:** a `<form>` in `index.html` with no `action`, hidden until JavaScript removes `hidden` (progressive enhancement). Labels, options and messages are `data-i18n` keys.
 - **Composition** (`src/contact/mailto.ts`, pure): the recipient is a constant. Single-line fields (name, email) have CR/LF removed and are capped (name 100, email 254 characters). The message is capped at 1,500 characters so the URL stays within what email apps accept. Subject and body are built from catalog templates, line breaks become CRLF, and both go through `encodeURIComponent`. Nothing typed can add headers (`&`, `?`, `%0A` are all encoded).
-- **Send:** validation (required fields, a basic email shape) sets `aria-invalid` and per-field messages and focuses the first invalid field. A valid form opens the `mailto:` URL through a temporary link. "Copy message" writes the recipient, subject and body to the clipboard. Status messages use the page's polite live region.
+- **Send:** validation (required fields, a basic email shape) sets `aria-invalid` and per-field messages and focuses the first invalid field. A valid form opens the `mailto:` URL through a temporary link. "Copy message" writes the recipient, subject and body to the clipboard. Status messages use the form's polite live region (the editor has its own, §5.6).
 - **Security:** the CSP is unchanged. The form never submits (`form-action 'none'` stays), and opening `mailto:` is a navigation, not a request. No data leaves the browser except through the visitor's own email app.
 
 ## 7. Build-time validation `[FR-B3, FR-I5, NFR-5, NFR-9]`
 `npm run validate` runs before the build and in CI. It fails on any of these:
-- Data that doesn't match its schema in `schemas/` (`tokens`, `editor`, `variant`), or editor colors that aren't style color tokens, or anti-rules missing for a derived range.
+- Data that doesn't match its schema in `schemas/` (`tokens`, `editor`, `variant`), or editor colors that aren't style color tokens, or anti-rules missing for a derived range, or an `inicial` value outside its range.
 - A `data-ed` on or inside a `.qr`, `.arroba`, `.url` or `<canvas>`, or on an element whose text is contact data (`@KoboTheWolf`, `t.me/`, `kobothewolf.com`).
 - A **back** face (`-r`) without exactly one main QR (a `.qr` outside any `data-parte`) and an `@KoboTheWolf` outside any `data-parte`. The site QR lives inside its optional `data-parte` block.
 - A `data-parte` key equal to a built-in piece key (`arte`, `lazo`, `washi-<n>`).
@@ -261,7 +268,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 | Unit | vitest | marks, store identity and migration, document validation (T-SEC-1–3), pHYs/CRC, sticker() against fixtures, code-cat layout, `t()` fallbacks, language resolution (T-SEC-5) |
 | E2E | Playwright: Chromium, Firefox, WebKit | every variant: edit, switch, mix, export, reload persistence including the user's sticker, `.kobo.json` round-trip, **language switch keeps state**, 360 px with no horizontal scroll, zero console errors, CSP and requests (T-SEC-4), library blocked → buttons disabled, profile readable with JavaScript disabled (FR-P6) |
 | Controls | Playwright with real clicks | **every** text and piece checkbox on every face hides and restores its element; every select and range driven through the UI (EV §8). Runs in both languages, because labels change and keys must not |
-| Visual | Playwright screenshots | default faces against baselines generated from P8 with allowed art only (NFR-1) |
+| Visual | Playwright screenshots | default faces in the editor against baselines generated from P8 with allowed art only (NFR-1) |
 | Export | `kobo check-exports` | PNG and PDF from every variant, rendered in Chromium **and WebKit** |
 | Code cat | `rustc --edition 2021 -D warnings`, Rust 1.99.1 | the text extracted in each browser compiles with no warnings and runs (§5.4) |
 | A11y | `@axe-core/playwright` | profile and panel, ES and EN: no serious or critical violations |
@@ -271,7 +278,8 @@ The site is static with no server state. What needs protecting is visitors' brow
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.
 - **Fixture pages:** behavior that needs a real browser but must not ship, such as CSS scoping with deliberately conflicting variants, is tested on fixture pages under `e2e/fixtures/`. They're built by their own Vite config with the same plugins and served by a second Playwright web server, so the production build stays unchanged.
   - `scoping/`: two conflicting demo variants (§5.1).
-  - `caras/`: every real face from every style, mounted through `src/styles.ts` with its default background. Each face is 960 × 560, every image loads from the origin, no console errors, and each face renders at most `max_fuentes_por_cara` fonts. The page awaits each variant's `montar`, so the code cat is drawn and its text saved for the `rustc` job. The visual baselines against P8 come with the editor preview (#14).
+  - `caras/`: every real face from every style, mounted through `src/styles.ts` with its default background. Each face is 960 × 560, every image loads from the origin, no console errors, and each face renders at most `max_fuentes_por_cara` fonts. The page awaits each variant's `montar`, so the code cat is drawn and its text saved for the `rustc` job.
+- **P8 baselines (NFR-1):** `scripts/p8-baselines.ts` opens a local copy of P8 (private, never committed) in the CI Playwright image, sets each face to the editor's default state through `window.__bk` (with `"feliz"` art on the socks front), hides the guides and saves each face at 960 × 560 to `e2e/baselines/<browser>/<face>.png`. The visual test screenshots each default face in the editor at scale 1 and compares with Playwright's comparator, which skips anti-aliased pixels. Chromium and Firefox must match exactly otherwise. WebKit paints the same face slightly differently from page to page (the phase of dashed lines, image edges), so it may differ in up to 0.5 % of the face. The baselines show only allowed art, apply the approved changes since P8 (the "feliz" art, the socks back greeting in Burbuja, #12) and carry pixel data only.
 - Tests name their requirement IDs.
 
 ## 11. Dependencies `[NFR-10]`

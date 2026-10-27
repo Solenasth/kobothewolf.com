@@ -92,8 +92,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--ui-focus); outl
 
 /* Editor section (placeholder until M4) */
 .editor { border-top: 2px dashed var(--ui-line); padding-top: 24px; }
-.editor h2 { margin: 0 0 8px; font: 400 28px Burbuja, system-ui, sans-serif; }
-.editor p { margin: 0; color: var(--ui-muted); }
+.editor > h2 { margin: 0 0 8px; font: 400 28px Burbuja, system-ui, sans-serif; }
+#editor-root > p { margin: 0; color: var(--ui-muted); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }

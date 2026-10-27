@@ -37,6 +37,14 @@ export function faceFrom(html: string, id: string): MarkElement {
 /** A writable element for paint tests: records what painting does to it. */
 export class FakeElement {
   readonly attributes = new Map<string, string>();
+  readonly style = {
+    transform: '',
+    display: '',
+    props: new Map<string, string>(),
+    setProperty(name: string, value: string) {
+      this.props.set(name, value);
+    },
+  };
   children: FakeElement[] = [];
   private text: string | null = null;
   readonly tagName: string;
@@ -47,6 +55,19 @@ export class FakeElement {
 
   getAttribute(name: string) {
     return this.attributes.get(name) ?? null;
+  }
+  setAttribute(name: string, value: string) {
+    this.attributes.set(name, value);
+  }
+  /** Backed by the class attribute, like DOMTokenList. */
+  get classList() {
+    const list = () => (this.getAttribute('class') ?? '').split(/\s+/).filter(Boolean);
+    const write = (classes: string[]) => this.attributes.set('class', classes.join(' '));
+    return {
+      [Symbol.iterator]: () => list()[Symbol.iterator](),
+      add: (token: string) => write([...new Set([...list(), token])]),
+      remove: (token: string) => write(list().filter((c) => c !== token)),
+    };
   }
   toggleAttribute(name: string, force: boolean) {
     if (force) this.attributes.set(name, '');

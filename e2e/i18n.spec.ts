@@ -49,6 +49,8 @@ test('T-SEC-5 an injected ?lang= is ignored and never reflected', async ({ page 
 
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   expect(await page.content()).not.toContain('onerror');
-  await expect(page.locator('img')).toHaveCount(0);
+  // The editor's faces have images of their own; nothing else on the page may.
+  await expect(page.locator('.ed-visor [data-cara]')).toHaveCount(2);
+  expect(await page.locator('img').evaluateAll((imgs) => imgs.filter((img) => !img.closest('[data-cara]')).length)).toBe(0);
   expect(dialog).toBe(false);
 });

@@ -1,7 +1,6 @@
 // Applies a face's state to its elements, as P8's pintar() did (DESIGN §5.2).
 // Text only ever goes in through textContent or per-letter spans built by the
-// caller, never as HTML (NFR-4, T-SEC-1). Art, background, rotations and
-// sparkles are painted with their controls (#16).
+// caller, never as HTML (NFR-4, T-SEC-1).
 import type { FaceState } from './document';
 import type { BoundMarks, FaceMarks, MarkElement } from './marks';
 
@@ -39,4 +38,64 @@ export function paintFace<E extends PaintElement>(
     const hidden = state.ocultasPiezas.includes(key);
     for (const el of elements) el.toggleAttribute(HIDDEN_PIECE, hidden);
   }
+}
+
+/** What paintLook() changes on an element. */
+export interface LookElement extends MarkElement {
+  setAttribute(name: string, value: string): void;
+  readonly style: { transform: string; display: string; setProperty(name: string, value: string): void };
+}
+
+/** The face root also gets its background class. */
+export interface LookRoot extends LookElement {
+  readonly classList: Iterable<string> & { add(token: string): void; remove(token: string): void };
+}
+
+/** The document-wide values a face shows. */
+export interface Look {
+  acento: string;
+  sombra: string;
+  rotTit: number;
+  escala: number;
+  anguloWashi: number;
+}
+
+/**
+ * Paints the rest of a face's state (FR-E5, FR-E7–E9): background class,
+ * accent and shadow, art, the sticker's rotation and scale, headline rotation,
+ * washi angles and the number of sparkles. `artUrl` maps a style art key to
+ * its built URL; the placeholder and the user's sticker come with #16.
+ */
+export function paintLook<E extends LookElement>(
+  root: LookRoot,
+  marks: FaceMarks,
+  bound: BoundMarks<E>,
+  state: Readonly<Required<FaceState>>,
+  look: Look,
+  artUrl: (key: string) => string | undefined,
+) {
+  for (const cls of [...root.classList]) if (cls.startsWith('fondo-') && cls !== `fondo-${state.fondo}`) root.classList.remove(cls);
+  root.classList.add(`fondo-${state.fondo}`);
+  root.style.setProperty('--acento', look.acento);
+  root.style.setProperty('--sombra', look.sombra);
+
+  const url = artUrl(state.arte);
+  for (const el of bound.pieces.get('arte') ?? []) {
+    if (url !== undefined) el.setAttribute('src', url);
+    const rotation = el.getAttribute('data-rot') === 'st' ? `rotate(${state.rotSt}deg) ` : '';
+    el.style.transform = `${rotation}scale(${look.escala / 100})`;
+  }
+
+  marks.rotations.forEach((rotation, i) => {
+    if (rotation.kind === 'tit') bound.rotations[i]!.style.transform = `rotate(${look.rotTit}deg)`;
+  });
+
+  for (const piece of marks.pieces) {
+    if (piece.kind !== 'washi') continue;
+    for (const el of bound.pieces.get(piece.key) ?? []) el.style.transform = `rotate(${piece.sign * look.anguloWashi}deg)`;
+  }
+
+  bound.sparks.forEach((el, i) => {
+    el.style.display = i < state.brillitos ? '' : 'none';
+  });
 }

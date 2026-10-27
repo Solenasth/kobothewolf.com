@@ -16,5 +16,10 @@
 .lista { position: absolute; left: 52px; top: 96px; width: 520px; font: 20px/1.4 Plumon; }
 .lista li { list-style: none; padding-left: 26px; position: relative; }
 .lista li::before { content: ""; position: absolute; left: 0; top: .32em; width: .8em; height: .74em; background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 86C22 66 6 50 6 31 6 16 17 6 30 6c9 0 16 6 20 13 4-7 11-13 20-13 13 0 24 10 24 25 0 19-16 35-44 55z' fill='%23FF8FB8' stroke='%232B2233' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E"); }
-h2 { position: absolute; left: 52px; top: 36px; font: 36px Burbuja; color: var(--tinta); transform: rotate(-1.5deg); }
+/* In P8 the editor's preview-heading rule (.cara h2) also reached this title;
+   its spacing, flex layout and margin are part of the look, so they are kept. */
+h2 {
+  position: absolute; left: 52px; top: 36px; font: 36px Burbuja; color: var(--tinta); transform: rotate(-1.5deg);
+  margin: 0 0 6px; letter-spacing: .6px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
+}
 h2 em { font: 32px Lazo; color: var(--chicle); font-style: normal; }

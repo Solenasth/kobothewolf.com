@@ -83,6 +83,14 @@ describe('FR-E8 FR-E9 cross-file rules', () => {
     expect(checkStyle(ajv, style({ tokens: t }))).toEqual([expect.stringContaining('rotacion_titulares_grados')]);
   });
 
+  it('rejects starting values outside their ranges', () => {
+    const e = { ...clone(editor), inicial: { rotTit: -9, anguloWashi: 14, brillitos: 7, escala: 100 } };
+    expect(checkStyle(ajv, style({ editor: e }))).toEqual(['styles/boykisser-uwu/editor.json: inicial.rotTit -9 is outside [-4, 3]']);
+    const missing = clone(editor);
+    delete missing.inicial;
+    expect(checkStyle(ajv, style({ editor: missing }))).toContainEqual(expect.stringContaining("must have required property 'inicial'"));
+  });
+
   it('rejects a style folder that does not match tokens.estilo', () => {
     expect(checkStyle(ajv, style({ dir: 'styles/other' }))).toEqual([expect.stringContaining('must match the folder')]);
   });

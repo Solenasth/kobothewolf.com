@@ -5,7 +5,7 @@
   "description": "Keys only; labels come from the style catalogs. Ranges other than escala are derived from tokens.json (DESIGN §3.3).",
   "type": "object",
   "additionalProperties": false,
-  "required": ["acentos", "sombras", "fondos", "arte", "escala"],
+  "required": ["acentos", "sombras", "fondos", "arte", "escala", "inicial"],
   "properties": {
     "acentos": { "$ref": "#/$defs/colors" },
     "sombras": { "$ref": "#/$defs/colors" },
@@ -16,6 +16,18 @@
       "prefixItems": [{ "type": "integer", "minimum": 10 }, { "type": "integer", "maximum": 300 }],
       "items": false,
       "minItems": 2
+    },
+    "inicial": {
+      "description": "Starting values of the shared ranges (P8's defaults); validate checks each is inside its range.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rotTit", "anguloWashi", "brillitos", "escala"],
+      "properties": {
+        "rotTit": { "type": "number" },
+        "anguloWashi": { "type": "number" },
+        "brillitos": { "type": "integer", "minimum": 0 },
+        "escala": { "type": "integer" }
+      }
     }
   },
   "$defs": {

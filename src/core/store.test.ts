@@ -114,6 +114,15 @@ describe('FR-E3 FR-E4 FR-E13 actions', () => {
     expect(store.document).toMatchObject({ acento: '#FF8FB8', rotTit: -4 });
   });
 
+  it('NFR-1 starts from the style\'s starting values, as P8 did', () => {
+    const { store } = make();
+    expect(store.document).toMatchObject({ rotTit: -2, anguloWashi: 14, escala: 100 });
+    // lic-f has 3 sparkles in the fixture: the starting 7 is capped at the face's count.
+    expect(store.face('lic-f').brillitos).toBe(3);
+    const out = make({ lists: { ...editor, inicial: { rotTit: 9, anguloWashi: 0, brillitos: 7, escala: 500 } } });
+    expect(out.store.document).toMatchObject({ rotTit: 3, anguloWashi: 12, escala: 115 });
+  });
+
   it('refuses to show a front as the back', () => {
     const { store } = make();
     expect(() => store.select('lic-r', 'lic-f')).toThrow();
