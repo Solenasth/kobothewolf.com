@@ -13,6 +13,9 @@ const faces = import.meta.glob<string>('../styles/*/variantes/*/caras.html', { e
 const assets = import.meta.glob<string>('../styles/*/assets/*', { eager: true, query: '?url', import: 'default' });
 // Lazy: a variant's code loads only when one of its faces is mounted.
 const scripts = import.meta.glob('../styles/*/variantes/*/montar.ts');
+const editors = import.meta.glob('../styles/*/editor.json', { eager: true, import: 'default' });
+const tokens = import.meta.glob('../styles/*/tokens.json', { eager: true, import: 'default' });
+const catalogs = import.meta.glob<Record<string, string>>('../styles/*/i18n/*.json', { eager: true, import: 'default' });
 
 /** Variants by style, in tab order. */
 export const variants: ReadonlyMap<string, readonly Variant[]> = collectVariants({ manifests, faces, scripts });
@@ -44,4 +47,26 @@ export async function montar(variant: Variant, face: HTMLElement): Promise<void>
   const mod = (await variant.montar()) as { montar?: unknown };
   if (typeof mod.montar !== 'function') throw new Error(`${variant.estilo}/${variant.manifest.id}: ${variant.manifest.montar} does not export montar()`);
   await (mod.montar as (cara: HTMLElement) => Promise<void>)(face);
+}
+
+/** A style's editor lists and anti-rules, checked by `validate` at build time. */
+export function styleData(estilo: string): { editor: EditorData; antirreglas: Record<string, unknown> } {
+  const editor = editors[`../styles/${estilo}/editor.json`] as EditorData | undefined;
+  const style = tokens[`../styles/${estilo}/tokens.json`] as { antirreglas: Record<string, unknown> } | undefined;
+  if (!editor || !style) throw new Error(`style ${estilo}: editor.json or tokens.json is missing`);
+  return { editor, antirreglas: style.antirreglas };
+}
+
+export interface EditorData {
+  acentos: string[];
+  sombras: string[];
+  fondos: string[];
+  arte: string[];
+  escala: [number, number];
+  inicial: { rotTit: number; anguloWashi: number; brillitos: number; escala: number };
+}
+
+/** A style label (DESIGN §4) in `lang`, falling back to English, then to the key. */
+export function styleLabel(estilo: string, lang: string, key: string): string {
+  return catalogs[`../styles/${estilo}/i18n/${lang}.json`]?.[key] ?? catalogs[`../styles/${estilo}/i18n/en.json`]?.[key] ?? key;
 }
