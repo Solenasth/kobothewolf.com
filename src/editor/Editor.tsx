@@ -1,10 +1,11 @@
-// The editor shell (FR-E1, FR-E2, FR-E10, FR-E21, DESIGN §5.6): variant tabs,
-// face selects, the guides toggle, the two-face stage and the status region.
-// Text and piece controls come with #15, art and ranges with #16.
+// The editor shell (FR-E1, FR-E2, FR-E10, FR-E13, FR-E21, DESIGN §5.6): variant
+// tabs, face selects, text and piece controls per face, the guides toggle,
+// restore, the two-face stage and the status region. Art and ranges: #16.
 import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'preact/hooks';
 import type { Notice } from '../core/store';
 import { getLanguage, onLanguageChange, t, type MessageKey } from '../i18n';
 import { styleLabel } from '../styles';
+import { FaceControls } from './FaceControls';
 import type { Session } from './session';
 
 const NOTICES: Record<Notice, MessageKey> = {
@@ -19,7 +20,7 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
   const session = sessions.get(estilo)!;
   const [, refresh] = useReducer((n: number) => n + 1, 0);
   const [guias, setGuias] = useState(true);
-  const [notice, setNotice] = useState<Notice | null>(null);
+  const [status, setStatus] = useState<MessageKey | null>(null);
 
   useEffect(() => onLanguageChange(() => refresh(0)), []);
   useEffect(() => {
@@ -27,8 +28,8 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
       session.paint();
       refresh(0);
     });
-    setNotice(session.notice);
-    const offNotice = session.onNotice(setNotice);
+    setStatus(session.notice && NOTICES[session.notice]);
+    const offNotice = session.onNotice((notice) => setStatus(NOTICES[notice]));
     return () => {
       offChange();
       offNotice();
@@ -54,7 +55,7 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
       )}
       <Tabs session={session} label={label} />
       <p class="status" role="status" aria-live="polite">
-        {notice ? t(NOTICES[notice]) : ''}
+        {status ? t(status) : ''}
       </p>
       <div class="ed-layout" id="ed-layout">
         <form class="ed-panel" autocomplete="off" onSubmit={(e) => e.preventDefault()}>
@@ -82,10 +83,25 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
             </div>
             <p class="ed-hint">{t('editor.facesHint')}</p>
           </fieldset>
-          <label class="chk">
-            <input type="checkbox" id="ed-guias" checked={guias} onChange={(e) => setGuias(e.currentTarget.checked)} />
-            {t('editor.guides')}
-          </label>
+          <FaceControls session={session} id={frente} heading={t('editor.front')} label={label} />
+          <FaceControls session={session} id={reverso} heading={t('editor.back')} label={label} />
+          <fieldset>
+            <legend>{t('editor.view')}</legend>
+            <label class="chk">
+              <input type="checkbox" id="ed-guias" checked={guias} onChange={(e) => setGuias(e.currentTarget.checked)} />
+              {t('editor.guides')}
+            </label>
+            <button
+              type="button"
+              class="ed-boton"
+              onClick={() => {
+                session.store.restore();
+                setStatus('editor.restored');
+              }}
+            >
+              {t('editor.restore')}
+            </button>
+          </fieldset>
         </form>
         <div class="ed-stage">
           <Viewer session={session} id={frente} heading={t('editor.front')} guias={guias} />

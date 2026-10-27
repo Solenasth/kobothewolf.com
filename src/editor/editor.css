@@ -28,6 +28,23 @@
 .ed-panel legend { font: 13px Silk, monospace; letter-spacing: .6px; color: var(--ui-accent-text); padding: 0 6px 0 0; }
 .ed-panel .f { margin: 6px 0 8px; }
 .ed-hint { margin: 2px 0 0; font-size: 14px; color: var(--ui-muted); }
+/* Per-face groups: texts and pieces */
+.ed-grupo { border-top: 2px dashed var(--ui-line); padding: 10px 0 4px; }
+.ed-grupo > summary { cursor: pointer; font: 400 22px Burbuja, system-ui, sans-serif; color: var(--tinta); }
+.ed-grupo > summary:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+.ed-grupo fieldset { border-top: 0; padding-top: 6px; }
+.ed-campo { display: flex; gap: 8px; align-items: flex-start; }
+.ed-campo > input[type='checkbox'] { margin-top: 30px; flex: none; width: 18px; height: 18px; accent-color: var(--ui-focus); }
+.ed-campo .f { flex: 1; min-width: 0; margin: 4px 0; }
+.ed-piezas { display: flex; flex-wrap: wrap; gap: 0 16px; }
+.ed-piezas > legend { width: 100%; }
+.ed-piezas .chk { margin: 3px 0; }
+.ed-boton {
+  font: inherit; font-size: 15px; cursor: pointer; color: var(--tinta); margin: 4px 0;
+  border: 2.5px solid var(--tinta); background: var(--blanco); border-radius: 12px; padding: 4px 12px;
+}
+.ed-boton:focus-visible, .ed-campo input:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+
 .chk { display: flex; gap: 8px; align-items: center; margin: 8px 0; font-size: 15px; }
 .chk input { accent-color: var(--ui-focus); width: 18px; height: 18px; flex: none; }
 .chk input:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }

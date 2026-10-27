@@ -18,7 +18,7 @@ export function mountEditor(root: HTMLElement): void {
   if (import.meta.env.VITE_TEST_HOOK === '1' && new URLSearchParams(location.search).has('test')) {
     const session = [...sessions.values()][0]!;
     Object.assign(window, {
-      __kobo: { store: session.store, ready: () => session.ready(), face: (id: string) => session.faces.get(id)?.el },
+      __kobo: { store: session.store, ready: () => session.ready(), face: (id: string) => session.faces.get(id)?.el, bound: (id: string) => session.faces.get(id)?.bound },
     });
   }
 }
