@@ -4,10 +4,12 @@
 import { parseFaces, resolveAssets } from '../core/faces';
 import { bindMarks, readMarks, type BoundMarks, type FaceMarks } from '../core/marks';
 import { paintFace, paintLook, type Look } from '../core/paint';
-import { deriveRanges } from '../core/ranges';
+import { deriveRanges, type EditorRanges } from '../core/ranges';
 import { createStore, type FaceSetup, type Notice, type StorageLike, type Store } from '../core/store';
 import type { Variant } from '../core/variants';
-import { assetUrls, montar, styleData } from '../styles';
+import { getLanguage, t } from '../i18n';
+import { assetUrls, montar, styleData, type EditorData } from '../styles';
+import { reencode, type Efectos } from './stickers';
 
 export interface FaceEntry {
   id: string;
@@ -23,6 +25,9 @@ export interface FaceEntry {
 export interface Session {
   estilo: string;
   variants: readonly Variant[];
+  lists: EditorData;
+  ranges: EditorRanges;
+  efectos: Efectos;
   faces: ReadonlyMap<string, FaceEntry>;
   store: Store;
   /** Inserts nothing: call after a face is placed in a viewer. Starts its montar once and paints it. */
@@ -42,6 +47,36 @@ function authoredArt(face: Element): string | undefined {
   return /^assets\/st-([a-z0-9-]+)\.png$/.exec(src)?.[1];
 }
 
+/** P8's "[ your kitty here ]" placeholder, drawn in the face font so it exports like any image (FR-E5). */
+const placeholders = new Map<string, string>();
+function placeholder(doc: Document): string {
+  const lang = getLanguage();
+  const cached = placeholders.get(lang);
+  if (cached) return cached;
+  const canvas = doc.createElement('canvas');
+  canvas.width = 500;
+  canvas.height = 540;
+  const ctx = canvas.getContext('2d')!;
+  ctx.scale(2, 2);
+  ctx.beginPath();
+  ctx.roundRect(6, 6, 238, 258, 20);
+  ctx.fillStyle = '#FFE4EE';
+  ctx.fill();
+  ctx.setLineDash([14, 10]);
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#6B5B73';
+  ctx.stroke();
+  ctx.font = '28px Plumon';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#6B5B73';
+  ctx.fillText(t('editor.placeholder.line1'), 125, 126);
+  ctx.fillText(t('editor.placeholder.line2'), 125, 162);
+  const uri = canvas.toDataURL('image/png');
+  // Cache only once the font is in, so an early draw in a fallback font is redone.
+  if (doc.fonts.check('28px Plumon')) placeholders.set(lang, uri);
+  return uri;
+}
+
 function browserStorage(): StorageLike | null {
   try {
     return window.localStorage;
@@ -52,7 +87,8 @@ function browserStorage(): StorageLike | null {
 
 export function createSession(estilo: string, variants: readonly Variant[], doc: Document = document): Session {
   const urls = assetUrls(estilo);
-  const { editor, antirreglas } = styleData(estilo);
+  const { editor, antirreglas, efectos } = styleData(estilo);
+  const ranges = deriveRanges(antirreglas, editor.escala);
   const faces = new Map<string, FaceEntry>();
   const setups: Record<string, FaceSetup> = {};
 
@@ -73,11 +109,10 @@ export function createSession(estilo: string, variants: readonly Variant[], doc:
     estilo,
     faces: setups,
     lists: editor,
-    ranges: deriveRanges(antirreglas, editor.escala),
+    ranges,
     initial: { frente: first.frente, reverso: first.reverso },
     storage: browserStorage(),
-    // The canvas re-encoder is plugged in with the upload control (#16).
-    reencode: () => Promise.reject(new Error('own art is not available yet')),
+    reencode,
   });
 
   let notice: Notice | null = null;
@@ -93,7 +128,8 @@ export function createSession(estilo: string, variants: readonly Variant[], doc:
     if (className) span.className = className;
     return span;
   };
-  const artUrl = (key: string) => urls[`st-${key}.png`];
+  const artUrl = (key: string) =>
+    key === 'hueco' ? placeholder(doc) : key === 'propio' ? store.document.artePropio : urls[`st-${key}.png`];
 
   function paintOne(id: string) {
     const face = faces.get(id)!;
@@ -107,6 +143,9 @@ export function createSession(estilo: string, variants: readonly Variant[], doc:
   return {
     estilo,
     variants,
+    lists: editor,
+    ranges,
+    efectos,
     faces,
     store,
     shown(id) {

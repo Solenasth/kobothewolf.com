@@ -55,9 +55,11 @@ for (const variant of VARIANTS) {
     await showAtScale1(page, variant);
     for (const id of [variant.caras.frente, variant.caras.reverso]) {
       const face = page.locator(`[data-cara="${id}"]`);
-      // Pin the viewer at (0, 0) with square corners, so the face lands on whole pixels, uncropped, as in the baseline.
+      // Scroll to the top and pin the viewer at (0, 0) with square corners, so the face lands on whole pixels, uncropped, as in the baseline.
       await face.evaluate((el) => {
         const visor = el.closest<HTMLElement>('.ed-visor')!;
+        // A fractional scroll offset would shift Firefox's element box by part of a pixel. Instant: the page scrolls smoothly.
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         Object.assign(visor.style, { position: 'fixed', left: '0', top: '0', width: '960px', zIndex: '9999', borderRadius: '0' });
       });
       await face.evaluate(redecode);

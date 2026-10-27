@@ -45,6 +45,20 @@
 }
 .ed-boton:focus-visible, .ed-campo input:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
 
+/* Ranges and the upload drop zone */
+.ed-rng { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; margin: 6px 0; }
+.ed-rng label { font-size: 15px; color: var(--ui-muted); }
+.ed-rng output { font: 14px Code, monospace; color: var(--tinta); }
+.ed-rng input { grid-column: 1 / -1; width: 100%; accent-color: var(--ui-focus); }
+.ed-rng input:focus-visible, .ed-panel select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+.ed-drop {
+  position: relative; display: block; margin-top: 6px; padding: 10px; text-align: center; cursor: pointer; color: var(--ui-muted); font-size: 15px;
+  border: 2.5px dashed var(--chicle); border-radius: 12px; background: var(--crema);
+}
+.ed-drop.on { background: var(--algodon); }
+.ed-drop:focus-within { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+.ed-drop input { position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; }
+
 .chk { display: flex; gap: 8px; align-items: center; margin: 8px 0; font-size: 15px; }
 .chk input { accent-color: var(--ui-focus); width: 18px; height: 18px; flex: none; }
 .chk input:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }

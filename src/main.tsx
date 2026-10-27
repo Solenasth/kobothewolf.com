@@ -33,8 +33,9 @@ initLanguage();
 const inquiry = document.querySelector<HTMLFormElement>('#inquiry');
 if (inquiry) setUpInquiryForm(inquiry);
 
-// The editor loads after the page, when the browser is idle, so the profile
-// never waits for it (NFR-2, DESIGN §5.6).
+// The editor loads after the page has loaded and painted a frame, when the
+// browser is idle, so the profile never waits for it (NFR-2, DESIGN §5.6). On a
+// fast load, `load` can fire before the first paint, hence the frame.
 const editorRoot = document.getElementById('editor-root');
 if (editorRoot) {
   editorRoot.querySelector<HTMLElement>('[data-i18n="editor.loading"]')?.removeAttribute('hidden');
@@ -49,6 +50,7 @@ if (editorRoot) {
       },
     );
   const whenIdle = () => ('requestIdleCallback' in window ? requestIdleCallback(load, { timeout: 2000 }) : setTimeout(load, 200));
-  if (document.readyState === 'complete') whenIdle();
-  else addEventListener('load', whenIdle, { once: true });
+  const afterPaint = () => requestAnimationFrame(() => setTimeout(whenIdle, 0));
+  if (document.readyState === 'complete') afterPaint();
+  else addEventListener('load', afterPaint, { once: true });
 }

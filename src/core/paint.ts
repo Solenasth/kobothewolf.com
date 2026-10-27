@@ -16,6 +16,8 @@ export type MakeLetter = (letter: string, className?: string) => unknown;
 /** CSS for the hide attributes: `[data-oculto],[data-oculto-pieza]{display:none!important}`. */
 export const HIDDEN_FIELD = 'data-oculto';
 export const HIDDEN_PIECE = 'data-oculto-pieza';
+/** Set on the art when a back shows no art ("ninguno"). */
+export const NO_ART = 'data-sin-arte';
 
 export function paintFace<E extends PaintElement>(
   marks: FaceMarks,
@@ -43,6 +45,7 @@ export function paintFace<E extends PaintElement>(
 /** What paintLook() changes on an element. */
 export interface LookElement extends MarkElement {
   setAttribute(name: string, value: string): void;
+  toggleAttribute(name: string, force: boolean): boolean;
   readonly style: { transform: string; display: string; setProperty(name: string, value: string): void };
 }
 
@@ -63,8 +66,9 @@ export interface Look {
 /**
  * Paints the rest of a face's state (FR-E5, FR-E7–E9): background class,
  * accent and shadow, art, the sticker's rotation and scale, headline rotation,
- * washi angles and the number of sparkles. `artUrl` maps a style art key to
- * its built URL; the placeholder and the user's sticker come with #16.
+ * washi angles and the number of sparkles. `artUrl` maps an art key to its
+ * image (a style sticker, the placeholder or the user's sticker); "ninguno"
+ * hides the art.
  */
 export function paintLook<E extends LookElement>(
   root: LookRoot,
@@ -82,6 +86,7 @@ export function paintLook<E extends LookElement>(
   const url = artUrl(state.arte);
   for (const el of bound.pieces.get('arte') ?? []) {
     if (url !== undefined) el.setAttribute('src', url);
+    el.toggleAttribute(NO_ART, state.arte === 'ninguno');
     const rotation = el.getAttribute('data-rot') === 'st' ? `rotate(${state.rotSt}deg) ` : '';
     el.style.transform = `${rotation}scale(${look.escala / 100})`;
   }

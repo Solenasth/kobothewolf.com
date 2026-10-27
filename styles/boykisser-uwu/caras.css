@@ -22,9 +22,9 @@
 }
 &, & * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Hidden fields and pieces (DESIGN §5.2); !important as in P8, so it also
+/* Hidden fields and pieces, and a back's art set to none (DESIGN §5.2); !important as in P8, so it also
    wins over inline display on SVG bows. */
-[data-oculto], [data-oculto-pieza] { display: none !important; }
+[data-oculto], [data-oculto-pieza], [data-sin-arte] { display: none !important; }
 
 /* The card at the cut line: 900 × 500 at (30, 30). */
 .card { position: absolute; left: 30px; top: 30px; width: 900px; height: 500px; }

@@ -12,7 +12,12 @@ export function mountEditor(root: HTMLElement): void {
   root.textContent = '';
   render(<Editor sessions={sessions} />, root);
 
-  addEventListener('pagehide', () => sessions.forEach((s) => s.store.flush()));
+  // Save pending edits when the page goes away or into the background.
+  const flush = () => sessions.forEach((s) => s.store.flush());
+  addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flush();
+  });
 
   // Test-only hook (DESIGN §5.6): compiled in only with VITE_TEST_HOOK=1, active only with ?test.
   if (import.meta.env.VITE_TEST_HOOK === '1' && new URLSearchParams(location.search).has('test')) {
