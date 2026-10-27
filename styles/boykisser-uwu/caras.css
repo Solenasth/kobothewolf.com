@@ -15,10 +15,16 @@
   width: 960px;
   height: 560px;
   overflow: hidden;
-  font-family: Plumon, cursive;
+  /* P8's faces inherited 15px/1.45 from its page; set here, so a face looks
+     the same on any page and in exports. */
+  font: 15px/1.45 Plumon, cursive;
   color: var(--tinta);
 }
 &, & * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Hidden fields and pieces (DESIGN §5.2); !important as in P8, so it also
+   wins over inline display on SVG bows. */
+[data-oculto], [data-oculto-pieza] { display: none !important; }
 
 /* The card at the cut line: 900 × 500 at (30, 30). */
 .card { position: absolute; left: 30px; top: 30px; width: 900px; height: 500px; }
