@@ -4,6 +4,27 @@ All notable changes, grouped by conventional-commit type. One section per releas
 
 ## Unreleased
 
+## v0.5.0 (2026-10-27): export
+
+Milestone M5 (export): the editor on the live site now saves your card for printing. Each face downloads as a 300 dpi PNG (1134 × 661 px, 96 × 56 mm with bleed), and both faces as a 2-page print PDF. Everything is made in your browser. CI renders every variant's exports in Chromium and WebKit and checks their size, dpi, QR codes, fonts and glyphs. The vector PDF arrives in M6.
+
+### Features
+- **export:** a 300 dpi PNG per face, with fixes for WebKit (missing images, square corners, a lost background layer) and a warm-up so the first export is fast ([#54](https://github.com/Solenasth/kobothewolf.com/pull/54), closes [#17](https://github.com/Solenasth/kobothewolf.com/issues/17))
+- **export:** the 2-page print PDF, 96 × 56 mm per page with each face at 300 ppi; jsPDF's unused optional modules stay out of the site ([#55](https://github.com/Solenasth/kobothewolf.com/pull/55), closes [#18](https://github.com/Solenasth/kobothewolf.com/issues/18))
+- **cli:** `kobo check-exports` checks exports' size, dpi, QR codes (main at 300 and 150 dpi), nothing over the QRs, fonts per face, glyph coverage, and the PDF's pages, images and fonts ([#56](https://github.com/Solenasth/kobothewolf.com/pull/56), closes [#19](https://github.com/Solenasth/kobothewolf.com/issues/19))
+
+### Chores
+- **deps:** html-to-image 1.11.13 and jsPDF 4.2.1, bundled from npm instead of P8's CDN versions; jsqr 1.4.0 for the QR checks ([#54](https://github.com/Solenasth/kobothewolf.com/pull/54)–[#56](https://github.com/Solenasth/kobothewolf.com/pull/56))
+
+### Docs
+- design revisions 20–22: PNG export, print PDF, check-exports and the export CI jobs ([#54](https://github.com/Solenasth/kobothewolf.com/pull/54)–[#56](https://github.com/Solenasth/kobothewolf.com/pull/56))
+- decision [0007](docs/decisions/0007-export-library-versions.md): bundle current export libraries instead of P8's CDN versions ([#54](https://github.com/Solenasth/kobothewolf.com/pull/54))
+
+### CI and tests
+- **test:** exported pixels checked in Chromium, Firefox and WebKit: hidden pieces, the drawn code cat, round corners, the gingham, and each PDF page against its PNG ([#54](https://github.com/Solenasth/kobothewolf.com/pull/54), [#55](https://github.com/Solenasth/kobothewolf.com/pull/55))
+- **test:** the page, editor and export code transfer under 3 MB (NFR-2) ([#55](https://github.com/Solenasth/kobothewolf.com/pull/55))
+- **ci:** each browser's export times in the job summary; every variant's exports rendered in Chromium and WebKit, checked, and kept as artifacts; `export` and `check-exports` are required checks ([#54](https://github.com/Solenasth/kobothewolf.com/pull/54), [#56](https://github.com/Solenasth/kobothewolf.com/pull/56))
+
 ## v0.4.0 (2026-10-26): editor UI
 
 Milestone M4 (editor UI): the card editor is live under the profile. Choose and mix the four boykisser-uwu variants, edit texts, hide pieces, pick art, backgrounds, colors and anti-rule angles, and turn your own drawing into a sticker, in English or Spanish. Your card is remembered in the browser. PNG and PDF export arrive in M5.
