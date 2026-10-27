@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-27 (rev. 22: §9, §10, §11 check-exports and the export CI jobs, #19; rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-27 (rev. 23: §9, §10 vector PDF, #20; rev. 22: §9, §10, §11 check-exports and the export CI jobs, #19; rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -281,9 +281,16 @@ The site is static with no server state. What needs protecting is visitors' brow
 
 ## 9. CLI `[FR-B1, FR-B2]`
 `cli/kobo.ts`, run by Node 24 directly (`npm run kobo -- <command>`), as the repo's other scripts are. tsx isn't needed.
-- `pdf-vector doc.kobo.json`: EV §5.2, `@page{size:96mm 56mm;margin:0}` with `preferCSSPageSize` (M6).
+- `pdf-vector doc.kobo.json [-o out.pdf] [--lang en|es]`: EV §5.2, below. The output defaults to the document's name with `.pdf`, next to it.
 - `check-exports dir/`: EV §5.3, below.
 - `validate`: §7 (`npm run validate`).
+
+**`pdf-vector` (FR-B1).** A PDF with real text and embedded subset fonts, for print shops that ask for vector output. It runs locally and in CI, never on the site.
+- **Input:** the document is read and checked in Node first, with the same `parseDocument` the editor uses (size, forbidden keys, schema). Its style must exist, and its front and back must be faces of that style. On any failure the command prints `invalid document <file>:` with each problem, exits 1, and never starts a browser.
+- **Print page:** `cli/print/` is a private page built by its own Vite config into `dist-print/`, never deployed, with the site's face-CSS plugin and CSP. It creates the editor's session (`createSession`) and opens the document through the store's validated `importText`, so the PDF shows what the editor would. It then puts the two shown faces on two pages, paints them, runs `montar` and waits for `ready()`. The PDF title is the two faces' names plus "KOBO.EXE <style>", in the chosen language, which also sets the placeholder's text.
+- **Pages:** `@page { size: 96mm 56mm; margin: 0 }`, one face per page, scaled with `zoom` (960 face pixels on 96 mm). A `transform` doesn't work: layout still sees the face 960 px wide, and Chromium shrinks the whole print to fit it. Chromium prints with `page.pdf({ preferCSSPageSize: true, printBackground: true })`.
+- **Measured caveat (EV §5.2):** Chromium sets page sizes in steps of 1.2 pt (0.42 mm). The closest it can make to 96 × 56 mm is **271.92 × 159.12 pt (95.93 × 56.13 mm)**, whatever unit the size is given in. That's 0.07 mm narrower and 0.13 mm taller, inside the 3 mm bleed, so the trimmed card isn't affected.
+- **What stays raster:** stickers, the user's own art, the QR images and the code cat, which `montar` draws on a canvas. Every other text is real text in its own font.
 
 **`check-exports dir/` (FR-B2).** Some checks need what a file can't tell, such as where the QRs are and which font drew each text. So the files come with a manifest.
 - **Renderer:** `e2e/exports/render.ts`, run by `playwright.exports.config.ts` in Chromium and WebKit (`npm run exports:render`).
@@ -304,6 +311,11 @@ The site is static with no server state. What needs protecting is visitors' brow
   | PDF size and images | `pdfinfo`, `pdfimages -list` | 2 pages of 272.13 × 158.74 pt, one 1134 × 661 image per page at 300 × 300 ppi |
   | PDF fonts | `pdffonts` | none: the text is in the images |
   | PDF content | `pdfimages -png`, then the QR check | each page's image passes its face's QR checks, so page 2 is the back |
+  | Vector PDF size | `pdfinfo` | 2 pages, each within one Chromium step (1.2 pt) of 272.13 × 158.74 pt |
+  | Vector PDF fonts | `pdffonts` | at least one; every font embedded and subset; each one of the site's fonts (by PostScript name); at most `max_fuentes_por_cara` per page |
+  | Vector PDF text | `pdftotext` | every text the document changed on its two faces, and doesn't hide, is in the PDF (ignoring spaces and case, since letters can be drawn one by one or uppercased) |
+
+- **Vector PDFs** are found by name: a `<name>.pdf` with a `<name>.kobo.json` beside it, which is where `pdf-vector` writes by default. The document says which texts to look for.
 
 - **Engines:** EV §5.3 also compares each export with a screenshot of the face. That isn't adopted. The WebKit bugs found so far (§5.5) have pixel checks in the E2E export test, and a whole-face comparison would need a tolerance wide enough to hide them: Firefox and WebKit draw export text 0.1 px smaller.
 - **Output:** one line per file with what failed, a summary, and exit code 1 on any failure. Poppler (`pdfinfo`, `pdfimages`, `pdffonts`, from `poppler-utils`) is required; without it the command fails rather than skipping the PDF checks.
@@ -322,7 +334,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 | A11y | `@axe-core/playwright` | profile and panel, ES and EN: no serious or critical violations |
 
 - **`ci.yml`** runs on every PR: `npm ci` → typecheck → validate → unit → build → E2E matrix → export checks → rustc → `npm audit` → gitleaks. Exports are uploaded as workflow artifacts.
-  - **Export jobs:** `export (chromium)` and `export (webkit)` run the renderer in the Playwright image and upload `exports/<browser>/` as an artifact (kept 14 days).
+  - **Export jobs:** `export (chromium)` and `export (webkit)` run the renderer in the Playwright image and upload `exports/<browser>/` as an artifact (kept 14 days). The Chromium job also runs `pdf-vector` on `tests/fixtures/documents/mezcla.kobo.json`, a mixed card with changed texts, into `exports/chromium/vector/`.
   - **`check-exports` job:** runs on the plain runner, because the image's user can't install packages. It installs `poppler-utils` with apt, downloads both artifacts, runs `kobo check-exports exports/`, adds the report to the job summary, and runs the check's unit tests with poppler required.
 - **E2E environment:** the E2E jobs run in Microsoft's Playwright image (`mcr.microsoft.com/playwright:v<version>-resolute`), pinned by digest, with browsers and system packages preinstalled. This avoids a slow `apt` step and gives the visual baselines the same fonts and libraries on every run. The tag must equal `@playwright/test`, and CI checks it.
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.
