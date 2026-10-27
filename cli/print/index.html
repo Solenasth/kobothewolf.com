@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>KOBO.EXE vector print</title>
+    <style>
+      @page { size: 96mm 56mm; margin: 0; }
+      html, body { margin: 0; padding: 0; background: #fff; }
+      .pagina { width: 96mm; height: 56mm; overflow: hidden; break-after: page; position: relative; }
+      .pagina:last-child { break-after: auto; }
+      /* 960 face pixels on 96 mm: 96 mm is 362.83 CSS px, so scale 0.377953. */
+      .pagina > [data-cara] { position: absolute; left: 0; top: 0; zoom: 0.37795276; }
+    </style>
+  </head>
+  <body>
+    <main id="paginas"></main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

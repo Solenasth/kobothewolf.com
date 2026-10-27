@@ -29,5 +29,8 @@
     "scripts",
     "cli",
     "tests"
+  ],
+  "exclude": [
+    "cli/print/main.ts"
   ]
 }
