@@ -27,6 +27,8 @@ export interface StyleLists {
   arte: readonly string[];
   acentos: readonly string[];
   sombras: readonly string[];
+  /** Starting values of the shared ranges (editor.json → inicial). */
+  inicial: Readonly<Record<'rotTit' | 'anguloWashi' | 'brillitos' | 'escala', number>>;
 }
 
 export interface StoreOptions {
@@ -49,7 +51,6 @@ type GlobalKey = 'acento' | 'sombra' | 'rotTit' | 'escala' | 'anguloWashi';
 type FaceKey = 'arte' | 'fondo' | 'rotSt' | 'brillitos';
 
 const clamp = (n: number, [min, max]: Range) => Math.min(max, Math.max(min, n));
-const middle = ([min, max]: Range) => Math.round((min + max) / 2);
 
 export function createStore(options: StoreOptions) {
   const { faces, lists, ranges } = options;
@@ -70,7 +71,7 @@ export function createStore(options: StoreOptions) {
       arte: defaults.arte ?? lists.arte[0] ?? 'hueco',
       fondo: defaults.fondo,
       rotSt: authoredRot(id),
-      brillitos: Math.min(Math.max(ranges.brillitos[0], 0), maxSparks(id)),
+      brillitos: Math.min(clamp(lists.inicial.brillitos, ranges.brillitos), maxSparks(id)),
     };
   }
 
@@ -83,9 +84,9 @@ export function createStore(options: StoreOptions) {
     caras: Object.fromEntries(Object.keys(faces).map((id) => [id, defaultFace(id)])),
     acento: lists.acentos[0]!,
     sombra: lists.sombras[0]!,
-    rotTit: 0,
-    escala: 100,
-    anguloWashi: middle(ranges.washi),
+    rotTit: clamp(lists.inicial.rotTit, ranges.rotTit),
+    escala: clamp(lists.inicial.escala, ranges.escala),
+    anguloWashi: clamp(lists.inicial.anguloWashi, ranges.washi),
   };
 
   // ── validation of single values (used by actions and migration) ──

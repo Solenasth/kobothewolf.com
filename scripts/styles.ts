@@ -27,6 +27,7 @@ interface EditorLists {
   fondos: string[];
   arte: string[];
   escala: Range;
+  inicial: Readonly<Record<'rotTit' | 'anguloWashi' | 'brillitos' | 'escala', number>>;
 }
 
 type Ajv2020 = Pick<Ajv, 'getSchema'>;
@@ -57,7 +58,12 @@ export function checkStyle(ajv: Ajv2020, style: StyleData): string[] {
   }
 
   try {
-    deriveRanges(tokens.antirreglas, editor.escala);
+    const ranges = deriveRanges(tokens.antirreglas, editor.escala);
+    const rangeOf = { rotTit: ranges.rotTit, anguloWashi: ranges.washi, brillitos: ranges.brillitos, escala: ranges.escala };
+    for (const [key, [min, max]] of Object.entries(rangeOf)) {
+      const value = editor.inicial[key as keyof typeof rangeOf];
+      if (value < min || value > max) errors.push(`${style.dir}/editor.json: inicial.${key} ${value} is outside [${min}, ${max}]`);
+    }
   } catch (error) {
     errors.push(`${style.dir}/tokens.json: ${(error as Error).message}`);
   }
