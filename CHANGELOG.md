@@ -1,8 +1,6 @@
 # Changelog
 
-All notable changes, grouped by conventional-commit type. One section per release; each line is a merged PR (its title is the merge commit on `main`).
-
-## Unreleased
+All notable changes, grouped by conventional-commit type, one section per release. From v0.7.0, release-please writes the entries, one line per conventional commit ([decision 0008](docs/decisions/0008-release-please.md)). Up to v0.6.0 they were written by hand, one line per merged PR.
 
 ## v0.6.0 (2026-10-27): vector PDF
 
