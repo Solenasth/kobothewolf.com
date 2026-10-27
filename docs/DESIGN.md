@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -202,8 +202,12 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 - **Choosing faces:** front and back `<select>`s list every face of the style, labeled from the style catalog. The variant tabs follow the ARIA tabs pattern: one tab stop with arrow keys, Home and End, and a tab shows as selected only when both faces are its variant. A style `<select>` appears only when more than one style exists.
 - **Guides (FR-E10):** the cut (pink, dashed) and safe-zone (blue, dotted) guides are an overlay in the viewer, outside the face element, so an export of the face can't include them. A checkbox toggles them; they start on and aren't saved.
 - **Status (FR-E21):** the editor has one polite `role="status"` region. Store notices and later progress messages go there.
+- **Texts and pieces (FR-E3, FR-E4, FR-E11–E13):** the panel has a collapsible group for the front and one for the back, each built from the face's marks.
+  - Texts: one row per field in document order, labeled `ed.<key>`, with a show checkbox and a text box capped at 90 characters. Changes apply as you type, through `textContent` only.
+  - Pieces: one show checkbox per piece. `data-parte` groups are labeled `parte.<key>` from the style catalog; the sticker, the bow and each washi tape use app labels. An optional contact block is one piece, so it shows or hides as a whole, while its own texts stay in the text list. Locked elements have no control, since the marks never list them.
+  - "Restore" resets texts and pieces on the two faces shown and says so in the status region.
 - Native controls. Labels are app catalog keys (`editor.*`) and style catalog keys (§4), so a language switch relabels the editor without touching its state.
-- **Test hook:** P8's `window.__bk` becomes `window.__kobo`: the store, `ready()` and the face elements. It exists only in builds made with `VITE_TEST_HOOK=1` and only when the URL has `?test`. The E2E web server builds with the flag; the deploy build doesn't, and CI checks that `dist/` has no trace of it.
+- **Test hook:** P8's `window.__bk` becomes `window.__kobo`: the store, `ready()`, the face elements and their bound marks. It exists only in builds made with `VITE_TEST_HOOK=1` and only when the URL has `?test`. The E2E web server builds with the flag; the deploy build doesn't, and CI checks that `dist/` has no trace of it.
 
 ## 6. Page and profile `[FR-P1–P7]`
 - **Order:**
