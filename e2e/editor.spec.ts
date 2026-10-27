@@ -101,7 +101,7 @@ test('FR-E1 variant tabs set both faces, with the ARIA tabs keyboard pattern', a
 test('FR-E1 a face keeps its element and drawing when shown again', async ({ page }) => {
   await open(page);
   await tab(page, 'Code cat').click();
-  await expect(page.locator('[data-cara="cod-f"]')).toHaveAttribute('data-codigo', /fn main/);
+  await expect(page.locator('[data-cara="cod-f"]')).toHaveAttribute('data-codigo', /fn\s+main/);
   await page.locator('[data-cara="cod-f"]').evaluate((el) => el.setAttribute('data-marca', 'same'));
   await tab(page, 'License').click();
   await tab(page, 'Code cat').click();

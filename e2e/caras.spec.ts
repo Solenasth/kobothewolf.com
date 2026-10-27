@@ -103,7 +103,9 @@ test('FR-E7 FR-E8 default backgrounds and accent come from the data', async ({ p
 test('FR-E19 FR-E20 the code cat is drawn and its program text saved for rustc', async ({ page, browserName }) => {
   const cara = page.locator('[data-cara="cod-f"]');
   const codigo = await cara.getAttribute('data-codigo');
-  expect(codigo).toContain('fn main() {');
+  // At the larger size (#75) a line can end between two tokens, e.g. `fn` and `main`.
+  expect(codigo).toMatch(/fn\s+main\(\)\s+\{/);
+  expect(await cara.getAttribute('data-codigo-px'), 'the top of the style\'s range (#75)').toBe('10');
   expect(codigo).toMatch(/\/\* Do you\s+liek\s+mwy\s+cwode\?UwU\?!\?1\s+\*\//);
   expect(codigo!.trimEnd()).toMatch(/\*\/$/);
   expect(await page.locator('[data-cara="cod-r"]').getAttribute('data-codigo'), 'the back has nothing to draw').toBeNull();

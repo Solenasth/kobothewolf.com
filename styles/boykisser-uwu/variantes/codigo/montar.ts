@@ -1,6 +1,7 @@
 // Draws the code cat (FR-E19, FR-E20, DESIGN §5.4): the Rust program and its
 // OwO filler laid out inside the mask silhouette. The layout is in gato.ts.
-import { PROGRAMA, acomodar, dibujar, tamanoLetra, texto, tramos, unidades } from './gato';
+import tokens from '../../tokens.json';
+import { PROGRAMA, ajustar, dibujar, texto, unidades } from './gato';
 
 const ESCALA = 4; // drawn at 4× for export
 const TINTE = '#FFE4EE';
@@ -45,11 +46,9 @@ export async function montar(cara: HTMLElement): Promise<void> {
   mctx.drawImage(img, (ancho - img.width * k) / 2, (alto - img.height * k) / 2, img.width * k, img.height * k);
   const datos = mctx.getImageData(0, 0, ancho, alto);
   const rojo = new Uint8ClampedArray(ancho * alto);
-  let area = 0;
   for (let i = 0; i < rojo.length; i++) {
     const r = datos.data[i * 4]!;
     rojo[i] = r;
-    if (r > 128) area++;
     datos.data[i * 4] = datos.data[i * 4 + 1] = datos.data[i * 4 + 2] = 255;
     datos.data[i * 4 + 3] = r;
   }
@@ -60,7 +59,8 @@ export async function montar(cara: HTMLElement): Promise<void> {
   };
 
   const programa = unidades(PROGRAMA);
-  const fs = tamanoLetra(area, programa);
+  // The style's range for code drawn in a shape (DESIGN §5.4).
+  const rango = tokens.efectos_imagen.codigo_con_forma.px as [number, number];
 
   cv.style.width = `${ancho}px`;
   cv.style.height = `${alto}px`;
@@ -71,12 +71,15 @@ export async function montar(cara: HTMLElement): Promise<void> {
   ctx.globalAlpha = 0.5;
   ctx.drawImage(silueta(mask, TINTE), 0, 0, ancho, alto);
   ctx.globalAlpha = 1;
-  ctx.font = `500 ${fs}px Code`;
   ctx.textBaseline = 'middle';
-  const cw = ctx.measureText('M').width;
-
-  const runs = tramos(dentro, ancho, alto, cw, fs * 1.1);
-  const colocados = acomodar(runs, programa);
+  const avance = (size: number) => {
+    ctx.font = `500 ${size}px Code`;
+    return ctx.measureText('M').width;
+  };
+  const { fs, cw, runs, colocados } = ajustar(dentro, ancho, alto, programa, rango, avance);
+  ctx.font = `500 ${fs}px Code`;
   dibujar(ctx, colocados, runs, cw);
   cara.dataset['codigo'] = texto(colocados);
+  // The size ajustar() chose, for the tests (DESIGN §5.4).
+  cara.dataset['codigoPx'] = String(fs);
 }

@@ -10,6 +10,8 @@
 // the approved changes since P8: allowed art only ("feliz" where P8 had the
 // removed sweater) and the socks back greeting in Burbuja (#12). The guides are
 // hidden, and each face is saved at 960 × 560 to e2e/baselines/<browser>/<id>.png.
+// Faces in FROM_EDITOR are skipped: P8 can't show them as the editor now does,
+// so their baselines are screenshots of the editor (DESIGN §10).
 import { mkdirSync, readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { chromium, firefox, webkit, type BrowserType } from '@playwright/test';
@@ -23,6 +25,9 @@ const editor = JSON.parse(readFileSync(`${style}/editor.json`, 'utf8')) as {
   sombras: string[];
   inicial: { rotTit: number; anguloWashi: number; brillitos: number; escala: number };
 };
+
+/** Faces whose baselines come from the editor: the code-cat front, since its code grew (#75). */
+const FROM_EDITOR = new Set(['cod-f']);
 
 interface Face {
   id: string;
@@ -91,6 +96,7 @@ for (const [name, type] of browsers) {
       },
     );
     for (const face of [front, back]) {
+      if (FROM_EDITOR.has(face.id)) continue;
       const bleed = page.locator(`.bleed[data-cara="${face.id}"]`);
       await page.waitForFunction((id) => {
         const escala = document.querySelector(`.bleed[data-cara="${id}"]`)!.closest<HTMLElement>('.escala')!;

@@ -119,12 +119,6 @@ export function* relleno(): Generator<Unidad, never> {
   }
 }
 
-/** Font size in pixels: the program takes about a third of the cells, the rest is filler. */
-export function tamanoLetra(area: number, programa: readonly Unidad[]): number {
-  const total = programa.reduce((s, u) => s + largo(u.t), 0);
-  return Math.max(5.5, Math.min(11, Math.sqrt((area * 0.34) / (0.6 * 1.1 * total))));
-}
-
 /** Runs of cells whose middle and both edges are inside the silhouette, row by row. */
 export function tramos(dentro: (x: number, y: number) => boolean, ancho: number, alto: number, cw: number, lh: number): Tramo[] {
   const out: Tramo[] = [];
@@ -212,4 +206,37 @@ export function dibujar(ctx: Lienzo, colocados: readonly Colocado[], runs: reado
     ctx.fillStyle = p.c;
     [...p.t].forEach((ch, i) => ctx.fillText(ch, (p.col + i) * cw, runs[p.tramo]!.y));
   }
+}
+
+export interface Ajuste {
+  fs: number;
+  cw: number;
+  runs: Tramo[];
+  colocados: Colocado[];
+}
+
+/**
+ * The largest font size in the style's range, in quarter pixels from the top
+ * down, at which the whole program and its closing filler fit the silhouette
+ * (DESIGN §5.4, #75). `avance` gives a character's width at a size. Throws when
+ * nothing in the range fits.
+ */
+export function ajustar(
+  dentro: (x: number, y: number) => boolean,
+  ancho: number,
+  alto: number,
+  programa: readonly Unidad[],
+  [min, max]: readonly [number, number],
+  avance: (fs: number) => number,
+): Ajuste {
+  for (let fs = max; fs >= min - 1e-9; fs -= 0.25) {
+    const cw = avance(fs);
+    const runs = tramos(dentro, ancho, alto, cw, fs * 1.1);
+    try {
+      return { fs, cw, runs, colocados: acomodar(runs, programa) };
+    } catch {
+      // Too big at this size: try a quarter pixel smaller.
+    }
+  }
+  throw new Error(`code cat: the program does not fit at any size from ${min} to ${max} px`);
 }
