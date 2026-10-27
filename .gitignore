@@ -7,3 +7,4 @@ test-results/
 playwright-report/
 src/core/generated/
 dist-e2e/
+/exports/

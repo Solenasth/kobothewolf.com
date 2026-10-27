@@ -23,7 +23,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check:playwright-image": "node scripts/check-playwright-image.ts",
-    "kobo": "node cli/kobo.ts"
+    "kobo": "node cli/kobo.ts",
+    "exports:render": "playwright test -c playwright.exports.config.ts"
   },
   "dependencies": {
     "html-to-image": "1.11.13",
