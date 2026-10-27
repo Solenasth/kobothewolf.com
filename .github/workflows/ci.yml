@@ -29,6 +29,9 @@ jobs:
       - run: npm run validate
       - run: npm test
       - run: npm run build
+      # DESIGN §5.6: the E2E test hook is compiled in only with VITE_TEST_HOOK=1.
+      - name: No test hook in the deploy build
+        run: "! grep -rl __kobo dist"
       - run: npm audit
 
   e2e:
