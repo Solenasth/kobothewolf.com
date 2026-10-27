@@ -8,6 +8,8 @@ export interface VariantData {
   dir: string;
   manifest: unknown;
   html?: string;
+  /** File names in the variant's folder. */
+  files?: readonly string[];
 }
 
 export interface StyleData {
@@ -74,8 +76,16 @@ function checkVariant(ajv: Ajv2020, variant: VariantData, editor: EditorLists, a
   const errors = check(ajv, 'variant', `${variant.dir}/variant.json`, variant.manifest);
   if (errors.length > 0) return errors;
 
-  const manifest = variant.manifest as { id: string; caras: { frente: string; reverso: string }; fondo: { frente: string; reverso: string } };
+  const manifest = variant.manifest as {
+    id: string;
+    caras: { frente: string; reverso: string };
+    fondo: { frente: string; reverso: string };
+    montar?: string;
+  };
   if (manifest.id !== id) errors.push(`${variant.dir}/variant.json: id "${manifest.id}" must match the folder "${id}"`);
+  if (manifest.montar !== undefined && !variant.files?.includes(manifest.montar)) {
+    errors.push(`${variant.dir}/variant.json: montar "${manifest.montar}" is not a file in the folder`);
+  }
   for (const side of ['frente', 'reverso'] as const) {
     const fondo = manifest.fondo[side];
     if (!editor.fondos.includes(fondo)) errors.push(`${variant.dir}/variant.json: fondo.${side} "${fondo}" is not in editor.json fondos`);

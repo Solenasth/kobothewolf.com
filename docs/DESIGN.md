@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-26 (rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-26 (rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -47,7 +47,7 @@
 │   ├── tokens.json  STYLE.md  caras.css  editor.json
 │   ├── i18n/{en,es}.json        labels: fields, pieces, variants, backgrounds, colors, art
 │   ├── variantes/{certificado,licencia,codigo,socks}/
-│   │     variant.json  caras.html  caras.css  [montar.ts]
+│   │     variant.json  caras.html  caras.css  [montar.ts]  (codigo also has gato.ts)
 │   └── assets/                  stickers, QR, masks (PNG files, metadata stripped)
 ├── schemas/  cli/  tests/       (fonts: src/theme/fonts/, each with its OFL license)
 ├── docs/   REQUIREMENTS.md  DESIGN.md  decisions/  origin/  marcas.md  agregar-variante.md
@@ -90,7 +90,7 @@ These are the lists P8 hard-coded. They hold keys only; display names come from 
 The other ranges are derived from `tokens.json` → `antirreglas`, so there is only one source of truth (FR-E9): `rotSt` ← `rotacion_stickers_grados`, `rotTit` ← `rotacion_titulares_grados`, `washi` ← `washi.grados`, `brillitos` ← `brillitos.por_cara` (the editor also caps it at the face's sparkle count). The sticker scale has no anti-rule, so it lives in `editor.json`. Every accent and shadow must be one of the style's `color` tokens. `"sueter"` is removed, and the Programming socks front defaults to `"feliz"` (D-3).
 
 ### 3.4 Variant manifest and faces
-As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). Names are catalog keys (`variant.licencia.name`). Two more fields:
+As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). That is the only value it takes, so the build finds every mount script with one glob. Names are catalog keys (`variant.licencia.name`). Two more fields:
 - `orden` (integer, optional): position in the variant tabs. Variants sort by `orden`, then by `id`, so adding one never means editing a list elsewhere (FR-E18).
 - There is no `nombre`: the label is `variant.<id>.name` in the style catalogs.
 
@@ -101,7 +101,7 @@ As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). Names are catalog keys (`
 - Art key `k` is the file `assets/st-<k>.png`. A face's default art is the key its `data-arte` image shows; `"feliz"` replaces P8's `"sueter"` (decision 0003).
 - Variant CSS needs no id prefixes (`#lic-f .foto` in P8 is `.foto` here): the build scopes it to the variant's two faces (§5.1).
 
-**Loading:** `src/core/variants.ts` `collectVariants(files)` turns the globbed files (manifests, faces HTML) into the list of styles and their variants, sorted as above, and rejects a variant with a missing file. It is pure, so a unit test feeds it a fixture variant and shows the editor needs no change to pick one up (FR-E18).
+**Loading:** `src/core/variants.ts` `collectVariants(files)` turns the globbed files (manifests, faces HTML, mount scripts) into the list of styles and their variants, sorted as above, and rejects a variant with a missing file, including a `montar` script its manifest names. Mount scripts are lazy imports, so a variant's code loads only when one of its faces is shown. It is pure, so a unit test feeds it a fixture variant and shows the editor needs no change to pick one up (FR-E18).
 
 ### 3.5 Document (`.kobo.json`), version 1
 EV §3.5 with these changes:
@@ -169,8 +169,16 @@ Recorded in [`0006-css-scoping-not-shadow-dom.md`](decisions/0006-css-scoping-no
 
 ### 5.4 Code-cat face `[FR-E19, FR-E20]`
 P8's `gato()` moves to `variantes/codigo/montar.ts`, exporting `async function montar(cara: HTMLElement): Promise<void>`.
+- **Contract (FR-E19):** the editor calls a variant's `montar` once for each of its faces after inserting it, and again whenever the face is rebuilt. The promise resolves when the face is fully drawn, and export waits for it. A face with nothing to draw (here `cod-r`, which has no `<canvas data-mask>`) resolves at once. Calling it again redraws from scratch.
+- **Layout (FR-E20):** the pure part lives next to it in `gato.ts`, with no DOM, so vitest covers it:
+  - `unidades()` cuts the program into tokens that never break across lines. Strings are one token; comments break only at spaces.
+  - `tramos()` finds each row's runs of whole character cells inside the mask.
+  - `acomodar()` places the program greedily, then filler: a closed `/* Do you liek mwy cwode?UwU?!?1 */` and one `/* … */` of OwO faces and phrases, whose last word becomes its `*/`. It throws if the program doesn't fit.
+  - `texto()` gives the plain text, one line per run, and `dibujar()` draws it one character at a time, so JetBrains Mono ligatures (`->`) never form.
+- The font size is chosen so the program fills about a third of the silhouette, as in P8. The canvas is drawn at 4× for export.
 - The program text is written to `cara.dataset.codigo`.
 - The mask is a same-origin PNG, so the canvas isn't tainted.
+- **Compiles (FR-E20):** the faces E2E test saves `cara.dataset.codigo` from each browser, since font metrics can change the layout. The CI `rustc` job compiles each with Rust 1.99.1 (pinned), `--edition 2021 -D warnings`, and runs it.
 
 ### 5.5 Export pipeline `[FR-E14, FR-E15, NFR-2]`
 ```
@@ -219,6 +227,7 @@ PDF: two PNGs ─► jsPDF {unit:'mm', format:[96,56], landscape} ─► Blob �
 - A catalog key missing in any language.
 - A style label missing for a key the style uses: every `data-ed` and `data-parte` value, variant and face id, and `editor.json` background, color and art. A label for a key nothing uses is also an error, so catalogs don't go stale.
 - A variant whose default backgrounds aren't in `editor.json` → `fondos`.
+- A variant whose `montar` names a file that isn't in its folder.
 - A face image or mask path that isn't `assets/<file>` of an existing file in the style, a `data-arte` image that isn't `assets/st-<key>.png` for an `editor.json` art key, or an art key without its file.
 - An asset file (under `styles/*/assets/`, `src/theme/fonts/` or `public/`) that is neither listed by path in `CREDITS.md` nor has a `LICENSE-<name>.txt` next to it.
 - A committed PNG with any chunk besides `IHDR`, `PLTE`, `tRNS`, `IDAT` and `IEND`. Text, EXIF and C2PA (`caBX`) metadata can carry personal details or tool credentials. Only pixel data is published.
@@ -254,7 +263,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 | Controls | Playwright with real clicks | **every** text and piece checkbox on every face hides and restores its element; every select and range driven through the UI (EV §8). Runs in both languages, because labels change and keys must not |
 | Visual | Playwright screenshots | default faces against baselines generated from P8 with allowed art only (NFR-1) |
 | Export | `kobo check-exports` | PNG and PDF from every variant, rendered in Chromium **and WebKit** |
-| Code cat | `rustc --edition 2021` (pinned) | the extracted text compiles with no warnings |
+| Code cat | `rustc --edition 2021 -D warnings`, Rust 1.99.1 | the text extracted in each browser compiles with no warnings and runs (§5.4) |
 | A11y | `@axe-core/playwright` | profile and panel, ES and EN: no serious or critical violations |
 
 - **`ci.yml`** runs on every PR: `npm ci` → typecheck → validate → unit → build → E2E matrix → export checks → rustc → `npm audit` → gitleaks. Exports are uploaded as workflow artifacts.
@@ -262,7 +271,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.
 - **Fixture pages:** behavior that needs a real browser but must not ship, such as CSS scoping with deliberately conflicting variants, is tested on fixture pages under `e2e/fixtures/`. They're built by their own Vite config with the same plugins and served by a second Playwright web server, so the production build stays unchanged.
   - `scoping/`: two conflicting demo variants (§5.1).
-  - `caras/`: every real face from every style, mounted through `src/styles.ts` with its default background. Each face is 960 × 560, every image loads from the origin, no console errors, and each face renders at most `max_fuentes_por_cara` fonts. The visual baselines against P8 come with the editor preview (#14).
+  - `caras/`: every real face from every style, mounted through `src/styles.ts` with its default background. Each face is 960 × 560, every image loads from the origin, no console errors, and each face renders at most `max_fuentes_por_cara` fonts. The page awaits each variant's `montar`, so the code cat is drawn and its text saved for the `rustc` job. The visual baselines against P8 come with the editor preview (#14).
 - Tests name their requirement IDs.
 
 ## 11. Dependencies `[NFR-10]`

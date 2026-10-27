@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { fixturePort } from '../playwright.config';
 
@@ -98,4 +98,29 @@ test('FR-E7 FR-E8 default backgrounds and accent come from the data', async ({ p
   expect(await bg('cod-f')).toBe('rgb(255, 248, 238)'); // crema
   expect(await bg('soc-f')).toBe('rgb(255, 228, 238)'); // algodon
   expect(await page.locator('[data-cara="cer-f"] .nombre').evaluate((el) => getComputedStyle(el).color)).toBe('rgb(255, 143, 184)');
+});
+
+test('FR-E19 FR-E20 the code cat is drawn and its program text saved for rustc', async ({ page, browserName }) => {
+  const cara = page.locator('[data-cara="cod-f"]');
+  const codigo = await cara.getAttribute('data-codigo');
+  expect(codigo).toContain('fn main() {');
+  expect(codigo).toMatch(/\/\* Do you\s+liek\s+mwy\s+cwode\?UwU\?!\?1\s+\*\//);
+  expect(codigo!.trimEnd()).toMatch(/\*\/$/);
+  expect(await page.locator('[data-cara="cod-r"]').getAttribute('data-codigo'), 'the back has nothing to draw').toBeNull();
+
+  const canvas = await cara.locator('canvas').evaluate((cv: HTMLCanvasElement) => {
+    const { data } = cv.getContext('2d')!.getImageData(0, 0, cv.width, cv.height);
+    let ink = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i]! > 0) ink++;
+    const box = cv.getBoundingClientRect();
+    return { width: cv.width, height: cv.height, box: [box.width, box.height], ink: ink / (cv.width * cv.height) };
+  });
+  expect([canvas.width, canvas.height], 'drawn at 4×').toEqual([1840, 1824]);
+  expect(canvas.box, 'shown at the authored size').toEqual([460, 456]);
+  expect(canvas.ink, 'the silhouette and its text are painted').toBeGreaterThan(0.3);
+  expect(problems).toEqual([]);
+
+  // The CI rustc job compiles each browser's text (DESIGN §5.4).
+  mkdirSync('test-results/code-cat', { recursive: true });
+  writeFileSync(`test-results/code-cat/${browserName}.rs`, `${codigo}\n`);
 });

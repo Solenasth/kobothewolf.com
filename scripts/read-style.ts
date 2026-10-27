@@ -28,6 +28,7 @@ export function readStyle(dir: string): StyleData {
       dir: v,
       manifest: readJson(join(v, 'variant.json')),
       ...(existsSync(join(v, 'caras.html')) ? { html: readFileSync(join(v, 'caras.html'), 'utf8') } : {}),
+      files: readdirSync(v),
     })),
     assets: existsSync(assets) ? readdirSync(assets).filter((f) => !f.startsWith('.')) : [],
   };
