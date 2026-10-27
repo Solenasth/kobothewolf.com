@@ -32,6 +32,9 @@ jobs:
       # DESIGN §5.6: the E2E test hook is compiled in only with VITE_TEST_HOOK=1.
       - name: No test hook in the deploy build
         run: "! grep -rl __kobo dist"
+      # DESIGN §5.5: jsPDF's optional html2canvas, DOMPurify and canvg stay out of the bundle.
+      - name: No jsPDF optional modules in the build
+        run: if ls dist/assets | grep -E '^(html2canvas|purify)' || grep -l Canvg dist/assets/*.js; then exit 1; fi
       - run: npm audit
 
   e2e:
