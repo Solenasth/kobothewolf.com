@@ -25,6 +25,7 @@ MIT, like the code (see `LICENSE`).
 | `styles/boykisser-uwu/assets/qr-sitio-kobothewolf.png` | QR code for https://kobothewolf.com |
 | `styles/boykisser-uwu/assets/qr-telegram-KoboTheWolf.png` | QR code for https://t.me/KoboTheWolf |
 | `public/favicon.svg` | Heart icon |
+| `public/og-image.png` | Open Graph image: the default Certificate card, made in the editor by `scripts/site-images.ts`. It shows the `st-licencia.png` sticker credited above |
 
 ## Fonts
 SIL Open Font License 1.1. Each license sits next to its file in `src/theme/fonts/`.
