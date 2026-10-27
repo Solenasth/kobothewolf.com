@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vitest/config';
 import en from './src/i18n/en.json' with { type: 'json' };
 import { fillStaticHtml } from './src/i18n/static-html.ts';
@@ -36,8 +37,14 @@ function contentSecurityPolicy(): Plugin {
   };
 }
 
+// jsPDF's optional modules, used only by features the export doesn't use (DESIGN §5.5).
+const noOptional = fileURLToPath(new URL('./src/core/export/no-optional.ts', import.meta.url));
+
 export default defineConfig({
   appType: 'mpa',
+  resolve: {
+    alias: { html2canvas: noOptional, dompurify: noOptional, canvg: noOptional },
+  },
   plugins: [scopeFaceCss(), staticI18n(), contentSecurityPolicy()],
   oxc: {
     jsx: { runtime: 'automatic', importSource: 'preact' },
