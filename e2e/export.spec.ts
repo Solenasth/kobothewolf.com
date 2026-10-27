@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 
 // PNG export (FR-E14, FR-E15, NFR-2, DESIGN §5.5).
@@ -71,7 +71,7 @@ function inkRatio(page: Page, bytes: Buffer, box: { x: number; y: number; w: num
   );
 }
 
-test('FR-E14 NFR-2 each face downloads as a 1134 × 661 PNG at 300 dpi, quickly', async ({ page }) => {
+test('FR-E14 NFR-2 each face downloads as a 1134 × 661 PNG at 300 dpi, quickly', async ({ page, browserName }) => {
   await open(page);
   for (const [button, name] of [
     ['#ed-png-frente', 'certified-bug-nuzzler-front-300dpi.png'],
@@ -84,6 +84,9 @@ test('FR-E14 NFR-2 each face downloads as a 1134 × 661 PNG at 300 dpi, quickly'
     expect(info.phys).toEqual({ x: 11811, y: 11811, unit: 1 }); // 300 dpi
     await expect(page.locator('#editor [role="status"]')).toHaveText(`Saved ${name}.`);
     test.info().annotations.push({ type: 'export time', description: `${name}: ${file.ms} ms` });
+    // CI adds these to the job summary (NFR-2 asks for the time to be reported).
+    mkdirSync('test-results/export-times', { recursive: true });
+    appendFileSync(`test-results/export-times/${browserName}.txt`, `- ${browserName}, ${name}: ${file.ms} ms\n`);
     expect(file.ms, 'NFR-2: one face in under 3 s').toBeLessThan(3000);
   }
   expect(problems).toEqual([]);
