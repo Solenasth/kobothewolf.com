@@ -17,7 +17,7 @@ History is the audit trail. Rewriting it erases what happened, breaks other clon
 - Tidy commits **only before their first push**: `git commit --fixup` plus a local `git rebase --autosquash`. Once pushed, commits are final.
 - Never run `git push --force` or `--force-with-lease`. Where the host allows it, block force-pushes and branch deletion on `main` (ruleset or branch protection).
 - Land PRs with **merge commits**, so the branch's individual commits survive on `main`. Disable squash and rebase merges.
-- Project exception (this repo only, [decision 0008](../docs/decisions/0008-release-please.md)): release-please force-updates its own release branch, `release-please--branches--main`. No person commits there, and only its final state reaches `main`, through a reviewed merge commit.
+- Project exception (this repo only, [decision 0008](../docs/decisions/0008-release-please.md)): release-please force-updates its own release branch, `release-please--branches--main--components--kobothewolf.com`. No person commits there, and only its final state reaches `main`, through a reviewed merge commit.
 - Exception: a leaked secret. Rotate it first; rewriting history then needs the user's explicit OK for that specific case.
 
 ## Verification

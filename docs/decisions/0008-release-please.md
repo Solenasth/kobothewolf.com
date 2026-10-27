@@ -15,10 +15,12 @@ Option 3. `googleapis/release-please-action` runs on every push to `main`, pinne
 
 Two trade-offs are accepted:
 - **Tags aren't signed by Kobo's key.** The app creates them through the API. The release commit is created by the app with no custom author, so GitHub signs it and it shows as Verified, which the "signed commits" rule requires.
-- **The release branch is force-updated.** release-please rebuilds `release-please--branches--main` from `main` and force-updates it each time it refreshes the release PR, which `preserve-history` forbids on every branch. This is a narrow exception for that bot branch only: no person commits there, its earlier states were never merged, and only its final state reaches `main`, through a reviewed merge commit. Every other branch keeps the rule.
+- **The release branch is force-updated.** release-please rebuilds `release-please--branches--main--components--kobothewolf.com` from `main` and force-updates it each time it refreshes the release PR, which `preserve-history` forbids on every branch. This is a narrow exception for that bot branch only: no person commits there, its earlier states were never merged, and only its final state reaches `main`, through a reviewed merge commit. Every other branch keeps the rule.
 
 ## Consequences
 - **Release cadence:** one release per milestone stays the rule (FR-R7). The release PR collects changes as PRs merge, and Kobo merges it at the milestone's end.
 - **No more manual steps** for the version bump, changelog entry, tag and GitHub release. The deploy check after a release stays manual.
 - **Changelog style:** entries are one line per conventional commit on `main`, so a PR shows as its merge commit (the PR title) and as its own commits. Entries v0.1.0–v0.6.0 stay as written.
+- **Amended 2026-10-27 (#68): Release Please is credited in its own release PRs.** The PR header and footer are written in the card style's voice and credit Release Please with a link. Merge commits copy PR descriptions, so the credit also reaches `main` in each release merge commit. That's a second narrow exception, to the project's no-tool-attribution rule in CONTRIBUTING. Release Please is a tool, not AI, so the global no-attribution policy is unaffected. Every other commit, PR, tag and release note stays credit-free.
+- **Issue references:** release-please renders a commit's `Refs #n` as "closes #n" in the changelog. That's its wording; it can't be configured.
 - **The app's private key** lives only in the `RELEASE_APP_PRIVATE_KEY` secret. If it's exposed, Kobo generates a new key on the app's page and deletes the old one.

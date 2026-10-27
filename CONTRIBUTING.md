@@ -77,7 +77,7 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 ## 10. Authorship (hard)
 [`no-attribution`](policies/no-attribution.md)
 - The maintainer is the sole author of record. Commits use the maintainer's git identity.
-- Commits, PRs, tags, release notes and file headers carry no AI or tool attribution: no `Co-Authored-By` trailers for tools and no "generated with" lines.
+- Commits, PRs, tags, release notes and file headers carry no AI or tool attribution: no `Co-Authored-By` trailers for tools and no "generated with" lines. The one exception is release-please's own release PRs and their merge commits, which credit Release Please ([decision 0008](docs/decisions/0008-release-please.md)).
 - AI assistance is part of this repo's workflow and is documented openly in [`CLAUDE.md`](CLAUDE.md) and `policies/`. It just isn't credited as an author.
 
 ## 11. Preserve history (hard)
@@ -94,7 +94,7 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - Each milestone in [DESIGN §14](docs/DESIGN.md) is a GitHub milestone.
 - Each milestone ends in a SemVer tag (`v0.1.0` = M1, …), a GitHub release, and a `CHANGELOG.md` entry grouped by commit type.
 - release-please makes them ([decision 0008](docs/decisions/0008-release-please.md)). It keeps a release PR (`chore(release): v…`) open with the next version and changelog entry, updated as PRs merge. Merge it at the milestone's end. release-please then tags and publishes the release; check the deploy afterwards.
-- Never commit to the release PR's branch (`release-please--branches--main`): release-please rebuilds and force-updates it, the one exception to `preserve-history`.
+- Never commit to the release PR's branch (`release-please--branches--main--components--kobothewolf.com`): release-please rebuilds and force-updates it, the one exception to `preserve-history`.
 
 ## Local setup
 Requires the Node version in [`.nvmrc`](.nvmrc) (`nvm use`).
