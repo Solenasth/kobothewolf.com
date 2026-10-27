@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import type { FaceState } from './document';
 import { LIC_F, LIC_R } from './fixtures';
 import { bindMarks, readMarks } from './marks';
-import { HIDDEN_FIELD, HIDDEN_PIECE, paintFace } from './paint';
+import { HIDDEN_FIELD, HIDDEN_PIECE, paintFace, paintLook, type Look } from './paint';
 import { FakeElement, fakeFaceFrom } from './parse5-element';
 
 const created: FakeElement[] = [];
@@ -18,7 +19,7 @@ function setup(html: string, id: string) {
   return { face, marks: readMarks(face), bound: bindMarks(face) };
 }
 
-const state = (over: Partial<{ textos: Record<string, string>; ocultosEd: number[]; ocultasPiezas: string[] }> = {}) => ({
+const state = (over: Partial<Required<FaceState>> = {}): Required<FaceState> => ({
   textos: {},
   ocultosEd: [],
   ocultasPiezas: [],
@@ -86,5 +87,54 @@ describe('FR-E3 FR-E4 paint applies visibility', () => {
       (el) => el.getAttribute(HIDDEN_FIELD) !== null || el.getAttribute(HIDDEN_PIECE) !== null,
     );
     expect(flagged).toEqual([]);
+  });
+});
+
+const look: Look = { acento: '#8EC5FF', sombra: '#CDB4DB', rotTit: -2, escala: 110, anguloWashi: 14 };
+const urls: Record<string, string> = { feliz: '/assets/st-feliz-x.png', clik: '/assets/st-clik-y.png' };
+
+describe('FR-E5 FR-E7 FR-E8 FR-E9 paintLook applies the rest of the face state', () => {
+  it('sets the background class, replacing the previous one, and the colors on the root', () => {
+    const { face, marks, bound } = setup(LIC_F, 'lic-f');
+    face.classList.add('fondo-crema');
+    paintLook(face, marks, bound, state({ fondo: 'gingham' }), look, (k) => urls[k]);
+    expect([...face.classList].filter((c) => c.startsWith('fondo-'))).toEqual(['fondo-gingham']);
+    expect(face.style.props).toEqual(new Map([['--acento', '#8EC5FF'], ['--sombra', '#CDB4DB']]));
+  });
+
+  it('points the art at the chosen sticker and scales it; a rotating sticker keeps its own angle', () => {
+    const front = setup(LIC_F, 'lic-f');
+    paintLook(front.face, front.marks, front.bound, state(), look, (k) => urls[k]);
+    const frontArt = front.bound.pieces.get('arte')![0]!;
+    expect(frontArt.getAttribute('src')).toBe('/assets/st-feliz-x.png');
+    expect(frontArt.style.transform).toBe('scale(1.1)');
+
+    const back = setup(LIC_R, 'lic-r');
+    paintLook(back.face, back.marks, back.bound, state({ arte: 'clik', rotSt: -7 }), look, (k) => urls[k]);
+    expect(back.bound.pieces.get('arte')![0]!.style.transform).toBe('rotate(-7deg) scale(1.1)');
+  });
+
+  it('leaves the image alone for an art key without a URL (placeholder and own sticker come with #16)', () => {
+    const { face, marks, bound } = setup(LIC_F, 'lic-f');
+    paintLook(face, marks, bound, state({ arte: 'hueco' }), look, (k) => urls[k]);
+    expect(bound.pieces.get('arte')![0]!.getAttribute('src')).toBeNull();
+  });
+
+  it('rotates headlines to the shared angle and each washi by the shared angle with its authored sign', () => {
+    const { face, marks, bound } = setup(LIC_F, 'lic-f');
+    paintLook(face, marks, bound, state(), look, (k) => urls[k]);
+    expect(bound.rotations.map((el) => el.style.transform)).toEqual(['rotate(-2deg)']);
+    expect([bound.pieces.get('washi-1')![0]!.style.transform, bound.pieces.get('washi-2')![0]!.style.transform]).toEqual([
+      'rotate(-14deg)',
+      'rotate(14deg)',
+    ]);
+  });
+
+  it('shows only as many sparkles as the face state asks for', () => {
+    const { face, marks, bound } = setup(LIC_F, 'lic-f');
+    paintLook(face, marks, bound, state({ brillitos: 2 }), look, (k) => urls[k]);
+    expect(bound.sparks.map((el) => el.style.display)).toEqual(['', '', 'none']);
+    paintLook(face, marks, bound, state({ brillitos: 3 }), look, (k) => urls[k]);
+    expect(bound.sparks.map((el) => el.style.display)).toEqual(['', '', '']);
   });
 });

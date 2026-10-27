@@ -73,6 +73,8 @@ export interface BoundMarks<E extends MarkElement> {
   fields: E[];
   pieces: Map<string, E[]>;
   sparks: E[];
+  /** One per FaceMarks.rotations entry. */
+  rotations: E[];
 }
 
 /** Reads the marks of one face root (the element with data-cara). */
@@ -86,7 +88,7 @@ export function bindMarks<E extends MarkElement>(face: E): BoundMarks<E> {
 }
 
 function scan<E extends MarkElement>(face: E): { marks: FaceMarks; bound: BoundMarks<E> } {
-  const bound: BoundMarks<E> = { fields: [], pieces: new Map(), sparks: [] };
+  const bound: BoundMarks<E> = { fields: [], pieces: new Map(), sparks: [], rotations: [] };
   const bind = (key: string, el: E) => bound.pieces.set(key, [...(bound.pieces.get(key) ?? []), el]);
   const fields: TextField[] = [];
   const partes = new Map<string, { count: number; contact: boolean }>();
@@ -133,6 +135,7 @@ function scan<E extends MarkElement>(face: E): { marks: FaceMarks; bound: BoundM
     const rot = el.getAttribute('data-rot');
     if (rot === 'st' || rot === 'tit') {
       rotations.push({ kind: rot, degrees: angle(el.getAttribute('style'), /rotate\((-?[\d.]+)deg\)/) });
+      bound.rotations.push(el);
     }
 
     if (el.getAttribute('data-lazo') !== null) {
