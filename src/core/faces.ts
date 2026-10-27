@@ -3,10 +3,16 @@
 // comes through here. Template content is inert: no scripts run and nothing
 // loads until a face is inserted into the document.
 
-/** Parses `html` and returns its face roots by `data-cara` id, in document order. */
+import { escalarFuentes } from './fuentes';
+
+/**
+ * Parses `html` and returns its face roots by `data-cara` id, in document order.
+ * Inline font sizes follow each section's --tam, as the face CSS does (FR-E22).
+ */
 export function parseFaces(html: string, doc: Document = document): Map<string, HTMLElement> {
   const template = doc.createElement('template');
   template.innerHTML = html;
+  for (const el of template.content.querySelectorAll('[style]')) el.setAttribute('style', escalarFuentes(el.getAttribute('style')!));
   const faces = new Map<string, HTMLElement>();
   for (const face of template.content.querySelectorAll<HTMLElement>('[data-cara]')) {
     const id = face.dataset['cara']!;

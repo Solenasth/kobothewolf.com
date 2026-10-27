@@ -40,6 +40,8 @@
   "editor.piece.lazo": "Moño",
   "editor.piece.washi": "Cinta washi {n}",
   "editor.look": "Arte, fondo y brillitos",
+  "editor.textSize": "Tamaño del texto por sección",
+  "editor.textSize.reset": "Restablecer tamaños",
   "editor.art": "Arte",
   "editor.art.placeholder": "[ tu gatito aquí ]",
   "editor.art.own": "Tu imagen",

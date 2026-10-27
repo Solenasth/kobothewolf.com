@@ -56,7 +56,10 @@ export function shadowsToDivs(root: HTMLElement): () => void {
     const layers = parseShadows(cs.boxShadow);
     if (!layers.length || layers.some((l) => l.inset || l.blur > 0)) continue;
 
-    const style = el.getAttribute('style');
+    // Undo restores only what this changes. Restoring the whole style attribute
+    // would also undo anything painted while a render ran, such as a text size
+    // set mid-export (#73).
+    const saved = (['position', 'box-shadow'] as const).map((name) => [name, el.style.getPropertyValue(name), el.style.getPropertyPriority(name)] as const);
     if (cs.position === 'static') el.style.position = 'relative';
     const radii = [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius].map((r) =>
       r.split(' ').map(parseFloat),
@@ -77,8 +80,11 @@ export function shadowsToDivs(root: HTMLElement): () => void {
     el.style.setProperty('box-shadow', 'none', 'important');
     undo.push(() => {
       holder.remove();
-      if (style === null) el.removeAttribute('style');
-      else el.setAttribute('style', style);
+      for (const [name, value, priority] of saved) {
+        if (value) el.style.setProperty(name, value, priority);
+        else el.style.removeProperty(name);
+      }
+      if (el.getAttribute('style') === '') el.removeAttribute('style');
     });
   }
   return () => undo.reverse().forEach((f) => f());

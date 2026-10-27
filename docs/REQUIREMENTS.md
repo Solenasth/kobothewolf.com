@@ -1,6 +1,6 @@
 # Requirements: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-27 (rev. 9: FR-P12, #66; rev. 8: FR-P11, #65; rev. 7: FR-B3 contact rule applies to back faces, #5; rev. 6: FR-P8, #30; rev. 5: FR-P1, #4; rev. 4: FR-R6, #24)
+**Status:** Approved 2026-10-27 (rev. 10: FR-E22, #73; rev. 9: FR-P12, #66; rev. 8: FR-P11, #65; rev. 7: FR-B3 contact rule applies to back faces, #5; rev. 6: FR-P8, #30; rev. 5: FR-P1, #4; rev. 4: FR-R6, #24)
 **Companion:** [DESIGN.md](DESIGN.md) · decisions in [decisions/](decisions/)
 **Inputs** (historical, superseded by this document; redacted copies go in `docs/origin/`, FR-R2):
 - **GP:** "Port the variant editor to GitHub Pages", the minimal single-file port.
@@ -93,6 +93,7 @@ The site is a freelance showcase on two levels:
 | FR-E19 | Variants with their own logic declare a `montar()` script that resolves when ready. Export waits for it. `[EV FR-13]` |
 | FR-E20 | The code-cat face lays out the Rust program inside the silhouette without splitting tokens, fills the rest with closed `/* … */` comments, and draws letter by letter (no ligatures). The extracted text compiles. `[EV §6.4, P8]` |
 | FR-E21 | Status and progress messages are announced through a polite live region. `[P8]` |
+| FR-E22 | Each face's text can be resized per section (a few groups of related texts, defined by the style), within a range set by the style's anti-rules. Locked contact elements keep their size. Sizes are saved per face in the document and reach every export. |
 
 ### 5.4 Build and CLI (FR-B)
 | ID | Requirement |

@@ -258,3 +258,51 @@ describe('FR-E17 open and save .kobo.json', () => {
     expect(store.document.artePropio).toBeUndefined();
   });
 });
+
+describe('FR-E22 text size per section', () => {
+  it('sets a section\'s size, clamped to the style\'s range, and forgets 100 %', () => {
+    const { store } = make();
+    store.setSectionSize('lic-r', 'firma', 112);
+    store.setSectionSize('lic-r', 'titulo', 200);
+    store.setSectionSize('lic-r', 'firma', 90.4);
+    expect(store.face('lic-r').tamanos).toEqual({ firma: 90, titulo: 115 });
+    store.setSectionSize('lic-r', 'titulo', 100);
+    expect(store.face('lic-r').tamanos).toEqual({ firma: 90 });
+  });
+
+  it('ignores sections the face doesn\'t have, and resets one face only', () => {
+    const { store } = make();
+    store.setSectionSize('lic-r', 'campos', 110); // a front section
+    store.setSectionSize('lic-f', 'campos', 110);
+    store.setSectionSize('lic-r', 'firma', 110);
+    expect(store.face('lic-r').tamanos).toEqual({ firma: 110 });
+    store.resetSizes('lic-r');
+    expect(store.face('lic-r').tamanos).toEqual({});
+    expect(store.face('lic-f').tamanos).toEqual({ campos: 110 });
+  });
+
+  it('round-trips through the document, dropping unknown sections and clamping the rest', async () => {
+    const { store } = make();
+    const sizes = store.face('lic-r').tamanos;
+    store.setSectionSize('lic-r', 'firma', 87);
+    const text = store.exportText();
+    const other = make().store;
+    expect(await other.importText(text)).toEqual({ ok: true });
+    expect(other.face('lic-r').tamanos).toEqual({ firma: 87 });
+
+    const doc = JSON.parse(text);
+    doc.caras['lic-r'].tamanos = { firma: 300, nada: 110, titulo: 100 };
+    expect(await store.importText(JSON.stringify(doc))).toEqual({ ok: true });
+    expect(store.face('lic-r').tamanos).toEqual({ firma: 115 });
+    expect(store.face('lic-r').tamanos, 'same object (DESIGN §5.2)').toBe(sizes);
+  });
+
+  it('the schema refuses sizes that aren\'t numbers or are far out of bounds', async () => {
+    const { store } = make();
+    const doc = JSON.parse(store.exportText());
+    doc.caras['lic-r'].tamanos = { firma: 'big' };
+    expect((await store.importText(JSON.stringify(doc))).ok).toBe(false);
+    doc.caras['lic-r'].tamanos = { firma: 9999 };
+    expect((await store.importText(JSON.stringify(doc))).ok).toBe(false);
+  });
+});

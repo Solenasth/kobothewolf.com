@@ -50,6 +50,8 @@ export interface FaceMarks {
   art?: 'frente' | 'reverso';
   rotations: Rotation[];
   sparks: number;
+  /** Section keys (`data-seccion`) in document order, each once (FR-E22). */
+  sections: string[];
 }
 
 const classesOf = (el: MarkElement) => (el.getAttribute('class') ?? '').split(/\s+/).filter(Boolean);
@@ -77,6 +79,8 @@ export interface BoundMarks<E extends MarkElement> {
   sparks: E[];
   /** One per FaceMarks.rotations entry. */
   rotations: E[];
+  /** Each section's elements: a section can span several. */
+  sections: Map<string, E[]>;
 }
 
 /** Reads the marks of one face root (the element with data-cara). */
@@ -90,7 +94,7 @@ export function bindMarks<E extends MarkElement>(face: E): BoundMarks<E> {
 }
 
 function scan<E extends MarkElement>(face: E): { marks: FaceMarks; bound: BoundMarks<E> } {
-  const bound: BoundMarks<E> = { fields: [], pieces: new Map(), sparks: [], rotations: [] };
+  const bound: BoundMarks<E> = { fields: [], pieces: new Map(), sparks: [], rotations: [], sections: new Map() };
   const bind = (key: string, el: E) => bound.pieces.set(key, [...(bound.pieces.get(key) ?? []), el]);
   const fields: TextField[] = [];
   const partes = new Map<string, { count: number; contact: boolean }>();
@@ -134,6 +138,9 @@ function scan<E extends MarkElement>(face: E): { marks: FaceMarks; bound: BoundM
       bind('arte', el);
     }
 
+    const seccion = el.getAttribute('data-seccion');
+    if (seccion !== null) bound.sections.set(seccion, [...(bound.sections.get(seccion) ?? []), el]);
+
     const rot = el.getAttribute('data-rot');
     if (rot === 'st' || rot === 'tit') {
       rotations.push({ kind: rot, degrees: angle(el.getAttribute('style'), /rotate\((-?[\d.]+)deg\)/) });
@@ -160,5 +167,5 @@ function scan<E extends MarkElement>(face: E): { marks: FaceMarks; bound: BoundM
   if (lazos) pieces.push({ kind: 'lazo', key: 'lazo', count: lazos });
   washis.forEach((sign, i) => pieces.push({ kind: 'washi', key: `washi-${i + 1}`, sign }));
 
-  return { marks: { fields, pieces, ...(art ? { art } : {}), rotations, sparks }, bound };
+  return { marks: { fields, pieces, ...(art ? { art } : {}), rotations, sparks, sections: [...bound.sections.keys()] }, bound };
 }

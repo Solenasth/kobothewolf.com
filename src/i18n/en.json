@@ -40,6 +40,8 @@
   "editor.piece.lazo": "Bow",
   "editor.piece.washi": "Washi tape {n}",
   "editor.look": "Art, background and sparkles",
+  "editor.textSize": "Text size per section",
+  "editor.textSize.reset": "Reset text sizes",
   "editor.art": "Art",
   "editor.art.placeholder": "[ your kitty here ]",
   "editor.art.own": "Your image",

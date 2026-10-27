@@ -45,7 +45,13 @@
         "arte": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 },
         "fondo": { "$ref": "#/$defs/key" },
         "rotSt": { "$ref": "#/$defs/degrees" },
-        "brillitos": { "type": "integer", "minimum": 0, "maximum": 64 }
+        "brillitos": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "tamanos": {
+          "type": "object",
+          "maxProperties": 32,
+          "propertyNames": { "$ref": "#/$defs/key" },
+          "additionalProperties": { "type": "number", "minimum": 10, "maximum": 400 }
+        }
       }
     }
   }

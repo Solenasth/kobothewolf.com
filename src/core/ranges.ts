@@ -10,6 +10,8 @@ export interface EditorRanges {
   washi: Range;
   brillitos: Range;
   escala: Range;
+  /** Text size per section, in percent (FR-E22). */
+  tamano: Range;
 }
 
 const isRange = (value: unknown): value is Range =>
@@ -33,5 +35,6 @@ export function deriveRanges(antirreglas: Record<string, unknown>, escala: Range
     washi: at(antirreglas, 'washi.grados'),
     brillitos: at(antirreglas, 'brillitos.por_cara'),
     escala,
+    tamano: at(antirreglas, 'tamano_texto_pct'),
   };
 }

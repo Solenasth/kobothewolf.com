@@ -103,4 +103,9 @@ export function paintLook<E extends LookElement>(
   bound.sparks.forEach((el, i) => {
     el.style.display = i < state.brillitos ? '' : 'none';
   });
+
+  // Text size per section (FR-E22): the face's font sizes multiply by --tam.
+  for (const [section, els] of bound.sections) {
+    for (const el of els) el.style.setProperty('--tam', String((state.tamanos[section] ?? 100) / 100));
+  }
 }

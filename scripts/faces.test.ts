@@ -85,3 +85,41 @@ describe('FR-E5 NFR-5 face images point at existing style assets', () => {
     expect(refs('<img data-arte="frente" src="assets/st-yap.png">')).toEqual([expect.stringContaining('does not exist')]);
   });
 });
+
+describe('FR-E22 text-size sections', () => {
+  const front = (inner: string) => back(inner, 'x-f');
+
+  it('accepts sections, one spanning two elements where only one is editable', () => {
+    expect(check(front('<div data-seccion="titular">is a</div><div data-seccion="titular" data-ed="Titular">hi</div><p data-seccion="campos"><span data-ed="A">a</span></p>'))).toEqual([]);
+  });
+
+  it('accepts a back whose site block lends its texts to a section, not its QR', () => {
+    const site = '<div class="sitio" data-parte="Sitio"><b data-seccion="sitio" data-ed="Sitio · pregunta">hi</b><div class="qr"><img></div><div class="txt"><span data-seccion="sitio" data-ed="Sitio · invitación">come</span><span class="url">kobothewolf.com</span></div></div>';
+    expect(check(back(`${QR}${AT}${site}`))).toEqual([]);
+  });
+
+  it('rejects a section key that is not a lowercase slug', () => {
+    expect(check(front('<div data-seccion="Título" data-ed="T">t</div>'))).toEqual([expect.stringContaining('must be a lowercase slug')]);
+  });
+
+  it('rejects a section on, around or inside a locked element', () => {
+    expect(check(back(`<div data-seccion="contacto">${QR}${AT}<span data-ed="R">r</span></div>`))).toEqual([expect.stringContaining('locked element')]);
+    expect(check(back(`<div class="qr" data-seccion="qr"><img></div>${AT}<span data-ed="R">r</span>`))).toEqual([
+      expect.stringContaining('locked element'),
+      expect.stringContaining('has no editable text'),
+    ]);
+    expect(check(back(`${QR}${AT}<div class="sitio" data-parte="S"><div class="txt"><span class="url" data-seccion="u">kobothewolf.com</span></div><b data-ed="Q">q</b></div>`))).toEqual([
+      expect.stringContaining('locked element'),
+      expect.stringContaining('has no editable text'),
+    ]);
+  });
+
+  it('rejects a section holding contact text', () => {
+    expect(check(front('<div data-seccion="nombre"><span data-ed="N">hi</span> @KoboTheWolf</div>'))).toEqual([expect.stringContaining('holds contact data')]);
+  });
+
+  it('rejects a section inside another, and a section with no editable text', () => {
+    expect(check(front('<div data-seccion="a"><span data-seccion="b" data-ed="X">x</span></div>'))).toEqual([expect.stringContaining('"b" is inside another section')]);
+    expect(check(front('<div data-seccion="adorno">just words</div>'))).toEqual([expect.stringContaining('"adorno" has no editable text')]);
+  });
+});
