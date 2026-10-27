@@ -27,6 +27,7 @@ export function requiredLabels(source: LabelSource): Map<string, string> {
       const marks = readMarks(faceFrom(variant.html, id));
       for (const field of marks.fields) need(`ed.${field.key}`, id);
       for (const piece of marks.pieces) if (piece.kind === 'parte') need(`parte.${piece.key}`, id);
+      for (const key of marks.sections) need(`seccion.${key}`, id);
     }
   }
   return keys;
