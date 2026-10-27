@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import tokens from '../styles/boykisser-uwu/tokens.json';
 import { dilate, figureMask, fillHoles, makeSticker, MAX_SIDE, stickerOptions } from '../src/core/sticker';
-import { readPng } from './png';
+import { readPng } from '../cli/png.ts';
 
 const DIR = 'tests/fixtures/sticker';
 const CASES = [

@@ -1,4 +1,4 @@
-// Minimal PNG reader for tests: 8-bit gray, RGB or RGBA, not interlaced.
+// Minimal PNG reader for the export checks and the tests: 8-bit gray, RGB or RGBA, not interlaced.
 import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 

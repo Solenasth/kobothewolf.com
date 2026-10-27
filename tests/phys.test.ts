@@ -3,7 +3,7 @@ import { crc32 as zlibCrc32 } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { dpiToPixelsPerMetre, setDpi } from '../src/core/phys';
 import { crc32 } from '../src/core/png';
-import { readPng } from './png';
+import { readPng } from '../cli/png.ts';
 
 const FIXTURE = 'tests/fixtures/sticker/filled-blob.sticker.png';
 
