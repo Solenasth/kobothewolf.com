@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title data-i18n="how.meta.title"></title>
+    <meta name="description" data-i18n-content="how.meta.description" />
+    <link rel="canonical" href="https://kobothewolf.com/how-it-works.html" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/theme/ui.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main" data-i18n="nav.skip"></a>
+    <div class="page">
+      <header class="top">
+        <nav data-i18n-aria-label="lang.label">
+          <ul class="lang">
+            <li><a href="?lang=en" hreflang="en" lang="en" data-lang="en" aria-current="true">EN</a></li>
+            <li><a href="?lang=es" hreflang="es" lang="es" data-lang="es">ES</a></li>
+          </ul>
+        </nav>
+        <a class="btn" href="/" data-i18n="how.back"></a>
+      </header>
+
+      <main id="main" class="profile how">
+        <h1 data-i18n="how.title"></h1>
+        <p class="pitch" data-i18n="how.lead"></p>
+        <nav aria-labelledby="how-contents">
+          <p class="label" id="how-contents" data-i18n="how.contents"></p>
+          <ol class="toc">
+            <li><a href="#overview" data-i18n="how.overview.title"></a></li>
+            <li><a href="#architecture" data-i18n="how.architecture.title"></a></li>
+            <li><a href="#data" data-i18n="how.data.title"></a></li>
+            <li><a href="#exports" data-i18n="how.exports.title"></a></li>
+            <li><a href="#security" data-i18n="how.security.title"></a></li>
+            <li><a href="#quality" data-i18n="how.quality.title"></a></li>
+            <li><a href="#releases" data-i18n="how.releases.title"></a></li>
+          </ol>
+        </nav>
+
+        <section id="overview" aria-labelledby="overview-title">
+          <h2 id="overview-title" data-i18n="how.overview.title"></h2>
+          <p data-i18n="how.overview.p1"></p>
+          <p data-i18n="how.overview.p2"></p>
+          <p class="label" id="overview-sources" data-i18n="how.sources"></p>
+          <ul class="sources" aria-labelledby="overview-sources">
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/README.md"><code>README.md</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/docs/REQUIREMENTS.md"><code>docs/REQUIREMENTS.md</code></a></li>
+          </ul>
+        </section>
+        <section id="architecture" aria-labelledby="architecture-title">
+          <h2 id="architecture-title" data-i18n="how.architecture.title"></h2>
+          <p data-i18n="how.architecture.p1"></p>
+          <p data-i18n="how.architecture.p2"></p>
+          <p class="label" id="architecture-sources" data-i18n="how.sources"></p>
+          <ul class="sources" aria-labelledby="architecture-sources">
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/docs/DESIGN.md"><code>docs/DESIGN.md</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/tree/main/styles/boykisser-uwu"><code>styles/boykisser-uwu</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/docs/decisions/0006-css-scoping-not-shadow-dom.md"><code>docs/decisions/0006-css-scoping-not-shadow-dom.md</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/docs/agregar-variante.md"><code>docs/agregar-variante.md</code></a></li>
+          </ul>
+        </section>
+        <section id="data" aria-labelledby="data-title">
+          <h2 id="data-title" data-i18n="how.data.title"></h2>
+          <p data-i18n="how.data.p1"></p>
+          <p data-i18n="how.data.p2"></p>
+          <p class="label" id="data-sources" data-i18n="how.sources"></p>
+          <ul class="sources" aria-labelledby="data-sources">
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/src/editor/sticker.worker.ts"><code>src/editor/sticker.worker.ts</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/src/core/document.ts"><code>src/core/document.ts</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/schemas/document.schema.json"><code>schemas/document.schema.json</code></a></li>
+          </ul>
+        </section>
+        <section id="exports" aria-labelledby="exports-title">
+          <h2 id="exports-title" data-i18n="how.exports.title"></h2>
+          <p data-i18n="how.exports.p1"></p>
+          <p data-i18n="how.exports.p2"></p>
+          <p class="label" id="exports-sources" data-i18n="how.sources"></p>
+          <ul class="sources" aria-labelledby="exports-sources">
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/tree/main/src/core/export"><code>src/core/export</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/cli/pdf-vector.ts"><code>cli/pdf-vector.ts</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/cli/check-exports.ts"><code>cli/check-exports.ts</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/docs/decisions/0007-export-library-versions.md"><code>docs/decisions/0007-export-library-versions.md</code></a></li>
+          </ul>
+        </section>
+        <section id="security" aria-labelledby="security-title">
+          <h2 id="security-title" data-i18n="how.security.title"></h2>
+          <p data-i18n="how.security.p1"></p>
+          <p data-i18n="how.security.p2"></p>
+          <p class="label" id="security-sources" data-i18n="how.sources"></p>
+          <ul class="sources" aria-labelledby="security-sources">
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/vite.config.ts"><code>vite.config.ts</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/.github/workflows/ci.yml"><code>.github/workflows/ci.yml</code></a></li>
+          </ul>
+        </section>
+        <section id="quality" aria-labelledby="quality-title">
+          <h2 id="quality-title" data-i18n="how.quality.title"></h2>
+          <p data-i18n="how.quality.p1"></p>
+          <p data-i18n="how.quality.p2"></p>
+          <p class="label" id="quality-sources" data-i18n="how.sources"></p>
+          <ul class="sources" aria-labelledby="quality-sources">
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/CONTRIBUTING.md"><code>CONTRIBUTING.md</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/tree/main/policies"><code>policies</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/tree/main/e2e"><code>e2e</code></a></li>
+          </ul>
+        </section>
+        <section id="releases" aria-labelledby="releases-title">
+          <h2 id="releases-title" data-i18n="how.releases.title"></h2>
+          <p data-i18n="how.releases.p1"></p>
+          <p data-i18n="how.releases.p2"></p>
+          <p class="label" id="releases-sources" data-i18n="how.sources"></p>
+          <ul class="sources" aria-labelledby="releases-sources">
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/CHANGELOG.md"><code>CHANGELOG.md</code></a></li>
+            <li><a href="https://github.com/Solenasth/kobothewolf.com/blob/main/docs/decisions/0008-release-please.md"><code>docs/decisions/0008-release-please.md</code></a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

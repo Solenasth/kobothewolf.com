@@ -1,6 +1,6 @@
 # Requirements: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-27 (rev. 8: FR-P11, #65; rev. 7: FR-B3 contact rule applies to back faces, #5; rev. 6: FR-P8, #30; rev. 5: FR-P1, #4; rev. 4: FR-R6, #24)
+**Status:** Approved 2026-10-27 (rev. 9: FR-P12, #66; rev. 8: FR-P11, #65; rev. 7: FR-B3 contact rule applies to back faces, #5; rev. 6: FR-P8, #30; rev. 5: FR-P1, #4; rev. 4: FR-R6, #24)
 **Companion:** [DESIGN.md](DESIGN.md) · decisions in [decisions/](decisions/)
 **Inputs** (historical, superseded by this document; redacted copies go in `docs/origin/`, FR-R2):
 - **GP:** "Port the variant editor to GitHub Pages", the minimal single-file port.
@@ -57,6 +57,7 @@ The site is a freelance showcase on two levels:
 | FR-P7 | The profile uses the editor's boykisser-uwu UI style (palette, fonts, buttons), not a separate neutral style. |
 | FR-P8 | An inquiry / quote form (name, reply email, type, message) composes an email to `contact@kobothewolf.com` in the active language and opens it in the visitor's email app. Nothing is sent or stored by the site. The address stays visible, and a "Copy message" button covers visitors without an email app. Without JavaScript the form is hidden and the email link remains. |
 | FR-P11 | The profile has an "OwO wats dis?!" disclosure: a short, playful explanation of the project (your card stays in your browser, how it's built, the tech), in both languages and readable without JavaScript, ending in a link to the technical details. FR-P9 and FR-P10 are reserved for #60 and #61. |
+| FR-P12 | A "How it works" page explains the whole project for curious visitors (architecture, your data, exports, security, quality, releases), linking each part to its source documents. It's in both languages, readable without JavaScript, and linked from the FR-P11 explainer. |
 
 ### 5.2 Languages (FR-I)
 | ID | Requirement |

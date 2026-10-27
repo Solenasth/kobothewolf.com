@@ -7,7 +7,7 @@ const COPY = {
   en: { button: 'OwO wats dis?!', first: /hewwo! this is Kobo's site/, details: "I'm actually interested in the technical details →" },
   es: { button: 'OwO ¿qué es esto?!', first: /¡hola! este es el sitio de Kobo/, details: 'En serio, quiero los detalles técnicos →' },
 } as const;
-const DETAILS_URL = 'https://github.com/Solenasth/kobothewolf.com#readme';
+const DETAILS_URL = '/how-it-works.html';
 
 const summary = (page: Page, lang: keyof typeof COPY) => page.locator('#owo > summary', { hasText: COPY[lang].button });
 const panel = (page: Page) => page.locator('#owo .owo-panel');
