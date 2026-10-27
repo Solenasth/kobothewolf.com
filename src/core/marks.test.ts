@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readMarks } from './marks';
+import { bindMarks, readMarks } from './marks';
 import { LIC_F, LIC_R } from './fixtures';
 import { faceFrom } from './parse5-element';
 
@@ -84,6 +84,17 @@ describe('FR-E5 FR-E9 art slot, rotations and sparkles', () => {
       pieces: [],
       rotations: [],
       sparks: 0,
+      sections: [],
     });
+  });
+});
+
+describe('FR-E22 sections', () => {
+  it('lists each face\'s sections once, in document order, with all their elements', () => {
+    const face = faceFrom(LIC_R, 'lic-r');
+    expect(readMarks(face).sections).toEqual(['titulo', 'firma']);
+    const bound = bindMarks(face);
+    expect(bound.sections.get('firma')!.map((el) => el.textContent)).toEqual(["holder's signature:", '~Kobo~ uwu']);
+    expect(readMarks(faceFrom(LIC_F, 'lic-f')).sections).toEqual(['titular', 'campos']);
   });
 });
