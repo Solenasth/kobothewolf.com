@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { FaceState } from './document';
 import { LIC_F, LIC_R } from './fixtures';
 import { bindMarks, readMarks } from './marks';
-import { HIDDEN_FIELD, HIDDEN_PIECE, paintFace, paintLook, type Look } from './paint';
+import { HIDDEN_FIELD, HIDDEN_PIECE, NO_ART, paintFace, paintLook, type Look } from './paint';
 import { FakeElement, fakeFaceFrom } from './parse5-element';
 
 const created: FakeElement[] = [];
@@ -114,10 +114,22 @@ describe('FR-E5 FR-E7 FR-E8 FR-E9 paintLook applies the rest of the face state',
     expect(back.bound.pieces.get('arte')![0]!.style.transform).toBe('rotate(-7deg) scale(1.1)');
   });
 
-  it('leaves the image alone for an art key without a URL (placeholder and own sticker come with #16)', () => {
+  it('shows the placeholder or the user\'s sticker through the same URL lookup', () => {
     const { face, marks, bound } = setup(LIC_F, 'lic-f');
-    paintLook(face, marks, bound, state({ arte: 'hueco' }), look, (k) => urls[k]);
-    expect(bound.pieces.get('arte')![0]!.getAttribute('src')).toBeNull();
+    const lookup = (k: string) => ({ ...urls, hueco: 'data:image/png;base64,HUECO', propio: 'data:image/png;base64,MINE' })[k];
+    paintLook(face, marks, bound, state({ arte: 'hueco' }), look, lookup);
+    expect(bound.pieces.get('arte')![0]!.getAttribute('src')).toBe('data:image/png;base64,HUECO');
+    paintLook(face, marks, bound, state({ arte: 'propio' }), look, lookup);
+    expect(bound.pieces.get('arte')![0]!.getAttribute('src')).toBe('data:image/png;base64,MINE');
+  });
+
+  it('hides the art on a back set to "ninguno", and shows it again for any other art', () => {
+    const { face, marks, bound } = setup(LIC_R, 'lic-r');
+    const art = bound.pieces.get('arte')![0]!;
+    paintLook(face, marks, bound, state({ arte: 'ninguno' }), look, (k) => urls[k]);
+    expect(art.getAttribute(NO_ART)).toBe('');
+    paintLook(face, marks, bound, state({ arte: 'clik' }), look, (k) => urls[k]);
+    expect(art.getAttribute(NO_ART)).toBeNull();
   });
 
   it('rotates headlines to the shared angle and each washi by the shared angle with its authored sign', () => {
