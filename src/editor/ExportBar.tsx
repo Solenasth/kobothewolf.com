@@ -1,7 +1,8 @@
 // The export buttons (FR-E14, FR-E15, DESIGN §5.5). The export chunk is
-// imported as soon as the editor mounts; the buttons wait for it and for both
-// shown faces to be ready. If the chunk can't load, they stay disabled and the
-// status region says so.
+// imported as soon as the editor mounts; the buttons wait for it, for both
+// shown faces to be ready, and for a first render of each to have loaded their
+// fonts and images. If the chunk can't load, they stay disabled and the status
+// region says so.
 import { useEffect, useState } from 'preact/hooks';
 import { t, type MessageKey } from '../i18n';
 import type { Session } from './session';
@@ -25,11 +26,19 @@ export function ExportBar({ session, say }: { session: Session; say: Say }) {
   useEffect(() => {
     let current = true;
     setFacesReady(false);
-    void session.ready().then(() => current && setFacesReady(true));
+    if (lib) {
+      void session
+        .ready()
+        .then(() => Promise.all([frente, reverso].map((id) => lib.prepareFace(session.faces.get(id)!.el))))
+        // The warm-up is best effort: it fails harmlessly when the page goes away
+        // mid-render, and a real export reports its own errors.
+        .catch(() => undefined)
+        .then(() => current && setFacesReady(true));
+    }
     return () => {
       current = false;
     };
-  }, [session, frente, reverso]);
+  }, [session, lib, frente, reverso]);
 
   async function exportPng(id: string, side: 'frente' | 'reverso') {
     if (!lib) return;
