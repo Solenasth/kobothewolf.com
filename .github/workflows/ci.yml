@@ -102,6 +102,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run exports:render -- --project=${{ matrix.browser }}
+      # FR-B1, DESIGN §9: a mixed card's vector PDF, made by Chromium and
+      # checked by check-exports (found as <name>.pdf beside <name>.kobo.json).
+      - name: Vector PDF
+        if: matrix.browser == 'chromium'
+        run: |
+          mkdir -p exports/chromium/vector
+          cp tests/fixtures/documents/mezcla.kobo.json exports/chromium/vector/
+          npm run kobo -- pdf-vector exports/chromium/vector/mezcla.kobo.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: exports-${{ matrix.browser }}

@@ -28,6 +28,7 @@
     "src",
     "styles",
     "e2e/fixtures/scoping",
-    "e2e/fixtures/caras"
+    "e2e/fixtures/caras",
+    "cli/print/main.ts"
   ]
 }

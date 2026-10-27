@@ -23,6 +23,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check:playwright-image": "node scripts/check-playwright-image.ts",
+    "prekobo": "npm run gen",
     "kobo": "node cli/kobo.ts",
     "exports:render": "playwright test -c playwright.exports.config.ts"
   },

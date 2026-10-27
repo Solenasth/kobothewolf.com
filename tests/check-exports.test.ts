@@ -1,11 +1,12 @@
 /// <reference lib="dom" />
 // pdf.ts imports the browser render code next to buildPdf; only buildPdf runs here.
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { jsPDF } from 'jspdf';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { checkExports, checkFace, checkFonts, checkPdf, checkPngFile, checkQrs, checkZones, hasPoppler, PNG_SIZE, repoRules } from '../cli/check-exports.ts';
+import { checkExports, checkFace, checkFonts, checkPdf, checkPngFile, checkQrs, checkVectorPdf, checkZones, hasPoppler, PNG_SIZE, repoRules } from '../cli/check-exports.ts';
+import type { KoboDocument } from '../src/core/document';
 import type { Box, ExportIndex, FaceManifest } from '../cli/manifest.ts';
 import { readPng, type Decoded } from '../cli/png.ts';
 import { buildPdf } from '../src/core/export/pdf';
@@ -118,6 +119,19 @@ describe('FR-B2 check-exports: PNG faces', () => {
   });
 });
 
+describe('FR-B1 check-exports: finding vector PDFs', () => {
+  it('reports a document with no vector PDF beside it', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'kobo-vector-'));
+    try {
+      mkdirSync(join(dir, 'vector'));
+      writeFileSync(join(dir, 'vector/card.kobo.json'), readFileSync('tests/fixtures/documents/mezcla.kobo.json'));
+      expect(checkExports(dir, rules)).toEqual([{ file: 'vector/card.pdf', problems: ['missing: no vector PDF beside vector/card.kobo.json'] }]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 // The PDF checks run poppler. Locally they skip without it; the check-exports
 // CI job sets KOBO_REQUIRE_POPPLER=1, so there a missing poppler fails them.
 describe.skipIf(!hasPoppler() && process.env.KOBO_REQUIRE_POPPLER !== '1')('FR-B2 check-exports: PDFs (poppler)', () => {
@@ -191,6 +205,36 @@ describe.skipIf(!hasPoppler() && process.env.KOBO_REQUIRE_POPPLER !== '1')('FR-B
     ]);
     const one = pdfFile('one.pdf', custom((doc) => doc.addImage(frontPng, 'PNG', 0, 0, 96, 56)));
     expect(checkPdf(one, [FRONT, BACK])[0]).toBe('1 pages, expected 2');
+  });
+
+  const MIX = JSON.parse(readFileSync('tests/fixtures/documents/mezcla.kobo.json', 'utf8')) as KoboDocument;
+  const MIX_TEXTS = ["Kobo's print test", '¡hola, imprenta!', 'vector text~'];
+
+  it('fails a "vector" PDF with no text in it', () => {
+    const file = pdfFile('image-only.pdf', buildPdf(frontPng, backPng, { title: 'test' }));
+    expect(checkVectorPdf(file, MIX, rules)).toEqual(['no fonts, so no real text', ...MIX_TEXTS.map((t) => `the text "${t}" isn't in the PDF as text`)]);
+  });
+
+  it('fails a vector PDF whose font isn\'t embedded or isn\'t the site\'s', () => {
+    const file = pdfFile(
+      'helvetica.pdf',
+      custom((doc) => {
+        doc.text(MIX_TEXTS, 5, 10);
+        doc.addPage([96, 56], 'landscape');
+      }),
+    );
+    expect(checkVectorPdf(file, MIX, rules)).toEqual(["font Helvetica isn't embedded", "font Helvetica isn't one of the site's fonts"]);
+  });
+
+  it('fails a vector PDF more than one Chromium step off 96 × 56 mm', () => {
+    const file = pdfFile(
+      'trim.pdf',
+      custom((doc) => {
+        doc.text(MIX_TEXTS, 5, 10);
+        doc.addPage([90, 50], 'landscape');
+      }),
+    );
+    expect(checkVectorPdf(file, MIX, rules)).toContain('page 2 is 255.118 × 141.732 pt, expected 272.13 × 158.74 (96 × 56 mm) within 1.2 pt');
   });
 
   it('fails a PDF image that is not 300 ppi', () => {

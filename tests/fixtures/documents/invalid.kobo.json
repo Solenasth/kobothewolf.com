@@ -1,0 +1,8 @@
+{
+  "app": "kobo-exe-editor",
+  "version": 2,
+  "estilo": "boykisser-uwu",
+  "frente": "lic-f",
+  "reverso": "soc-r",
+  "caras": { "lic-f": { "textos": { "0": 42 } } }
+}
