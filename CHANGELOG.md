@@ -2,6 +2,27 @@
 
 All notable changes, grouped by conventional-commit type, one section per release. From v0.7.0, release-please writes the entries, one line per conventional commit ([decision 0008](docs/decisions/0008-release-please.md)). Up to v0.6.0 they were written by hand, one line per merged PR.
 
+## [0.6.1](https://github.com/Solenasth/kobothewolf.com/compare/v0.6.0...v0.6.1) (2026-10-27)
+
+
+### Fixes
+
+* **ci:** give release PRs a header and footer in the card style's voice ([5635df1](https://github.com/Solenasth/kobothewolf.com/commit/5635df102d101a40e78bc8cc6d4fc7ac1d6e5003)), closes [#68](https://github.com/Solenasth/kobothewolf.com/issues/68)
+* **ci:** thematic release PR text and the real release branch name ([#69](https://github.com/Solenasth/kobothewolf.com/issues/69)) ([2d0541f](https://github.com/Solenasth/kobothewolf.com/commit/2d0541fd1b21aa343075ff5a98697a7bc930d997))
+
+
+### Docs
+
+* let release-please write new changelog entries ([8e587cd](https://github.com/Solenasth/kobothewolf.com/commit/8e587cde36b8f4e34c38171830047754fc155909)), closes [#48](https://github.com/Solenasth/kobothewolf.com/issues/48)
+* name the real release branch and allow crediting Release Please (DESIGN rev. 25) ([32edbbd](https://github.com/Solenasth/kobothewolf.com/commit/32edbbd1ed359691a1c39cdbaf86212587e92339)), closes [#68](https://github.com/Solenasth/kobothewolf.com/issues/68)
+* specify releases with release-please (DESIGN rev. 24, decision 0008) ([88badc1](https://github.com/Solenasth/kobothewolf.com/commit/88badc17955bf25e60988b1fc5c46734a8034e93)), closes [#48](https://github.com/Solenasth/kobothewolf.com/issues/48)
+
+
+### CI and tests
+
+* automate releases with release-please ([#64](https://github.com/Solenasth/kobothewolf.com/issues/64)) ([7e62f15](https://github.com/Solenasth/kobothewolf.com/commit/7e62f1593b8ef9b30ff7fbd4ac1f7321e31be854))
+* release with release-please and the release app's token ([affec0f](https://github.com/Solenasth/kobothewolf.com/commit/affec0f59ca0c257ac79df72fd2b3c550a1c5f13)), closes [#48](https://github.com/Solenasth/kobothewolf.com/issues/48)
+
 ## v0.6.0 (2026-10-27): vector PDF
 
 Milestone M6 (CLI): `npm run kobo -- pdf-vector card.kobo.json` makes a print PDF with real, selectable text and the site's fonts embedded as subsets, for print shops that ask for vector output. It runs locally and in CI, never on the site, and checks the document with the editor's own rules first. `kobo check-exports` now checks vector PDFs too. Chromium sets PDF page sizes in 1.2 pt steps, so pages come out 95.93 × 56.13 mm, inside the 3 mm bleed. The live site is unchanged.
