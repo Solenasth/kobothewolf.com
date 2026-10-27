@@ -4,7 +4,8 @@ import type { ExportIndex, FaceManifest } from '../../cli/manifest.ts';
 
 // Renders what `kobo check-exports` checks (FR-B2, DESIGN §9, §10): every
 // variant's PNGs and print PDF, exported through the editor's own buttons in
-// its default state, plus what the files can't tell: where the QRs and what
+// its default state, and its PNGs again with every text section at the
+// smallest and at the largest size (FR-E22), plus what the files can't tell: where the QRs and what
 // could cover them are, and each face's text with its font. Written to
 // exports/<browser>/, which CI uploads as an artifact.
 
@@ -46,6 +47,13 @@ function manifest(page: Page, id: string): Promise<Omit<FaceManifest, 'png' | 'e
   });
 }
 
+/** Sets every text-size range of a face to its min or max, through the panel (FR-E22). */
+async function sizeAll(page: Page, id: string, end: 'min' | 'max') {
+  for (const range of await page.locator(`details[data-face="${id}"] .ed-tamanos input[type="range"]`).all()) {
+    await range.fill((await range.getAttribute(end))!);
+  }
+}
+
 async function save(page: Page, button: string, dir: string, name: string) {
   await expect(page.locator(button)).toBeEnabled();
   const [file] = await Promise.all([page.waitForEvent('download'), page.locator(button).click()]);
@@ -53,7 +61,7 @@ async function save(page: Page, button: string, dir: string, name: string) {
 }
 
 test('render every variant for check-exports', async ({ page, browserName }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(240_000);
   const problems: string[] = [];
   page.on('console', (msg) => {
     if (msg.type() === 'error' || msg.type() === 'warning') problems.push(`${msg.type()}: ${msg.text()}`);
@@ -80,8 +88,23 @@ test('render every variant for check-exports', async ({ page, browserName }) => 
     }
     await save(page, '#ed-pdf', dir, `${variant}.pdf`);
     index.pdfs.push({ file: `${variant}.pdf`, pages: [`${front}.json`, `${back}.json`] });
+
+    for (const end of ['min', 'max'] as const) {
+      for (const [id, button] of [
+        [front!, '#ed-png-frente'],
+        [back!, '#ed-png-reverso'],
+      ] as const) {
+        await sizeAll(page, id, end);
+        const name = `${id}-${end}`;
+        await save(page, button, dir, `${name}.png`);
+        const face: FaceManifest = { ...(await manifest(page, id)), png: `${name}.png`, engine: browserName };
+        writeFileSync(`${dir}/${name}.json`, `${JSON.stringify(face, null, 1)}\n`);
+        index.faces.push(`${name}.json`);
+      }
+    }
+    for (const id of [front!, back!]) await page.locator(`#ed-tam-reset-${id}`).click();
   }
   writeFileSync(`${dir}/index.json`, `${JSON.stringify(index, null, 1)}\n`);
-  expect(index.faces.length).toBeGreaterThanOrEqual(8);
+  expect(index.faces.length).toBeGreaterThanOrEqual(24);
   expect(problems).toEqual([]);
 });
