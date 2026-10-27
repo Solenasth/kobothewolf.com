@@ -4,6 +4,28 @@ All notable changes, grouped by conventional-commit type. One section per releas
 
 ## Unreleased
 
+## v0.3.0 (2026-10-26): boykisser-uwu
+
+Milestone M3 (boykisser-uwu): the style's cards as data, ready for the editor. The live site looks the same as v0.2.0; the editor UI that shows the cards arrives in M4 ([#14](https://github.com/Solenasth/kobothewolf.com/issues/14)).
+
+### Features
+- **styles:** port the code-cat `montar()`: the Rust program laid out inside the cat without splitting a token, closed OwO filler comments, drawn one letter at a time ([#45](https://github.com/Solenasth/kobothewolf.com/pull/45), closes [#13](https://github.com/Solenasth/kobothewolf.com/issues/13))
+- **styles:** add the four boykisser-uwu variants (Certificado, Licencia, Gatito de código, Programming socks) as data, with English and Spanish labels; adding a variant needs no code change ([#44](https://github.com/Solenasth/kobothewolf.com/pull/44), closes [#12](https://github.com/Solenasth/kobothewolf.com/issues/12))
+- **validate:** check style labels in every language, default backgrounds, face asset paths and mount scripts ([#44](https://github.com/Solenasth/kobothewolf.com/pull/44), [#45](https://github.com/Solenasth/kobothewolf.com/pull/45))
+- **styles:** scope each variant's CSS to its own faces at build time ([#43](https://github.com/Solenasth/kobothewolf.com/pull/43), closes [#11](https://github.com/Solenasth/kobothewolf.com/issues/11))
+
+### Chores
+- **assets:** add the fonts, meme art, QR codes and `CREDITS.md`; published images keep only pixel data ([#42](https://github.com/Solenasth/kobothewolf.com/pull/42), closes [#10](https://github.com/Solenasth/kobothewolf.com/issues/10))
+
+### Docs
+- design revisions 13–16: asset and credits rules, CSS scoping, variants as data, the code-cat mount step ([#42](https://github.com/Solenasth/kobothewolf.com/pull/42)–[#45](https://github.com/Solenasth/kobothewolf.com/pull/45))
+- decision [0006](docs/decisions/0006-css-scoping-not-shadow-dom.md): CSS scoping at build time instead of Shadow DOM ([#43](https://github.com/Solenasth/kobothewolf.com/pull/43))
+- how to add a variant: [`docs/agregar-variante.md`](docs/agregar-variante.md) ([#44](https://github.com/Solenasth/kobothewolf.com/pull/44))
+
+### CI and tests
+- **ci:** compile and run the code-cat text from every browser with pinned Rust 1.99.1 and `-D warnings`; now a required check on `main` ([#45](https://github.com/Solenasth/kobothewolf.com/pull/45))
+- **test:** fixture pages that check CSS isolation and every real face in Chromium, Firefox and WebKit ([#43](https://github.com/Solenasth/kobothewolf.com/pull/43), [#44](https://github.com/Solenasth/kobothewolf.com/pull/44))
+
 ## v0.2.0 (2026-10-26): core
 
 Milestone M2 (core): the editor's engine, with no UI yet. The live site looks the same as v0.1.0; the editor UI arrives in M3.
