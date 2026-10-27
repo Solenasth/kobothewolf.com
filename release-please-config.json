@@ -5,6 +5,8 @@
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "pull-request-title-pattern": "chore(release): v${version}",
+  "pull-request-header": ":3 rawr! a new release is ready~ *notices your commits*",
+  "pull-request-footer": "made with [Release Please](https://github.com/googleapis/release-please) uwu · merge me at the milestone's end ([decision 0008](https://github.com/Solenasth/kobothewolf.com/blob/main/docs/decisions/0008-release-please.md))",
   "changelog-sections": [
     { "type": "feat", "section": "Features" },
     { "type": "fix", "section": "Fixes" },
