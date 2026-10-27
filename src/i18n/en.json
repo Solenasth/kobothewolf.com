@@ -77,5 +77,14 @@
   "mail.subject.quote": "Quote request from {name}",
   "mail.signature": "{name} · {email}",
   "mail.to": "To",
-  "mail.subjectLabel": "Subject"
+  "mail.subjectLabel": "Subject",
+  "export.label": "Export",
+  "export.png.front": "PNG front · 300 dpi",
+  "export.png.back": "PNG back · 300 dpi",
+  "export.file.front": "{file}-front-300dpi.png",
+  "export.file.back": "{file}-back-300dpi.png",
+  "export.making": "Making {file}…",
+  "export.saved": "Saved {file}.",
+  "export.failed": "Couldn't make {file}. Please try again.",
+  "export.unavailable": "Export isn't available: its code didn't load. Reload the page to try again."
 }
