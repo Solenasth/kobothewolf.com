@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { fontCoverage } from '../cli/font-cmap.ts';
+import { fontCoverage, postScriptName } from '../cli/font-cmap.ts';
 
 // FR-B2: the glyph check reads each site font's cmap. The counts are what
 // fontTools reports for the same files (characters up to U+30000, #19).
@@ -11,6 +11,21 @@ const FONTS = {
   'pacifico-latin-400-normal': 224,
   'silkscreen-latin-400-normal': 215,
 };
+
+// The names Chromium's PDFs give the embedded fonts, as pdffonts lists them (#20).
+const POSTSCRIPT = {
+  'cherry-bomb-one-latin-400-normal': 'CherryBombOne-Regular',
+  'gochi-hand-latin-400-normal': 'GochiHand-Regular',
+  'jetbrains-mono-latin-500-normal': 'JetBrainsMono-Medium',
+  'pacifico-latin-400-normal': 'Pacifico-Regular',
+  'silkscreen-latin-400-normal': 'Silkscreen-Regular',
+};
+
+describe('FR-B1 FR-B2 PostScript names from WOFF2 name tables', () => {
+  for (const [name, expected] of Object.entries(POSTSCRIPT)) {
+    it(`${name} is ${expected}`, () => expect(postScriptName(readFileSync(`src/theme/fonts/${name}.woff2`))).toBe(expected));
+  }
+});
 
 describe('FR-B2 font coverage from WOFF2 cmaps', () => {
   for (const [name, count] of Object.entries(FONTS)) {

@@ -1,6 +1,7 @@
-// Which characters a font has (FR-B2, DESIGN §9): the cmap of a WOFF2 font, the
-// format the site ships, with its brotli stream through Node's zlib. Only cmap
-// is read, so this needs no font library. Formats 4 and 12, which every Unicode
+// Which characters a font has, and its PostScript name (FR-B1, FR-B2, DESIGN
+// §9): the cmap and name tables of a WOFF2 font, the format the site ships,
+// with its brotli stream through Node's zlib. Only those two tables are read,
+// so this needs no font library. Cmap formats 4 and 12, which every Unicode
 // font carries; a font with neither is rejected.
 import { brotliDecompressSync } from 'node:zlib';
 
@@ -16,8 +17,9 @@ function tag(view: DataView, at: number): string {
   return String.fromCharCode(view.getUint8(at), view.getUint8(at + 1), view.getUint8(at + 2), view.getUint8(at + 3));
 }
 
-/** The raw cmap table of a WOFF2 font. */
-function woff2Cmap(bytes: Uint8Array): Uint8Array {
+/** One raw table of a WOFF2 font, or undefined when it has none. */
+function woff2Table(bytes: Uint8Array, wanted: string): Uint8Array | undefined {
+  if (new TextDecoder('latin1').decode(bytes.subarray(0, 4)) !== 'wOF2') throw new Error('font-cmap: not a WOFF2 font');
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   if (tag(view, 4) === 'ttcf') throw new Error('font-cmap: WOFF2 collections are not supported');
   const numTables = view.getUint16(12);
@@ -45,16 +47,34 @@ function woff2Cmap(bytes: Uint8Array): Uint8Array {
   const data = brotliDecompressSync(bytes.subarray(at, at + compressedSize));
   let offset = 0;
   for (const table of tables) {
-    if (table.tag === 'cmap') return data.subarray(offset, offset + table.length);
+    if (table.tag === wanted) return data.subarray(offset, offset + table.length);
     offset += table.length;
   }
-  throw new Error('font-cmap: no cmap table');
+  return undefined;
+}
+
+/** The font's PostScript name (name ID 6), as PDFs name embedded fonts. */
+export function postScriptName(bytes: Uint8Array): string {
+  const name = woff2Table(bytes, 'name');
+  if (!name) throw new Error('font-cmap: no name table');
+  const view = new DataView(name.buffer, name.byteOffset, name.byteLength);
+  const strings = view.getUint16(4);
+  for (let i = 0, n = view.getUint16(2); i < n; i++) {
+    const record = 6 + i * 12;
+    if (view.getUint16(record + 6) !== 6) continue;
+    const platform = view.getUint16(record);
+    const raw = name.subarray(strings + view.getUint16(record + 10), strings + view.getUint16(record + 10) + view.getUint16(record + 8));
+    // Windows and Unicode platforms store UTF-16BE; Macintosh, single bytes.
+    if (platform === 3 || platform === 0) return String.fromCharCode(...Array.from({ length: raw.length / 2 }, (_, j) => (raw[2 * j]! << 8) | raw[2 * j + 1]!));
+    return String.fromCharCode(...raw);
+  }
+  throw new Error('font-cmap: no PostScript name');
 }
 
 /** A test for whether the font maps a code point to a real glyph (not .notdef). */
 export function fontCoverage(bytes: Uint8Array): (codePoint: number) => boolean {
-  if (new TextDecoder('latin1').decode(bytes.subarray(0, 4)) !== 'wOF2') throw new Error('font-cmap: not a WOFF2 font');
-  const cmap = woff2Cmap(bytes);
+  const cmap = woff2Table(bytes, 'cmap');
+  if (!cmap) throw new Error('font-cmap: no cmap table');
   const view = new DataView(cmap.buffer, cmap.byteOffset, cmap.byteLength);
   const subtables = new Map<string, number>();
   for (let i = 0, n = view.getUint16(2); i < n; i++) {
