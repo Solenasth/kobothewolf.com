@@ -33,8 +33,9 @@ const assets = ASSET_DIRS.flatMap((dir) => globSync(`${dir}/**/*`, { withFileTyp
   .sort();
 const credits = existsSync('CREDITS.md') ? readFileSync('CREDITS.md', 'utf8') : '';
 const styleFiles = globSync(['styles/**/*.{css,html,json}', 'src/**/*.css']).sort();
-// Screenshots made from P8 for the visual test (DESIGN §10): pixel data only, like the assets.
-const baselines = globSync('e2e/baselines/**/*.png').sort();
+// Screenshots made from P8 for the visual test (DESIGN §10), and the README's
+// (DESIGN §6): pixel data only, like the assets.
+const baselines = globSync(['e2e/baselines/**/*.png', 'docs/images/**/*.png']).sort();
 
 const errors = [
   ...catalogDirs.flatMap((dir) => checkCatalogs(dir, readCatalogs(dir), languages)),
