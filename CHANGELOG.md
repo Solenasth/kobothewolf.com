@@ -4,6 +4,28 @@ All notable changes, grouped by conventional-commit type. One section per releas
 
 ## Unreleased
 
+## v0.4.0 (2026-10-26): editor UI
+
+Milestone M4 (editor UI): the card editor is live under the profile. Choose and mix the four boykisser-uwu variants, edit texts, hide pieces, pick art, backgrounds, colors and anti-rule angles, and turn your own drawing into a sticker, in English or Spanish. Your card is remembered in the browser. PNG and PDF export arrive in M5.
+
+### Features
+- **editor:** art, background, accent, shadow and range controls, and your own drawing turned into a sticker in a Worker, kept after a reload ([#51](https://github.com/Solenasth/kobothewolf.com/pull/51), closes [#16](https://github.com/Solenasth/kobothewolf.com/issues/16))
+- **editor:** text form, piece checkboxes and restore for both faces ([#50](https://github.com/Solenasth/kobothewolf.com/pull/50), closes [#15](https://github.com/Solenasth/kobothewolf.com/issues/15))
+- **editor:** editor shell loaded after the page: variant tabs, mixing fronts and backs, the scaled two-face preview, cut guides and a status line ([#49](https://github.com/Solenasth/kobothewolf.com/pull/49), closes [#14](https://github.com/Solenasth/kobothewolf.com/issues/14))
+- **styles:** default faces start at P8's values (titles −2°, washi 14°, 7 sparkles) ([#49](https://github.com/Solenasth/kobothewolf.com/pull/49))
+
+### Fixes
+- **styles:** faces no longer inherit the page's font or section styles, so they look the same anywhere ([#49](https://github.com/Solenasth/kobothewolf.com/pull/49))
+- **editor:** load after the first painted frame, and save pending edits when the page is hidden ([#51](https://github.com/Solenasth/kobothewolf.com/pull/51))
+
+### Docs
+- design revisions 17–19: editor shell and preview, text and piece controls, art, color and range controls ([#49](https://github.com/Solenasth/kobothewolf.com/pull/49)–[#51](https://github.com/Solenasth/kobothewolf.com/pull/51))
+
+### CI and tests
+- **test:** default faces compared with baselines made from P8 in Chromium, Firefox and WebKit ([#49](https://github.com/Solenasth/kobothewolf.com/pull/49))
+- **test:** every text, piece, art, color and range control driven through the UI in both languages ([#50](https://github.com/Solenasth/kobothewolf.com/pull/50), [#51](https://github.com/Solenasth/kobothewolf.com/pull/51))
+- **ci:** the deploy build is checked for the E2E test hook ([#49](https://github.com/Solenasth/kobothewolf.com/pull/49))
+
 ## v0.3.0 (2026-10-26): boykisser-uwu
 
 Milestone M3 (boykisser-uwu): the style's cards as data, ready for the editor. The live site looks the same as v0.2.0; the editor UI that shows the cards arrives in M4 ([#14](https://github.com/Solenasth/kobothewolf.com/issues/14)).
