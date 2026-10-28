@@ -84,7 +84,7 @@
 /* Contact: the main QR and the optional site block. */
 .qr { position: absolute; background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 0 0 3px var(--tinta); }
 .qr img { display: block; width: 100%; image-rendering: pixelated; }
-.sitio { position: absolute; display: grid; grid-template-columns: 96px 1fr; column-gap: 12px; align-items: center; width: 284px; }
+.sitio { position: absolute; left: 600px; top: 346px; display: grid; grid-template-columns: 96px 1fr; column-gap: 12px; align-items: center; width: 284px; }
 .sitio > b { grid-column: 1 / -1; font: 18px/1 Plumon; color: var(--tinta); font-weight: normal; margin: 0 0 6px 2px; }
 .sitio .qr { position: static; width: 96px; padding: 6px; border-radius: 10px; }
 .sitio .txt { font: 16px/1.12 Plumon; color: var(--tinta2); }

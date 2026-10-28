@@ -21,3 +21,9 @@ pre .p { color: #E0559B; }
 pre .s { color: #3D8BD9; }
 pre .c { color: #B49BB0; }
 pre .n { color: #9B6BD1; }
+
+/* Back: the contact column (main QR, @KoboTheWolf, the line under it), in CSS
+   so QR layouts can move it (FR-E23, DESIGN §3.4). The site block is in the base CSS. */
+.card > .qr { left: 650px; top: 70px; width: 180px; }
+.card > .arroba { position: absolute; left: 640px; top: 268px; }
+.linea-contacto { position: absolute; left: 650px; top: 310px; font: 17px Plumon; color: var(--tinta2); }
