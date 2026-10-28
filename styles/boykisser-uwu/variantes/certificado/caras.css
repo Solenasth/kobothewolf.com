@@ -37,3 +37,13 @@
 .contacto .arroba { margin-top: 14px; letter-spacing: .3px; }
 .contacto .tme { font: 16px Plumon; color: var(--tinta2); }
 .cred2 { position: absolute; left: 44px; top: 466px; font: 10.5px Silk; letter-spacing: .4px; color: var(--tinta2); }
+
+/* QR layouts (FR-E23): the certificate's contact column is the .contacto
+   wrapper, so it moves as one; the site block follows the base rules. */
+&.qr-iguales .contacto { left: 600px; top: 46px; }
+&.qr-iguales .contacto .qr { width: 150px; }
+
+/* In the same-size layout, decorations next to the old QR column move clear
+   of the QRs (FR-E23). Their positions are inline, hence !important. */
+&.qr-iguales .washi.junto-qr { left: 470px !important; }
+&.qr-iguales .spark.junto-qr { left: 556px !important; }

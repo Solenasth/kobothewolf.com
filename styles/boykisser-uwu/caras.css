@@ -92,3 +92,15 @@
 .arroba { font: 30px Plumon; letter-spacing: .5px; }
 .cred { position: absolute; font: 9px Silk; color: var(--chicle); letter-spacing: .3px; }
 .st { position: absolute; }
+
+/* QR layouts on the backs (FR-E23, DESIGN §3.4). The painter puts qr-<layout>
+   on the face root; positions are in card pixels. QR sizes are the framed box:
+   150 px is 15 mm, the Telegram QR's minimum. These rules serve backs whose
+   contact column sits directly in .card; a variant with another structure
+   adds its own (the certificate). */
+/* Same size: both QRs 15 mm, stacked in one column, inside the safe zone. */
+&.qr-iguales .card > .qr { left: 600px; top: 56px; width: 150px; }
+&.qr-iguales .card > .arroba { left: 600px; top: 216px; }
+&.qr-iguales .card > .linea-contacto { left: 602px; top: 254px; }
+&.qr-iguales .sitio { left: 600px; top: 284px; grid-template-columns: 150px 1fr; }
+&.qr-iguales .sitio .qr { width: 150px; padding: 10px; border-radius: 12px; }
