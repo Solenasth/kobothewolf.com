@@ -58,7 +58,7 @@ test('FR-P12 every link points at this site or at a file that exists in the repo
   }
   for (const href of hrefs.filter((h) => !h.startsWith(REPO))) expect(href, 'only same-site links besides the repo').toMatch(/^(\/|#|\?lang=)/);
   await page.getByRole('link', { name: TITLES.en.back }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/\?lang=en$/);
 });
 
 test('FR-I2 the language switch works in place on this page too', async ({ page }) => {
@@ -73,7 +73,7 @@ test('FR-P11 FR-P12 the OwO details link opens this page', async ({ page }) => {
   await page.goto('/?lang=en');
   await page.locator('#owo > summary').click();
   await page.getByRole('link', { name: "I'm actually interested in the technical details →" }).click();
-  await expect(page).toHaveURL(/\/how-it-works\.html$/);
+  await expect(page).toHaveURL(/\/how-it-works\.html\?lang=en$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('How it works');
 });
 
@@ -107,4 +107,38 @@ test('NFR-6 FR-P12 no serious accessibility problems in either language', async 
     const serious = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
     expect(serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(', ')}`), lang).toEqual([]);
   }
+});
+
+test.describe('#79 the language carries between pages, whatever the browser prefers', () => {
+  // A Spanish browser: without the fix, an English visitor fell back to Spanish on the next page.
+  test.use({ locale: 'es-ES' });
+
+  test('English from ?lang=en: the details link and the back link stay in English', async ({ page }) => {
+    await page.goto('/?lang=en');
+    await page.locator('#owo > summary').click();
+    await page.getByRole('link', { name: "I'm actually interested in the technical details →" }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('How it works');
+    await page.getByRole('link', { name: TITLES.en.back }).click();
+    await expect(page.locator('#owo > summary')).toHaveText('OwO wats dis?!');
+  });
+
+  test('a switch in place carries over too, both ways', async ({ page }) => {
+    await page.goto('/?lang=en');
+    await page.locator('a[data-lang="es"]').click();
+    await page.locator('#owo > summary').click();
+    await page.getByRole('link', { name: 'En serio, quiero los detalles técnicos →' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(TITLES.es.h1);
+    await page.locator('a[data-lang="en"]').click();
+    await page.getByRole('link', { name: TITLES.en.back }).click();
+    await expect(page.locator('#owo > summary')).toHaveText('OwO wats dis?!');
+  });
+});
+
+test.describe('#79 without JavaScript the links stay plain', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('no ?lang= is added', async ({ page }) => {
+    await page.goto('/how-it-works.html');
+    await expect(page.getByRole('link', { name: TITLES.en.back })).toHaveAttribute('href', '/');
+  });
 });

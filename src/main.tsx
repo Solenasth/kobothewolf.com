@@ -23,10 +23,24 @@ document.addEventListener('click', (event) => {
   setLanguage(lang);
 });
 
+/**
+ * Links to the site's other page carry the current language (#79): a ?lang=
+ * choice isn't remembered, so without it the next page could fall back to
+ * the browser's language.
+ */
+function keepLanguage() {
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-keep-lang]')) {
+    const url = new URL(link.getAttribute('href')!, location.href);
+    url.searchParams.set('lang', getLanguage());
+    link.setAttribute('href', `${url.pathname}${url.search}${url.hash}`);
+  }
+}
+
 onLanguageChange(() => {
   // Keys in the HTML are checked at build time (fillStaticHtml throws on unknown ones).
   applyStatic(document, (key) => t(key as MessageKey));
   markCurrent();
+  keepLanguage();
 });
 
 initLanguage();

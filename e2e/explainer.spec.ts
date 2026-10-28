@@ -7,7 +7,8 @@ const COPY = {
   en: { button: 'OwO wats dis?!', first: /hewwo! this is Kobo's site/, details: "I'm actually interested in the technical details →" },
   es: { button: 'OwO ¿qué es esto?!', first: /¡hola! este es el sitio de Kobo/, details: 'En serio, quiero los detalles técnicos →' },
 } as const;
-const DETAILS_URL = '/how-it-works.html';
+/** The details link carries the page's language (#79). */
+const DETAILS_URL = { en: '/how-it-works.html?lang=en', es: '/how-it-works.html?lang=es' } as const;
 
 const summary = (page: Page, lang: keyof typeof COPY) => page.locator('#owo > summary', { hasText: COPY[lang].button });
 const panel = (page: Page) => page.locator('#owo .owo-panel');
@@ -22,7 +23,7 @@ for (const lang of ['en', 'es'] as const) {
     await button.click();
     await expect(panel(page)).toBeVisible();
     await expect(panel(page)).toContainText(COPY[lang].first);
-    await expect(panel(page).getByRole('link', { name: COPY[lang].details })).toHaveAttribute('href', DETAILS_URL);
+    await expect(panel(page).getByRole('link', { name: COPY[lang].details })).toHaveAttribute('href', DETAILS_URL[lang]);
     await button.click();
     await expect(panel(page)).toBeHidden();
 
