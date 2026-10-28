@@ -22,6 +22,8 @@ export interface FaceState {
   fondo?: string;
   rotSt?: number;
   brillitos?: number;
+  /** A back's QR layout (FR-E23). */
+  qr?: string;
   /** Section key → text size in percent (FR-E22). */
   tamanos?: Record<string, number>;
 }

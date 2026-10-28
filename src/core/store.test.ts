@@ -21,7 +21,7 @@ function make(over: Partial<StoreOptions> = {}) {
     estilo: 'boykisser-uwu',
     faces: {
       'lic-f': { marks: readMarks(faceFrom(LIC_F, 'lic-f')), defaults: { fondo: 'gingham', arte: 'licencia' } },
-      'lic-r': { marks: readMarks(faceFrom(LIC_R, 'lic-r')), defaults: { fondo: 'cuaderno' } },
+      'lic-r': { marks: readMarks(faceFrom(LIC_R, 'lic-r')), defaults: { fondo: 'cuaderno' }, layouts: ['actual', 'iguales'] },
     },
     lists: editor,
     ranges: deriveRanges(tokens.antirreglas, editor.escala as unknown as Range),
@@ -304,5 +304,39 @@ describe('FR-E22 text size per section', () => {
     expect((await store.importText(JSON.stringify(doc))).ok).toBe(false);
     doc.caras['lic-r'].tamanos = { firma: 9999 };
     expect((await store.importText(JSON.stringify(doc))).ok).toBe(false);
+  });
+});
+
+describe('FR-E23 QR layouts on the backs', () => {
+  it('starts on the variant\'s first layout and keeps only listed ones', () => {
+    const { store } = make();
+    expect(store.face('lic-r').qr).toBe('actual');
+    store.setFaceValue('lic-r', 'qr', 'iguales');
+    store.setFaceValue('lic-r', 'qr', 'lado'); // not listed by this variant
+    expect(store.face('lic-r').qr).toBe('iguales');
+    store.setFaceValue('lic-f', 'qr', 'iguales'); // a front has no layouts
+    expect(store.face('lic-f').qr).toBe('');
+  });
+
+  it('round-trips through the document; a front writes no qr, an unknown layout falls back', async () => {
+    const { store } = make();
+    store.setFaceValue('lic-r', 'qr', 'iguales');
+    const doc = JSON.parse(store.exportText());
+    expect(doc.caras['lic-r'].qr).toBe('iguales');
+    expect('qr' in doc.caras['lic-f']).toBe(false);
+    const other = make().store;
+    expect(await other.importText(JSON.stringify(doc))).toEqual({ ok: true });
+    expect(other.face('lic-r').qr).toBe('iguales');
+    doc.caras['lic-r'].qr = 'diagonal';
+    expect(await other.importText(JSON.stringify(doc))).toEqual({ ok: true });
+    expect(other.face('lic-r').qr).toBe('actual');
+  });
+
+  it('is saved and restored', () => {
+    const storage = { data: new Map<string, string>(), getItem(k: string) { return this.data.get(k) ?? null; }, setItem(k: string, v: string) { this.data.set(k, v); } };
+    const first = make({ storage });
+    first.store.setFaceValue('lic-r', 'qr', 'iguales');
+    first.flushSaves();
+    expect(make({ storage }).store.face('lic-r').qr).toBe('iguales');
   });
 });

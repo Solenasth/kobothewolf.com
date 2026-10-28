@@ -1,10 +1,10 @@
-// One face's controls (FR-E3–E5, FR-E7, FR-E9, FR-E11, FR-E12, FR-E22, DESIGN §5.6),
+// One face's controls (FR-E3–E5, FR-E7, FR-E9, FR-E11, FR-E12, FR-E22, FR-E23, DESIGN §5.6),
 // built from its marks and its variant's `controles`. Locked elements never
 // appear: the marks don't list them. Every change goes through the store,
 // which checks the value against the style and paints the face.
 import { MAX_TEXT } from '../core/store';
 import type { Piece } from '../core/marks';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 import { Range } from './Range';
 import type { Session } from './session';
 
@@ -30,6 +30,7 @@ export function FaceControls(props: { session: Session; id: string; heading: str
   const rotates = controls.has('rotSt') && marks.rotations.some((r) => r.kind === 'st');
   const [min, max] = session.ranges.brillitos;
   const [sizeMin, sizeMax] = session.ranges.tamano;
+  const layouts = side === 'reverso' ? (variant.manifest.qr ?? []) : [];
   const sparksMax = Math.min(max, marks.sparks);
   const artOptions: [string, string, boolean?][] = [
     ...session.lists.arte.map((key): [string, string] => [key, label(`arte.${key}`)]),
@@ -88,6 +89,16 @@ export function FaceControls(props: { session: Session; id: string; heading: str
       )}
       <fieldset class="ed-look">
         <legend>{t('editor.look')}</legend>
+        {layouts.length > 1 && (
+          <div class="f">
+            <label for={`ed-qr-${id}`}>{t('editor.qr.label')}</label>
+            <select id={`ed-qr-${id}`} value={state.qr} onChange={(e) => session.store.setFaceValue(id, 'qr', e.currentTarget.value)}>
+              {layouts.map((key) => (
+                <option value={key}>{t(`editor.qr.${key}` as MessageKey)}</option>
+              ))}
+            </select>
+          </div>
+        )}
         {hasArt && (
           <div class="f">
             <label for={`ed-arte-${id}`}>{t('editor.art')}</label>

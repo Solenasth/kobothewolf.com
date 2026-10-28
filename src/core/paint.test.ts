@@ -28,6 +28,7 @@ const state = (over: Partial<Required<FaceState>> = {}): Required<FaceState> => 
   rotSt: 0,
   brillitos: 5,
   tamanos: {},
+  qr: '',
   ...over,
 });
 

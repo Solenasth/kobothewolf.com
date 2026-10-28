@@ -20,6 +20,8 @@ export interface StorageLike {
 export interface FaceSetup {
   marks: FaceMarks;
   defaults: { fondo: string; arte?: string };
+  /** A back's QR layouts, the first being its default (FR-E23); none on a front. */
+  layouts?: readonly string[];
 }
 
 export interface StyleLists {
@@ -48,9 +50,11 @@ export interface StoreOptions {
 export type Notice = 'storage-unavailable' | 'storage-full' | 'sticker-not-saved' | 'saved-state-invalid';
 export type ImportError = ParseError | { code: 'other-style'; estilo: string } | { code: 'bad-image' };
 type GlobalKey = 'acento' | 'sombra' | 'rotTit' | 'escala' | 'anguloWashi';
-type FaceKey = 'arte' | 'fondo' | 'rotSt' | 'brillitos';
+type FaceKey = 'arte' | 'fondo' | 'rotSt' | 'brillitos' | 'qr';
 
 const clamp = (n: number, [min, max]: Range) => Math.min(max, Math.max(min, n));
+/** Leaves out a front's empty QR layout, which isn't a valid key (FR-E23). */
+const withoutEmptyQr = (key: string, value: unknown) => (key === 'qr' && value === '' ? undefined : value);
 
 export function createStore(options: StoreOptions) {
   const { faces, lists, ranges } = options;
@@ -73,6 +77,7 @@ export function createStore(options: StoreOptions) {
       rotSt: authoredRot(id),
       brillitos: Math.min(clamp(lists.inicial.brillitos, ranges.brillitos), maxSparks(id)),
       tamanos: {},
+      qr: faces[id]!.layouts?.[0] ?? '',
     };
   }
 
@@ -105,6 +110,8 @@ export function createStore(options: StoreOptions) {
         return typeof value === 'number' && Number.isInteger(value)
           ? Math.min(clamp(value, ranges.brillitos), maxSparks(id))
           : undefined;
+      case 'qr':
+        return typeof value === 'string' && (faces[id]!.layouts ?? []).includes(value) ? value : undefined;
     }
   }
 
@@ -144,7 +151,7 @@ export function createStore(options: StoreOptions) {
       if (size !== undefined && size !== 100) target.tamanos[section] = size;
     }
     const fresh = defaultFace(id);
-    for (const key of ['arte', 'fondo', 'rotSt', 'brillitos'] as const) {
+    for (const key of ['arte', 'fondo', 'rotSt', 'brillitos', 'qr'] as const) {
       (target as Record<FaceKey, unknown>)[key] = validFaceValue(id, key, source[key]) ?? fresh[key];
     }
   }
@@ -174,7 +181,7 @@ export function createStore(options: StoreOptions) {
       say('sticker-not-saved');
     }
     try {
-      options.storage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      options.storage.setItem(STORAGE_KEY, JSON.stringify(toSave, withoutEmptyQr));
     } catch {
       say('storage-full');
     }
@@ -333,7 +340,7 @@ export function createStore(options: StoreOptions) {
 
     /** The document as a .kobo.json file body. */
     exportText(): string {
-      return `${JSON.stringify(doc, null, 2)}\n`;
+      return `${JSON.stringify(doc, withoutEmptyQr, 2)}\n`;
     },
 
     subscribe(listener: () => void): () => void {
