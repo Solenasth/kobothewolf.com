@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { jsPDF } from 'jspdf';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { checkExports, checkFace, checkFonts, checkPdf, checkPngFile, checkQrs, checkVectorPdf, checkZones, hasPoppler, PNG_SIZE, repoRules } from '../cli/check-exports.ts';
+import { checkExports, checkFace, checkFonts, checkPdf, checkPngFile, checkQrSizes, checkQrs, checkVectorPdf, checkZones, hasPoppler, PNG_SIZE, repoRules } from '../cli/check-exports.ts';
 import type { KoboDocument } from '../src/core/document';
 import type { Box, ExportIndex, FaceManifest } from '../cli/manifest.ts';
 import { readPng, type Decoded } from '../cli/png.ts';
@@ -93,6 +93,14 @@ describe('FR-B2 check-exports: PNG faces', () => {
       'main QR at 300 dpi: reads "https://kobothewolf.com", expected "https://t.me/KoboTheWolf"',
       'main QR at 150 dpi: reads "https://kobothewolf.com", expected "https://t.me/KoboTheWolf"',
     ]);
+  });
+
+  it('fails a QR printed smaller than its minimum (FR-E23)', () => {
+    expect(checkQrSizes(BACK)).toEqual([]);
+    const small: FaceManifest = { ...BACK, qrs: [{ kind: 'main', box: [680, 100, 140, 140] }, { kind: 'site', box: [636, 400, 90, 90] }] };
+    expect(checkQrSizes(small)).toEqual(['main QR is 140 px (14.0 mm), at least 150', 'site QR is 90 px (9.0 mm), at least 96']);
+    // The same-size layout's 15 mm boxes pass.
+    expect(checkQrSizes({ ...BACK, qrs: [{ kind: 'main', box: [600, 56, 150, 150] }, { kind: 'site', box: [600, 308, 150, 150] }] })).toEqual([]);
   });
 
   it('fails anything over the main QR or the site block', () => {

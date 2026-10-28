@@ -116,6 +116,17 @@ export function checkQrs(image: Decoded, face: FaceManifest): string[] {
   return problems;
 }
 
+/** The smallest framed box each QR may print at, in face pixels (FR-E23, EV §3.1): 15 mm, and today's site QR. */
+export const MIN_QR_PX = { main: 150, site: 96 } as const;
+
+/** No layout prints a QR smaller than its minimum (FR-E23). Half a pixel of rounding is allowed. */
+export function checkQrSizes(face: FaceManifest): string[] {
+  return face.qrs.flatMap((qr) => {
+    const size = Math.min(qr.box[2], qr.box[3]);
+    return size + 0.5 < MIN_QR_PX[qr.kind] ? [`${qr.kind} QR is ${Math.round(size)} px (${(size / 10).toFixed(1)} mm), at least ${MIN_QR_PX[qr.kind]}`] : [];
+  });
+}
+
 const overlaps = (a: Box, b: Box) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
 
 /** No sparkle, tape, sticker or text over the main QR or the site block. */
@@ -145,7 +156,7 @@ export function checkFonts(face: FaceManifest, rules: Rules): string[] {
 }
 
 export function checkFace(png: Uint8Array, face: FaceManifest, rules: Rules): string[] {
-  return [...checkPngFile(png), ...checkQrs(readPng(png), face), ...checkZones(face), ...checkFonts(face, rules)];
+  return [...checkPngFile(png), ...checkQrSizes(face), ...checkQrs(readPng(png), face), ...checkZones(face), ...checkFonts(face, rules)];
 }
 
 function run(command: string, args: string[]): string {
