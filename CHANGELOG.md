@@ -2,6 +2,38 @@
 
 All notable changes, grouped by conventional-commit type, one section per release. From v0.7.0, release-please writes the entries, one line per conventional commit ([decision 0008](docs/decisions/0008-release-please.md)). Up to v0.6.0 they were written by hand, one line per merged PR.
 
+## [0.8.0](https://github.com/Solenasth/kobothewolf.com/compare/v0.7.0...v0.8.0) (2026-10-29)
+
+
+### Features
+
+* **cli:** fail exports whose QRs print below their minimum size ([be3df3a](https://github.com/Solenasth/kobothewolf.com/commit/be3df3aafaa87a13364b0086bf4dc6784a3ee3ef)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+* **editor:** choose a back's QR layout ([c9c30d2](https://github.com/Solenasth/kobothewolf.com/commit/c9c30d2e6aba5dc6defaa500b41865e3dea5cd97)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+* **editor:** QR layouts on the backs ([#82](https://github.com/Solenasth/kobothewolf.com/issues/82)) ([a31aa73](https://github.com/Solenasth/kobothewolf.com/commit/a31aa73c864685c10e8c65a71fa1fed99420abcf))
+* **styles:** add the same-size QR layout to every back ([c3e10f7](https://github.com/Solenasth/kobothewolf.com/commit/c3e10f7fc04aa200aa83f692af7d0f97c1fc42e2)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+
+
+### Fixes
+
+* **page:** keep the language when moving between the site's pages ([fdf67ea](https://github.com/Solenasth/kobothewolf.com/commit/fdf67eae0253bd04df21b3d1c97920f3ea38997a)), closes [#79](https://github.com/Solenasth/kobothewolf.com/issues/79)
+* **page:** keep the language when moving between the site's pages ([#80](https://github.com/Solenasth/kobothewolf.com/issues/80)) ([0007061](https://github.com/Solenasth/kobothewolf.com/commit/0007061c8ef31c5a854583f920199bb5864ec7ba))
+
+
+### Refactors
+
+* **styles:** move the backs' contact column positions into CSS ([0ab13be](https://github.com/Solenasth/kobothewolf.com/commit/0ab13bee912baecbfa47eb6418ff89c62eeddf9d)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+
+
+### Docs
+
+* carry the language on links between pages (DESIGN rev. 31) ([a8b1476](https://github.com/Solenasth/kobothewolf.com/commit/a8b1476533d492a5a10ca0df56bed80ef090c906)), closes [#79](https://github.com/Solenasth/kobothewolf.com/issues/79)
+* specify QR layouts on the backs (FR-E23, DESIGN rev. 32) ([ab7eb32](https://github.com/Solenasth/kobothewolf.com/commit/ab7eb32a0bedbc1d4a8777a41baa97b41b655744)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+
+
+### CI and tests
+
+* drive the QR layouts and render every back in each one ([e560fbd](https://github.com/Solenasth/kobothewolf.com/commit/e560fbd883c21affa0f712523925e9c31cb33d71)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+
 ## [0.7.0](https://github.com/Solenasth/kobothewolf.com/compare/v0.6.1...v0.7.0) (2026-10-27)
 
 
