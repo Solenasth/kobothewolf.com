@@ -80,6 +80,9 @@ export function paintLook<E extends LookElement>(
 ) {
   for (const cls of [...root.classList]) if (cls.startsWith('fondo-') && cls !== `fondo-${state.fondo}`) root.classList.remove(cls);
   root.classList.add(`fondo-${state.fondo}`);
+  // A back's QR layout (FR-E23): the style's CSS places the contact column for qr-<layout>.
+  for (const cls of [...root.classList]) if (cls.startsWith('qr-') && cls !== `qr-${state.qr}`) root.classList.remove(cls);
+  if (state.qr) root.classList.add(`qr-${state.qr}`);
   root.style.setProperty('--acento', look.acento);
   root.style.setProperty('--sombra', look.sombra);
 

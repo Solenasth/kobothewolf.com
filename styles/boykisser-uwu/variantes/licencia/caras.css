@@ -23,3 +23,15 @@ h2 {
   margin: 0 0 6px; letter-spacing: .6px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
 }
 h2 em { font: 32px Lazo; color: var(--chicle); font-style: normal; }
+
+/* Back: the contact column (main QR, @KoboTheWolf, the line under it), in CSS
+   so QR layouts can move it (FR-E23, DESIGN §3.4). The site block is in the base CSS. */
+.card > .qr { left: 648px; top: 70px; width: 180px; }
+.card > .arroba { position: absolute; left: 640px; top: 268px; }
+.linea-contacto { position: absolute; left: 648px; top: 310px; font: 17px Plumon; color: var(--tinta2); }
+
+/* In the same-size layout, decorations next to the old QR column move clear
+   of the QRs (FR-E23). Their positions are inline, hence !important. */
+&.qr-iguales .washi.junto-qr { left: 470px !important; }
+&.qr-iguales .spark.junto-qr { left: 550px !important; }
+&.qr-iguales .spark.junto-qr-arriba { top: 250px !important; }

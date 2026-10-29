@@ -1,6 +1,6 @@
 # Design: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-10-27 (rev. 31: §6 language carried between pages, #79; rev. 30: §3.2, §3.3, §3.5, §5.1, §5.6, §7, §10 text size per section, #73; rev. 29: §6 "How it works" page, #66; rev. 28: §5.4, §10 larger code-cat text, #75; rev. 27: §6 "OwO wats dis?!" explainer, #65; rev. 26: §6, §7 Open Graph image, build line, README images, #22; rev. 25: §12 release PR text and branch name, #68; rev. 24: §12 releases with release-please, #48; rev. 23: §9, §10 vector PDF, #20; rev. 22: §9, §10, §11 check-exports and the export CI jobs, #19; rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
+**Status:** Approved 2026-10-28 (rev. 32: §3.4, §3.5, §5.6, §9 QR layouts, #74; rev. 31: §6 language carried between pages, #79; rev. 30: §3.2, §3.3, §3.5, §5.1, §5.6, §7, §10 text size per section, #73; rev. 29: §6 "How it works" page, #66; rev. 28: §5.4, §10 larger code-cat text, #75; rev. 27: §6 "OwO wats dis?!" explainer, #65; rev. 26: §6, §7 Open Graph image, build line, README images, #22; rev. 25: §12 release PR text and branch name, #68; rev. 24: §12 releases with release-please, #48; rev. 23: §9, §10 vector PDF, #20; rev. 22: §9, §10, §11 check-exports and the export CI jobs, #19; rev. 21: §5.5 print PDF, #18; rev. 20: §5.5 PNG export, #17; rev. 19: §5.2, §5.3, §5.6 art, color and range controls, #16; rev. 18: §5.6 text and piece controls, #15; rev. 17: §2, §3.3, §5.2, §5.6, §7, §10 editor shell and preview, #14; rev. 16: §2, §3.4, §5.4, §7, §10 code-cat mount step, #13; rev. 15: §2, §3.4, §4, §7, §10 variants as data, #12; rev. 14: §5.1 CSS scoping, §10, §11, #11; rev. 13: §2, §7 assets and credits, #10; rev. 12: §5.5 pHYs, #9; rev. 11: §5.3 sticker tolerance and Worker, #8; rev. 10: §5.2, #7; rev. 9: §3.2, §7, #6; rev. 8: §3.3, §7, §11, #5; rev. 7: §6.1, #30; rev. 6: §6, #4; rev. 5: §10, #26; rev. 4: §12, #24)
 **Implements:** [REQUIREMENTS.md](REQUIREMENTS.md). Section headers list the requirement IDs they cover.
 **Base:** EV (the editor app spec, see `docs/origin/`) is adopted unless a section says otherwise, and every deviation gives a reason.
 
@@ -117,6 +117,11 @@ As in EV §3.4, with `"montar": "montar.ts"` (FR-E19). That is the only value it
 
 **Loading:** `src/core/variants.ts` `collectVariants(files)` turns the globbed files (manifests, faces HTML, mount scripts) into the list of styles and their variants, sorted as above, and rejects a variant with a missing file, including a `montar` script its manifest names. Mount scripts are lazy imports, so a variant's code loads only when one of its faces is shown. It is pure, so a unit test feeds it a fixture variant and shows the editor needs no change to pick one up (FR-E18).
 
+**QR layouts (FR-E23, #74).** A variant lists the layouts its back supports in `variant.json` → `qr`, in order, the first being the default: `actual` (today's: an 18 mm Telegram QR, with the site block below it and a 9.6 mm site QR) and `iguales` (both QRs 15 mm, stacked, each with its text). All four boykisser-uwu backs offer both.
+- **Side by side (`lado`) isn't offered yet:** two 15 mm QRs side by side need about 316 card pixels, but each back's contact column has about 270 between its left content (which reaches x ≈ 572–599) and the safe zone (x ≈ 870). Making room means redesigning the backs' left content, a follow-up. The painter puts `qr-<layout>` on the face root for any layout but the default, and the style's CSS places the contact column for it.
+- **Where positions live:** the contact column's positions (main QR, `@KoboTheWolf`, the line under it, the site block) are in CSS, not inline styles, so a layout's rules override them without `!important`. Moving them out of `caras.html` leaves the default backs pixel-identical, which the visual baselines check.
+- **Sizes:** QR sizes are the framed box (white padding and frame included). 15 mm is 150 face pixels, the EV minimum for the Telegram QR (EV §3.1); no layout goes below it, and check-exports enforces it (§9). Labels for layouts are app catalog keys (`editor.qr.<layout>`), since every style shares them.
+
 ### 3.5 Document (`.kobo.json`), version 1
 EV §3.5 with these changes:
 - `app` and `version` are required.
@@ -125,6 +130,7 @@ EV §3.5 with these changes:
 - Unknown face IDs are dropped.
 - Migration fills only the missing keys and never replaces a face object (EV §6.5).
 
+- A back may carry `qr`: its layout key (FR-E23). The store keeps it only if the back's variant lists it; otherwise the back shows its default layout.
 - Each face may carry `tamanos`: section key → size in percent (FR-E22). The store keeps only the face's own sections and clamps each value into the style's range, like the other ranges; a missing section is 100 %.
 
 Documents store keys, never labels, so they're language-independent.
@@ -241,6 +247,7 @@ PDF: front PNG, back PNG ─► jsPDF {unit:'mm', format:[96,56], landscape, com
 - **Art, background and ranges (FR-E5–E9):** a face shows only the controls its variant lists in `variant.json` → `controles` and that apply to it.
   - Per face, in its group: the art `<select>` (style stickers labeled `arte.<key>`, the localized placeholder, "your image" once one exists, and "none" on backs), sticker rotation, background (`fondo.<key>`) and sparkles (from the range minimum, or the face's count if lower, to the face's count).
   - Shared, in their own group: accent and flat shadow as `<select>`s of the style's colors (`color.<hex>`), shown when either face's variant lists them, and headline rotation, sticker scale and washi angle ranges. Every range comes from `tokens.json` (`editor.json` for scale), and each shows its value.
+  - **QR layout (FR-E23):** on a back whose variant lists more than one layout, a select labeled from `editor.qr.<layout>`.
   - **Text size (FR-E22):** in each face's group, one range per section the face has, labeled `seccion.<key>`, in percent, with a "Reset sizes" button.
   - Upload: a file input for PNG, JPEG or WebP with a drop zone, and the "cut off at the bottom" checkbox (§5.3).
   - The placeholder is drawn on a canvas in the face font (Plumon) with the localized "[ your kitty here ]", so it exports like any image and follows the language.
@@ -340,6 +347,7 @@ The site is static with no server state. What needs protecting is visitors' brow
   | Check | How | Criterion |
   |---|---|---|
   | PNG size and dpi | IHDR and pHYs | 1134 × 661 px, 11811 px/m (300 dpi) |
+  | QR size | manifest boxes | the main QR's framed box is at least 150 face pixels (15 mm) wide, and the site QR's at least 96 (today's) |
   | QR | crop each QR's box from the PNG, `jsqr` | main: exactly `https://t.me/KoboTheWolf` at 300 dpi and at 150 dpi (the crop halved); site: exactly `https://kobothewolf.com` at 300 dpi |
   | Nothing over the QRs | manifest boxes | no sparkle, tape, sticker or text box overlaps the main QR's box or the site block's |
   | Fonts per face | manifest texts | at most `tipografia.max_fuentes_por_cara` families |
@@ -370,7 +378,7 @@ The site is static with no server state. What needs protecting is visitors' brow
 | A11y | `@axe-core/playwright` | profile and panel, ES and EN: no serious or critical violations |
 
 - **`ci.yml`** runs on every PR: `npm ci` → typecheck → validate → unit → build → E2E matrix → export checks → rustc → `npm audit` → gitleaks. Exports are uploaded as workflow artifacts.
-  - **Export jobs:** `export (chromium)` and `export (webkit)` run the renderer in the Playwright image. It exports every variant at the default sizes, and again with every section at the smallest and at the largest size (FR-E22), so check-exports covers both extremes. The jobs upload `exports/<browser>/` as an artifact (kept 14 days). The Chromium job also runs `pdf-vector` on `tests/fixtures/documents/mezcla.kobo.json`, a mixed card with changed texts, into `exports/chromium/vector/`.
+  - **Export jobs:** `export (chromium)` and `export (webkit)` run the renderer in the Playwright image. It exports every variant at the default sizes, and again with every section at the smallest and at the largest size (FR-E22), and every back in each of its QR layouts (FR-E23), so check-exports covers them all. The jobs upload `exports/<browser>/` as an artifact (kept 14 days). The Chromium job also runs `pdf-vector` on `tests/fixtures/documents/mezcla.kobo.json`, a mixed card with changed texts, into `exports/chromium/vector/`.
   - **`check-exports` job:** runs on the plain runner, because the image's user can't install packages. It installs `poppler-utils` with apt, downloads both artifacts, runs `kobo check-exports exports/`, adds the report to the job summary, and runs the check's unit tests with poppler required.
 - **E2E environment:** the E2E jobs run in Microsoft's Playwright image (`mcr.microsoft.com/playwright:v<version>-resolute`), pinned by digest, with browsers and system packages preinstalled. This avoids a slow `apt` step and gives the visual baselines the same fonts and libraries on every run. The tag must equal `@playwright/test`, and CI checks it.
 - **`deploy.yml`** runs on push to `main`: the same gates, then `upload-pages-artifact` → `deploy-pages`.

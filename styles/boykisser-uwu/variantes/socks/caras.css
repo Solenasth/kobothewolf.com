@@ -16,3 +16,9 @@
 .git { position: absolute; left: 48px; top: 176px; font: 17px Code; background: var(--blanco); padding: 10px 14px; border-radius: 10px; box-shadow: 0 0 0 3px var(--tinta); transform: rotate(-1deg); }
 .git .p { color: #E0559B; }
 .git .s { color: #3D8BD9; }
+
+/* Back: the contact column (main QR, @KoboTheWolf, the line under it), in CSS
+   so QR layouts can move it (FR-E23, DESIGN §3.4). The site block is in the base CSS. */
+.card > .qr { left: 650px; top: 70px; width: 180px; }
+.card > .arroba { position: absolute; left: 640px; top: 268px; }
+.linea-contacto { position: absolute; left: 650px; top: 310px; font: 17px Plumon; color: var(--tinta2); }

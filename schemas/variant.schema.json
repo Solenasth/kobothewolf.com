@@ -31,7 +31,11 @@
       "items": { "enum": ["textos", "arte", "fondo", "acento", "rotSt", "rotTit", "brillitos", "washi", "lazo", "escala", "sombra"] }
     },
     "verificar": { "type": "array", "uniqueItems": true, "items": { "enum": ["qr", "contacto", "max_fuentes"] } },
-    "montar": { "const": "montar.ts", "description": "The variant's mount script; one fixed name, so the build finds every one with a single glob." }
+    "montar": { "const": "montar.ts", "description": "The variant's mount script; one fixed name, so the build finds every one with a single glob." },
+    "qr": {
+      "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["actual", "iguales", "lado"] },
+      "description": "QR layouts the back supports, the first being its default (FR-E23, DESIGN §3.4)."
+    }
   },
   "$defs": {
     "key": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 40 }

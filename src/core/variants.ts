@@ -11,6 +11,8 @@ export interface VariantManifest {
   controles: readonly string[];
   verificar?: readonly string[];
   montar?: string;
+  /** QR layouts the back supports, the first being its default (FR-E23). */
+  qr?: readonly string[];
 }
 
 export interface Variant {

@@ -5,7 +5,8 @@ import type { ExportIndex, FaceManifest } from '../../cli/manifest.ts';
 // Renders what `kobo check-exports` checks (FR-B2, DESIGN §9, §10): every
 // variant's PNGs and print PDF, exported through the editor's own buttons in
 // its default state, and its PNGs again with every text section at the
-// smallest and at the largest size (FR-E22), plus what the files can't tell: where the QRs and what
+// smallest and at the largest size (FR-E22), and each back in its other
+// QR layouts (FR-E23), plus what the files can't tell: where the QRs and what
 // could cover them are, and each face's text with its font. Written to
 // exports/<browser>/, which CI uploads as an artifact.
 
@@ -103,6 +104,20 @@ test('render every variant for check-exports', async ({ page, browserName }) => 
       }
     }
     for (const id of [front!, back!]) await page.locator(`#ed-tam-reset-${id}`).click();
+
+    const select = page.locator(`#ed-qr-${back}`);
+    if (await select.count()) {
+      const layouts = await select.locator('option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+      for (const layout of layouts.slice(1)) {
+        await select.selectOption(layout);
+        const name = `${back}-qr-${layout}`;
+        await save(page, '#ed-png-reverso', dir, `${name}.png`);
+        const face: FaceManifest = { ...(await manifest(page, back!)), png: `${name}.png`, engine: browserName };
+        writeFileSync(`${dir}/${name}.json`, `${JSON.stringify(face, null, 1)}\n`);
+        index.faces.push(`${name}.json`);
+      }
+      await select.selectOption(layouts[0]!);
+    }
   }
   writeFileSync(`${dir}/index.json`, `${JSON.stringify(index, null, 1)}\n`);
   expect(index.faces.length).toBeGreaterThanOrEqual(24);

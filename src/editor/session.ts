@@ -100,7 +100,11 @@ export function createSession(estilo: string, variants: readonly Variant[], doc:
       el.dataset['estilo'] = estilo;
       const marks = readMarks(el);
       faces.set(id, { id, variant, side, el, marks, bound: bindMarks(el) });
-      setups[id] = { marks, defaults: { fondo: variant.manifest.fondo[side], ...(arte ? { arte } : {}) } };
+      setups[id] = {
+        marks,
+        defaults: { fondo: variant.manifest.fondo[side], ...(arte ? { arte } : {}) },
+        ...(side === 'reverso' && variant.manifest.qr ? { layouts: variant.manifest.qr } : {}),
+      };
     }
   }
 

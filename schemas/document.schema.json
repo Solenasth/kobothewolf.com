@@ -46,6 +46,7 @@
         "fondo": { "$ref": "#/$defs/key" },
         "rotSt": { "$ref": "#/$defs/degrees" },
         "brillitos": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "qr": { "$ref": "#/$defs/key" },
         "tamanos": {
           "type": "object",
           "maxProperties": 32,

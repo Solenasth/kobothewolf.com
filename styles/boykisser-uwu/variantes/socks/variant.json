@@ -5,5 +5,6 @@
   "fondo": { "frente": "algodon", "reverso": "cuaderno" },
   "archivo": "programming-socks",
   "controles": ["textos", "arte", "fondo", "acento", "rotSt", "rotTit", "brillitos", "washi", "lazo", "escala"],
+  "qr": ["actual", "iguales"],
   "verificar": ["qr", "contacto", "max_fuentes"]
 }
