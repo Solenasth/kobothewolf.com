@@ -1,7 +1,10 @@
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vitest/config';
 import en from './src/i18n/en.json' with { type: 'json' };
 import { fillStaticHtml } from './src/i18n/static-html.ts';
+import { renderVersion } from './scripts/release-notes.ts';
 import { scopeFaceCss } from './scripts/scope-css.ts';
 
 // DESIGN §8. Pages can't send headers, so the policy ships as a meta tag. It is
@@ -25,6 +28,32 @@ function staticI18n(): Plugin {
   };
 }
 
+/** The build's commit: CI's GITHUB_SHA, else git; none outside a checkout. */
+function buildCommit(): string | undefined {
+  if (process.env['GITHUB_SHA']) return process.env['GITHUB_SHA'];
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return undefined;
+  }
+}
+
+/** FR-P9, DESIGN §6: the version label and release notes, from package.json and CHANGELOG.md. */
+function versionNotes(): Plugin {
+  const MARK = '<!-- kobo:version -->';
+  return {
+    name: 'kobo:version',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        if (!html.includes(MARK)) return html;
+        const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
+        return html.replace(MARK, renderVersion(readFileSync('CHANGELOG.md', 'utf8'), version, buildCommit()));
+      },
+    },
+  };
+}
+
 function contentSecurityPolicy(): Plugin {
   return {
     name: 'kobo:csp',
@@ -45,7 +74,7 @@ export default defineConfig({
   resolve: {
     alias: { html2canvas: noOptional, dompurify: noOptional, canvg: noOptional },
   },
-  plugins: [scopeFaceCss(), staticI18n(), contentSecurityPolicy()],
+  plugins: [scopeFaceCss(), versionNotes(), staticI18n(), contentSecurityPolicy()],
   oxc: {
     jsx: { runtime: 'automatic', importSource: 'preact' },
   },
