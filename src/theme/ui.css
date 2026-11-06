@@ -2,6 +2,8 @@
    Palette from styles/boykisser-uwu/tokens.json; fonts in ./fonts.css. */
 
 @import './fonts.css';
+/* Page themes (FR-P10): generated from styles/<style>/temas.json by npm run gen. */
+@import './generated/themes.css';
 
 :root {
   color-scheme: light;
@@ -39,6 +41,11 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--ui-focus); outl
 .lang { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; font: 13px Silk, monospace; letter-spacing: .6px; }
 .lang a { display: inline-block; padding: 5px 12px; border: 2.5px solid var(--ui-line); border-radius: 999px; background: var(--blanco); text-decoration: none; }
 .lang a[aria-current='true'] { border-color: var(--tinta); background: var(--algodon); box-shadow: 3px 4px 0 0 var(--rosa); }
+.tema { display: flex; align-items: center; gap: 8px; font-size: 15px; margin-right: auto; }
+.tema[hidden] { display: none; }
+.tema label { font: 12px Silk, monospace; color: var(--ui-muted); }
+.tema select { font: inherit; font-size: 15px; padding: 4px 10px; border: 2.5px solid var(--ui-line); border-radius: 999px; background: var(--blanco); color: var(--tinta); }
+.tema select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
 
 .btn {
   display: inline-block; font: inherit; font-size: 17px; text-decoration: none; cursor: pointer;

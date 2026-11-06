@@ -3,6 +3,8 @@ import { getLanguage, initLanguage, onLanguageChange, setLanguage, t, type Messa
 import { isLang } from './i18n/languages';
 import { applyStatic } from './i18n/static';
 import { setUpExplainer } from './page/explainer';
+import { setUpThemes } from './page/theme';
+import themes from './theme/generated/themes.json';
 
 function markCurrent() {
   for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-lang]')) {
@@ -44,6 +46,9 @@ onLanguageChange(() => {
 });
 
 initLanguage();
+
+const themeSelect = document.querySelector<HTMLSelectElement>('#tema');
+if (themeSelect) setUpThemes(themeSelect, themes.porDefecto);
 
 const inquiry = document.querySelector<HTMLFormElement>('#inquiry');
 if (inquiry) setUpInquiryForm(inquiry);

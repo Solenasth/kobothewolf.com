@@ -54,6 +54,42 @@ function versionNotes(): Plugin {
   };
 }
 
+/** FR-P10, DESIGN §6: the theme switcher, and tema.js, which applies the remembered theme before the first paint. */
+function pageThemes(): Plugin {
+  const MARK = '<!-- kobo:temas -->';
+  const read = () => JSON.parse(readFileSync('src/theme/generated/themes.json', 'utf8')) as { porDefecto: string; ids: string[] };
+  const script = () =>
+    [
+      '// Applies the remembered page theme before the first paint (FR-P10, DESIGN §6).',
+      `try { var t = localStorage.getItem('kobo-theme'); if (${JSON.stringify(read().ids)}.indexOf(t) >= 0) document.documentElement.setAttribute('data-theme', t); } catch (e) {}`,
+      '',
+    ].join('\n');
+  return {
+    name: 'kobo:themes',
+    configureServer(server) {
+      server.middlewares.use('/tema.js', (_req, res) => {
+        res.setHeader('Content-Type', 'text/javascript');
+        res.end(script());
+      });
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'tema.js', source: script() });
+    },
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        // A classic script in <head> blocks first paint for a few lines, so the theme never flashes.
+        let out = html.replace('<head>', '<head>\n    <script src="/tema.js"></script>');
+        if (out.includes(MARK)) {
+          const options = read().ids.map((id) => `<option value="${id}" data-i18n="theme.${id}"></option>`).join('');
+          out = out.replace(MARK, `<div class="tema" hidden><label for="tema" data-i18n="theme.label"></label> <select id="tema">${options}</select></div>`);
+        }
+        return out;
+      },
+    },
+  };
+}
+
 function contentSecurityPolicy(): Plugin {
   return {
     name: 'kobo:csp',
@@ -74,7 +110,7 @@ export default defineConfig({
   resolve: {
     alias: { html2canvas: noOptional, dompurify: noOptional, canvg: noOptional },
   },
-  plugins: [scopeFaceCss(), versionNotes(), staticI18n(), contentSecurityPolicy()],
+  plugins: [scopeFaceCss(), versionNotes(), pageThemes(), staticI18n(), contentSecurityPolicy()],
   oxc: {
     jsx: { runtime: 'automatic', importSource: 'preact' },
   },
