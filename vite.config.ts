@@ -116,6 +116,10 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
+    // A dynamic import never needs to preload the entry chunk: it's what is
+    // running. Preloading it again made WebKit warn about an unused preload a
+    // few seconds after load (seen in #66 and #61).
+    modulePreload: { resolveDependencies: (_file, deps) => deps.filter((dep) => !/(^|\/)main-[\w-]+\.js$/.test(dep)) },
     rolldownOptions: {
       input: { main: 'index.html', notFound: '404.html', how: 'how-it-works.html' },
     },
