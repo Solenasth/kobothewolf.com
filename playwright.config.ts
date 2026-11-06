@@ -10,6 +10,10 @@ export default defineConfig({
   // Visual baselines made from P8 (DESIGN §10), one folder per browser.
   snapshotPathTemplate: '{testDir}/baselines/{projectName}/{arg}{ext}',
   forbidOnly: !!process.env.CI,
+  // The editor's export buttons wait for a warm-up render, which WebKit can take
+  // over 5 s to finish on a busy machine (#17's measurement: 3.3–5.5 s), so the
+  // default 5 s for an assertion is too tight there (#74, #61).
+  expect: { timeout: 10_000 },
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
