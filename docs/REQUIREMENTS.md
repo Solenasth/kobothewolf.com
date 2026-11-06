@@ -1,6 +1,6 @@
 # Requirements: kobothewolf.com (profile + KOBO.EXE card editor)
 
-**Status:** Approved 2026-11-06 (rev. 12: FR-P9, #60; rev. 11: FR-E23, #74; rev. 10: FR-E22, #73; rev. 9: FR-P12, #66; rev. 8: FR-P11, #65; rev. 7: FR-B3 contact rule applies to back faces, #5; rev. 6: FR-P8, #30; rev. 5: FR-P1, #4; rev. 4: FR-R6, #24)
+**Status:** Approved 2026-11-06 (rev. 13: FR-P10, #61; rev. 12: FR-P9, #60; rev. 11: FR-E23, #74; rev. 10: FR-E22, #73; rev. 9: FR-P12, #66; rev. 8: FR-P11, #65; rev. 7: FR-B3 contact rule applies to back faces, #5; rev. 6: FR-P8, #30; rev. 5: FR-P1, #4; rev. 4: FR-R6, #24)
 **Companion:** [DESIGN.md](DESIGN.md) · decisions in [decisions/](decisions/)
 **Inputs** (historical, superseded by this document; redacted copies go in `docs/origin/`, FR-R2):
 - **GP:** "Port the variant editor to GitHub Pages", the minimal single-file port.
@@ -57,7 +57,8 @@ The site is a freelance showcase on two levels:
 | FR-P7 | The profile uses the editor's boykisser-uwu UI style (palette, fonts, buttons), not a separate neutral style. |
 | FR-P8 | An inquiry / quote form (name, reply email, type, message) composes an email to `contact@kobothewolf.com` in the active language and opens it in the visitor's email app. Nothing is sent or stored by the site. The address stays visible, and a "Copy message" button covers visitors without an email app. Without JavaScript the form is hidden and the email link remains. |
 | FR-P9 | The page shows the version it runs (the release and the build's commit) and, on request, the latest release's notes, linking to the release on GitHub. It works without JavaScript and in both languages; the notes themselves are in English. |
-| FR-P11 | The profile has an "OwO wats dis?!" disclosure: a short, playful explanation of the project (your card stays in your browser, how it's built, the tech), in both languages and readable without JavaScript, ending in a link to the technical details. FR-P10 is reserved for #61. |
+| FR-P10 | Visitors can switch the page between themes drawn from the cards (colors and background); the default is the current look. The choice is remembered per browser and applied before the page paints. Every theme keeps text at WCAG AA and focus rings at 3:1. Themes change the page only, never the card or its exports. |
+| FR-P11 | The profile has an "OwO wats dis?!" disclosure: a short, playful explanation of the project (your card stays in your browser, how it's built, the tech), in both languages and readable without JavaScript, ending in a link to the technical details.  |
 | FR-P12 | A "How it works" page explains the whole project for curious visitors (architecture, your data, exports, security, quality, releases), linking each part to its source documents. It's in both languages, readable without JavaScript, and linked from the FR-P11 explainer. |
 
 ### 5.2 Languages (FR-I)
