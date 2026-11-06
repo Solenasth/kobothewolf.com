@@ -88,6 +88,17 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--ui-focus); outl
 .owo-panel p { margin: 0 0 6px; }
 .owo-panel ul { margin: 0 0 10px; padding-left: 1.2em; }
 .owo-panel li { margin: 4px 0; }
+.version { margin: 10px 0 0; }
+.version > summary { display: inline-block; cursor: pointer; padding: 2px 10px; font: 13px Silk, monospace; color: var(--ui-muted); border: 2px solid var(--ui-line); border-radius: 999px; background: var(--blanco); }
+.version > summary:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+.version > summary .v { font: 13px Code, monospace; color: var(--tinta); }
+.version-panel { margin: 10px 0 0; padding: 12px 16px; max-width: 68ch; background: var(--blanco); border: 2px solid var(--ui-line); border-radius: 14px; }
+.version-panel .label { margin-top: 0; }
+.version-panel h3 { margin: 10px 0 4px; font: 14px Silk, monospace; color: var(--ui-accent-text); }
+.version-panel ul { margin: 0; padding-left: 1.2em; }
+.version-panel li { margin: 3px 0; overflow-wrap: anywhere; }
+.version-title { margin: 0 0 4px; font-weight: bold; }
+.version-links { margin: 10px 0 0; }
 
 /* Inquiry form (FR-P8) */
 .inquiry { margin-top: 26px; border-top: 2px dashed var(--ui-line); }

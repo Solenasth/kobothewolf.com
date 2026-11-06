@@ -48,8 +48,8 @@ initLanguage();
 const inquiry = document.querySelector<HTMLFormElement>('#inquiry');
 if (inquiry) setUpInquiryForm(inquiry);
 
-const explainer = document.querySelector<HTMLDetailsElement>('#owo');
-if (explainer) setUpExplainer(explainer);
+// The explainer and the release notes are both <details>; Escape closes them.
+for (const details of document.querySelectorAll<HTMLDetailsElement>('#owo, #version')) setUpExplainer(details);
 
 // The editor loads after the page has loaded and painted a frame, when the
 // browser is idle, so the profile never waits for it (NFR-2, DESIGN §5.6). On a
