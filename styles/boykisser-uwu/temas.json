@@ -1,0 +1,21 @@
+{
+  "porDefecto": "certificado",
+  "temas": [
+    { "id": "certificado", "fondo": "liso", "colores": {} },
+    {
+      "id": "licencia",
+      "fondo": "cuaderno",
+      "colores": { "ui-bg": "rosa_algodon", "ui-line": "rosa_bebe", "ui-muted": "#5E4F66", "ui-accent-text": "#A8323A", "ui-focus": "#C2303A", "rosa": "rubor", "algodon": "rosa_bebe" }
+    },
+    {
+      "id": "codigo",
+      "fondo": "crema",
+      "colores": { "ui-bg": "crema_leche", "ui-line": "lila", "ui-accent-text": "#7A4BB3", "ui-focus": "sintaxis_cadena", "chicle": "azul_cielo", "rosa": "sintaxis_cadena", "algodon": "azul_bebe" }
+    },
+    {
+      "id": "socks",
+      "fondo": "femboy",
+      "colores": { "ui-bg": "blanco_gatito", "ui-line": "azul_bebe", "ui-accent-text": "#285F9E", "ui-focus": "#285F9E", "chicle": "azul_cielo", "rosa": "lila", "algodon": "azul_bebe" }
+    }
+  ]
+}

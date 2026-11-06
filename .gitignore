@@ -9,3 +9,4 @@ src/core/generated/
 dist-e2e/
 /exports/
 /dist-print/
+/src/theme/generated/

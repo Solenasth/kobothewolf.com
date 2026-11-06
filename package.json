@@ -11,7 +11,7 @@
   "scripts": {
     "predev": "npm run gen",
     "dev": "vite",
-    "gen": "node scripts/gen-validators.ts",
+    "gen": "node scripts/gen-validators.ts && node scripts/gen-themes.ts",
     "prevalidate": "npm run gen",
     "validate": "node scripts/validate.ts",
     "prebuild": "npm run validate",
