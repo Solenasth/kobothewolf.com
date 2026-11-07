@@ -2,6 +2,54 @@
 
 All notable changes, grouped by conventional-commit type, one section per release. From v0.7.0, release-please writes the entries, one line per conventional commit ([decision 0008](docs/decisions/0008-release-please.md)). Up to v0.6.0 they were written by hand, one line per merged PR.
 
+## [0.8.0](https://github.com/Solenasth/kobothewolf.com/compare/v0.7.0...v0.8.0) (2026-11-07)
+
+
+### Features
+
+* **cli:** fail exports whose QRs print below their minimum size ([be3df3a](https://github.com/Solenasth/kobothewolf.com/commit/be3df3aafaa87a13364b0086bf4dc6784a3ee3ef)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+* **editor:** choose a back's QR layout ([c9c30d2](https://github.com/Solenasth/kobothewolf.com/commit/c9c30d2e6aba5dc6defaa500b41865e3dea5cd97)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+* **editor:** QR layouts on the backs ([#82](https://github.com/Solenasth/kobothewolf.com/issues/82)) ([a31aa73](https://github.com/Solenasth/kobothewolf.com/commit/a31aa73c864685c10e8c65a71fa1fed99420abcf))
+* **page:** show the site version with the latest release notes ([4d9b654](https://github.com/Solenasth/kobothewolf.com/commit/4d9b654c5524a9f5e3dab39c343216bec6cf3af9)), closes [#60](https://github.com/Solenasth/kobothewolf.com/issues/60)
+* **page:** show the site version with the latest release notes ([#84](https://github.com/Solenasth/kobothewolf.com/issues/84)) ([999f4ab](https://github.com/Solenasth/kobothewolf.com/commit/999f4abd161b1bd21b7dbc598a9fb75a809b8636))
+* **page:** switch the page theme from the header ([4e74e46](https://github.com/Solenasth/kobothewolf.com/commit/4e74e46814c02d72beba4e9ccc497daa58798a13)), closes [#61](https://github.com/Solenasth/kobothewolf.com/issues/61)
+* **page:** theme switcher with four themes from the cards ([#85](https://github.com/Solenasth/kobothewolf.com/issues/85)) ([f26abf0](https://github.com/Solenasth/kobothewolf.com/commit/f26abf017dde526fa8bb1f0c5bc32b724705897b))
+* **page:** turn a changelog entry into the page's release notes ([304ba16](https://github.com/Solenasth/kobothewolf.com/commit/304ba16f9618b1e913950bf81d445dc70e960fc1)), closes [#60](https://github.com/Solenasth/kobothewolf.com/issues/60)
+* **styles:** add the same-size QR layout to every back ([c3e10f7](https://github.com/Solenasth/kobothewolf.com/commit/c3e10f7fc04aa200aa83f692af7d0f97c1fc42e2)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+
+
+### Fixes
+
+* **build:** never preload the entry chunk from a dynamic import ([f0c0927](https://github.com/Solenasth/kobothewolf.com/commit/f0c0927e415035d1278a7fb632693793693cd2b2)), closes [#61](https://github.com/Solenasth/kobothewolf.com/issues/61)
+* **page:** keep the language when moving between the site's pages ([fdf67ea](https://github.com/Solenasth/kobothewolf.com/commit/fdf67eae0253bd04df21b3d1c97920f3ea38997a)), closes [#79](https://github.com/Solenasth/kobothewolf.com/issues/79)
+* **page:** keep the language when moving between the site's pages ([#80](https://github.com/Solenasth/kobothewolf.com/issues/80)) ([0007061](https://github.com/Solenasth/kobothewolf.com/commit/0007061c8ef31c5a854583f920199bb5864ec7ba))
+
+
+### Refactors
+
+* **styles:** move the backs' contact column positions into CSS ([0ab13be](https://github.com/Solenasth/kobothewolf.com/commit/0ab13bee912baecbfa47eb6418ff89c62eeddf9d)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+
+
+### Docs
+
+* carry the language on links between pages (DESIGN rev. 31) ([a8b1476](https://github.com/Solenasth/kobothewolf.com/commit/a8b1476533d492a5a10ca0df56bed80ef090c906)), closes [#79](https://github.com/Solenasth/kobothewolf.com/issues/79)
+* specify QR layouts on the backs (FR-E23, DESIGN rev. 32) ([ab7eb32](https://github.com/Solenasth/kobothewolf.com/commit/ab7eb32a0bedbc1d4a8777a41baa97b41b655744)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+* specify the page themes (FR-P10, DESIGN rev. 34) ([aef9f54](https://github.com/Solenasth/kobothewolf.com/commit/aef9f54998abbe09c26548f4f7abd8c4718bc25d)), closes [#61](https://github.com/Solenasth/kobothewolf.com/issues/61)
+* specify the version label and notes (FR-P9, DESIGN rev. 33) ([62a2926](https://github.com/Solenasth/kobothewolf.com/commit/62a292670c8b3cf6e047b75b53218cda18a124c0)), closes [#60](https://github.com/Solenasth/kobothewolf.com/issues/60)
+
+
+### CI and tests
+
+* check the version label and release notes in both languages ([f74a59a](https://github.com/Solenasth/kobothewolf.com/commit/f74a59ad73fbaebc24b9177b1495da484d6f6eb4)), closes [#60](https://github.com/Solenasth/kobothewolf.com/issues/60)
+* drive the QR layouts and render every back in each one ([e560fbd](https://github.com/Solenasth/kobothewolf.com/commit/e560fbd883c21affa0f712523925e9c31cb33d71)), closes [#74](https://github.com/Solenasth/kobothewolf.com/issues/74)
+* give assertions 10 s, for the WebKit export warm-up ([5857ee5](https://github.com/Solenasth/kobothewolf.com/commit/5857ee59161716bc0ad3f0dbeba4b6f70d50d33c)), closes [#61](https://github.com/Solenasth/kobothewolf.com/issues/61)
+* switch every theme through the UI and keep the cards identical ([3a45cc8](https://github.com/Solenasth/kobothewolf.com/commit/3a45cc8f60cb515b04b57f487406d4208845484b)), closes [#61](https://github.com/Solenasth/kobothewolf.com/issues/61)
+
+
+### Chores
+
+* generate page themes from the style's temas.json ([eed56de](https://github.com/Solenasth/kobothewolf.com/commit/eed56dedc6de157ffb3c2a1ad658fa4d7661564b)), closes [#61](https://github.com/Solenasth/kobothewolf.com/issues/61)
+
 ## [0.7.0](https://github.com/Solenasth/kobothewolf.com/compare/v0.6.1...v0.7.0) (2026-10-27)
 
 
