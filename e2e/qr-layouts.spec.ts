@@ -7,8 +7,8 @@ const TABS = {
   es: [['Certificado', 'cer-r'], ['Licencia', 'lic-r'], ['Gatito de código', 'cod-r'], ['Programming socks', 'soc-r']],
 } as const;
 const LABELS = {
-  en: ['Large Telegram QR (current)', 'Both QRs the same size, stacked'],
-  es: ['QR de Telegram grande (actual)', 'Ambos QR del mismo tamaño, apilados'],
+  en: ['Large Telegram QR (current)', 'Both QRs the same size, stacked', 'Both QRs side by side'],
+  es: ['QR de Telegram grande (actual)', 'Ambos QR del mismo tamaño, apilados', 'Ambos QR lado a lado'],
 };
 
 let problems: string[];
@@ -22,6 +22,18 @@ async function open(page: Page, lang: 'en' | 'es') {
   await page.goto(`/?lang=${lang}#editor`);
   await expect(page.locator('.ed-visor [data-cara]')).toHaveCount(2);
 }
+
+/** The main and site QRs' framed boxes in face pixels. */
+const qrBoxes = (page: Page, id: string) =>
+  page.locator(`.ed-visor [data-cara="${id}"]`).evaluate((face) => {
+    const frame = face.getBoundingClientRect();
+    const k = frame.width / 960;
+    const box = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return { x: Math.round((r.x - frame.x) / k), y: Math.round((r.y - frame.y) / k), width: Math.round(r.width / k) };
+    };
+    return { main: box([...face.querySelectorAll('.qr')].find((q) => !q.closest('.sitio'))!), site: box(face.querySelector('.sitio .qr')!) };
+  });
 
 /** Each QR's framed width in face pixels: [main, site]. */
 const qrWidths = (page: Page, id: string) =>
@@ -47,6 +59,14 @@ for (const lang of ['en', 'es'] as const) {
       await expect(face).toHaveClass(/\bqr-iguales\b/);
       await expect(face).not.toHaveClass(/\bqr-actual\b/);
       expect(await qrWidths(page, id), `${id} same size: 15 mm each`).toEqual([150, 150]);
+      await select.selectOption('lado');
+      await expect(face).toHaveClass(/\bqr-lado\b/);
+      expect(await qrWidths(page, id), `${id} side by side: 15 mm each`).toEqual([150, 150]);
+      const { main, site } = await qrBoxes(page, id);
+      expect(main.y, `${id} side by side: one row`).toBe(site.y);
+      // Frame rings are 3 px outside each box; they must not touch, and the site QR stays in the safe zone (x 900).
+      expect(site.x - (main.x + main.width), `${id} side by side: gap`).toBeGreaterThan(6);
+      expect(site.x + site.width + 3, `${id} side by side: safe zone`).toBeLessThanOrEqual(900);
       await select.selectOption('actual');
       expect(await qrWidths(page, id), `${id} back to current`).toEqual([180, 96]);
     }

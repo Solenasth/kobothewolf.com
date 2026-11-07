@@ -54,6 +54,7 @@
   "editor.qr.label": "QR layout",
   "editor.qr.actual": "Large Telegram QR (current)",
   "editor.qr.iguales": "Both QRs the same size, stacked",
+  "editor.qr.lado": "Both QRs side by side",
   "editor.art": "Art",
   "editor.art.placeholder": "[ your kitty here ]",
   "editor.art.own": "Your image",
