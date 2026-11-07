@@ -35,3 +35,6 @@ h2 em { font: 32px Lazo; color: var(--chicle); font-style: normal; }
 &.qr-iguales .washi.junto-qr { left: 470px !important; }
 &.qr-iguales .spark.junto-qr { left: 550px !important; }
 &.qr-iguales .spark.junto-qr-arriba { top: 250px !important; }
+&.qr-lado .lista { width: 446px; line-height: 1.32; }
+&.qr-lado .washi.junto-qr { left: 590px !important; top: 30px !important; }
+&.qr-lado .spark.junto-lado { left: 680px !important; top: 44px !important; }

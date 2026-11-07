@@ -54,6 +54,7 @@
   "editor.qr.label": "Disposición de los QR",
   "editor.qr.actual": "QR de Telegram grande (actual)",
   "editor.qr.iguales": "Ambos QR del mismo tamaño, apilados",
+  "editor.qr.lado": "Ambos QR lado a lado",
   "editor.art": "Arte",
   "editor.art.placeholder": "[ tu gatito aquí ]",
   "editor.art.own": "Tu imagen",
