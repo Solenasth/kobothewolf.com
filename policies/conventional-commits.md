@@ -1,7 +1,7 @@
 ---
 id: conventional-commits
 title: Conventional commits
-version: 1
+version: 2
 scope: opt-in
 enforcement: soft
 ---
@@ -17,6 +17,7 @@ A readable history makes changelogs easy to generate.
 - The body explains *why* when that isn't obvious.
 - The footer has `Refs #n` / `Closes #n` (see `issue-first`).
 - Breaking changes get `!` and a `BREAKING CHANGE:` footer.
+- Each commit builds and passes the tests on its own, so `git bisect` works. Check each one (for example in a worktree) before the first push.
 
 ## Verification
 Review `git log --oneline` for the PR's commits before opening it.
