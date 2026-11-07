@@ -2,6 +2,29 @@
 
 All notable changes, grouped by conventional-commit type, one section per release. From v0.7.0, release-please writes the entries, one line per conventional commit ([decision 0008](docs/decisions/0008-release-please.md)). Up to v0.6.0 they were written by hand, one line per merged PR.
 
+## [0.9.0](https://github.com/Solenasth/kobothewolf.com/compare/v0.8.0...v0.9.0) (2026-11-07)
+
+
+### Features
+
+* **a11y:** accessibility pass on profile and editor ([#88](https://github.com/Solenasth/kobothewolf.com/issues/88)) ([b052768](https://github.com/Solenasth/kobothewolf.com/commit/b0527680e5897a6593a0c2c9f593b593515a3e94))
+* **editor:** label the previews and note iOS download previews ([11d2bdf](https://github.com/Solenasth/kobothewolf.com/commit/11d2bdf6b9219cf5e423d6ef547c27f602e3e37f)), closes [#21](https://github.com/Solenasth/kobothewolf.com/issues/21)
+* **editor:** offer the side-by-side QR layout on every back ([a31cf99](https://github.com/Solenasth/kobothewolf.com/commit/a31cf99ef31da478aa593df2d25daf32dce368e5)), closes [#83](https://github.com/Solenasth/kobothewolf.com/issues/83)
+* **styles:** make room for side-by-side QRs on every back ([19ecf00](https://github.com/Solenasth/kobothewolf.com/commit/19ecf007d50e64c39f0c2eedb3579836c0457af3)), closes [#83](https://github.com/Solenasth/kobothewolf.com/issues/83)
+* **styles:** side-by-side QR layout on every back ([#86](https://github.com/Solenasth/kobothewolf.com/issues/86)) ([e89f00d](https://github.com/Solenasth/kobothewolf.com/commit/e89f00db41278ba1549126ea8e2ea0956cdf6e5a))
+
+
+### Docs
+
+* refresh the README screenshots ([65096da](https://github.com/Solenasth/kobothewolf.com/commit/65096dacbef7b44d6265b75d8eb8d73196b2c400)), closes [#21](https://github.com/Solenasth/kobothewolf.com/issues/21)
+* specify the accessibility pass (NFR-6, DESIGN rev. 36) ([ce53468](https://github.com/Solenasth/kobothewolf.com/commit/ce5346895d665e6387d72796646b9839f5335b8d)), closes [#21](https://github.com/Solenasth/kobothewolf.com/issues/21)
+* specify the side-by-side QR layout (FR-E23, DESIGN rev. 35) ([41204c2](https://github.com/Solenasth/kobothewolf.com/commit/41204c2bbb19e95d28769e6f580af6806f9eb5d1)), closes [#83](https://github.com/Solenasth/kobothewolf.com/issues/83)
+
+
+### CI and tests
+
+* cover the accessibility pass across tabs, keys and motion ([4069d57](https://github.com/Solenasth/kobothewolf.com/commit/4069d57f7e12ec2e0af1722a93d3e5854d76e594)), closes [#21](https://github.com/Solenasth/kobothewolf.com/issues/21)
+
 ## [0.8.0](https://github.com/Solenasth/kobothewolf.com/compare/v0.7.0...v0.8.0) (2026-11-07)
 
 
