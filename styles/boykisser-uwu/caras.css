@@ -104,3 +104,12 @@
 &.qr-iguales .card > .linea-contacto { left: 602px; top: 254px; }
 &.qr-iguales .sitio { left: 600px; top: 284px; grid-template-columns: 150px 1fr; }
 &.qr-iguales .sitio .qr { width: 150px; padding: 10px; border-radius: 12px; }
+/* Side by side: both QRs 15 mm in one row, each with its text below; each
+   back's own CSS narrows its left content to make room. The site question
+   takes two lines above its QR, so the Telegram QR starts at the same height. */
+&.qr-lado .card > .qr { left: 508px; top: 86px; width: 150px; }
+&.qr-lado .card > .arroba { left: 507px; top: 248px; font-size: 27px; }
+&.qr-lado .card > .linea-contacto { left: 509px; top: 286px; width: 196px; font-size: 15px; }
+&.qr-lado .sitio { left: 714px; top: 40px; width: 150px; grid-template-columns: 150px; row-gap: 10px; }
+&.qr-lado .sitio > b { margin: 0 0 0 2px; }
+&.qr-lado .sitio .qr { width: 150px; padding: 10px; border-radius: 12px; }

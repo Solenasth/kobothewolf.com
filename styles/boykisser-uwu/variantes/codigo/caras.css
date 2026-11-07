@@ -31,3 +31,4 @@ pre .n { color: #9B6BD1; }
 /* In the same-size layout, decorations next to the old QR column move clear
    of the QRs (FR-E23). Their positions are inline, hence !important. */
 &.qr-iguales .spark.junto-qr { left: 556px !important; }
+&.qr-lado .ventana { width: 446px; }

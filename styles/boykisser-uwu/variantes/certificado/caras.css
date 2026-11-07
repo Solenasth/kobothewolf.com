@@ -47,3 +47,11 @@
    of the QRs (FR-E23). Their positions are inline, hence !important. */
 &.qr-iguales .washi.junto-qr { left: 470px !important; }
 &.qr-iguales .spark.junto-qr { left: 556px !important; }
+&.qr-lado .contacto { left: 506px; top: 86px; width: 200px; }
+&.qr-lado .contacto .qr { width: 150px; margin-left: 2px; }
+&.qr-lado .contacto .arroba { margin-top: 12px; font-size: 27px; }
+&.qr-lado .contacto .tme { width: 196px; margin-left: 2px; font-size: 15px; }
+&.qr-lado .terminos { width: 430px; }
+&.qr-lado .arte-r { top: 300px; width: 176px; }
+&.qr-lado .spark.junto-lado { left: 470px !important; top: 44px !important; }
+&.qr-lado .spark.junto-lado-abajo { left: 640px !important; top: 318px !important; }
