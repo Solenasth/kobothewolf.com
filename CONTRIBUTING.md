@@ -1,6 +1,6 @@
 # Contributing
 
-This repo is built spec-first, through a visible issue → PR → release flow. These rules compile the 11 engineering policies in [`policies/`](policies/). The policy files are the source of truth, and each section below links to its policy.
+This repo is built spec-first, through a visible issue → PR → release flow. These rules compile the 14 engineering policies in [`policies/`](policies/), copied unchanged from a shared policy library. The policy files are the source of truth, and each section below links to its policy.
 
 **Enforcement:**
 - **Hard** rules are not negotiable: work that breaks one is rejected.
@@ -39,6 +39,7 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - Breaking changes take `!` and a `BREAKING CHANGE:` footer.
 - **Tidy before the first push:** each commit is one logical change, and local fixups are folded in with `git rebase --autosquash` before pushing. Once pushed, commits are final (see §11).
 - **Signed:** every commit is signed (SSH signing), so GitHub shows it as Verified.
+- **Each commit stands alone:** it builds and passes the tests on its own, so `git bisect` works. Check each one (for example in a worktree) before the first push.
 
 ## 5. Tests (hard)
 [`tests-required`](policies/tests-required.md)
@@ -66,18 +67,21 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - Work is done only when it has been run the way a user will use it: built, tested and exercised in the browser.
 - The PR's **Verified** section lists the commands run and their results, what failed, and what couldn't be verified (and why).
 - No hedging about things that were verified, and no confidence about things that weren't.
+- CI's E2E jobs run in the pinned Playwright image, so check there before calling the work done, not only on your machine.
+- A failure blamed on the environment needs evidence: the log line, the kernel message, or the same test passing in CI. Without it, it's a failure.
+- A release is done once the live site has been checked after its deploy.
 
 ## 9. Private by default (hard)
 [`private-by-default`](policies/private-by-default.md)
 - New repositories, artifacts and shares start private. Making anything public takes the maintainer's explicit OK for that specific item. This repo and its site were approved as public in [decision 0003](docs/decisions/0003-public-repo-and-art.md).
 - Never commit secrets, local paths, personal or household details, or internal-only notes. gitleaks runs in CI.
-- Images are committed with their metadata stripped (`node scripts/strip-png.ts <file.png>`), and every asset is listed in [`CREDITS.md`](CREDITS.md) or has a license file next to it. `npm run validate` enforces both.
+- Every asset is listed in [`CREDITS.md`](CREDITS.md) or has a license file next to it. `npm run validate` enforces it.
 - Per-machine notes go in `CLAUDE.local.md`, which is ignored.
 
 ## 10. Authorship (hard)
 [`no-attribution`](policies/no-attribution.md)
 - The maintainer is the sole author of record. Commits use the maintainer's git identity.
-- Commits, PRs, tags, release notes and file headers carry no AI or tool attribution: no `Co-Authored-By` trailers for tools and no "generated with" lines. The one exception is release-please's own release PRs and their merge commits, which credit Release Please ([decision 0008](docs/decisions/0008-release-please.md)).
+- Commits, PRs, tags, release notes and file headers carry no AI or tool attribution: no `Co-Authored-By` trailers for tools and no "generated with" lines. The one exception is release-please's own release PRs and their merge commits, which credit Release Please ([`release-automation`](policies/release-automation.md), [decision 0008](docs/decisions/0008-release-please.md)).
 - AI assistance is part of this repo's workflow and is documented openly in [`CLAUDE.md`](CLAUDE.md) and `policies/`. It just isn't credited as an author.
 
 ## 11. Preserve history (hard)
@@ -86,15 +90,29 @@ This repo is built spec-first, through a visible issue → PR → release flow. 
 - Undo a pushed commit with `git revert <sha>`. The message keeps the commit format, and its body says `This reverts commit <sha>.` and why.
 - If a branch needs `main`'s changes, merge `main` into it; don't rebase.
 - PRs land with merge commits, so every branch commit stays on `main`.
+- Exception: release-please force-updates its own release branch (see Releases). No person commits there.
 - Exception: a leaked secret. Rotate it first; rewriting history then needs the maintainer's explicit OK.
+
+## 12. Clean media (hard)
+[`clean-media`](policies/clean-media.md)
+- Images are committed with their metadata stripped (`node scripts/strip-png.ts <file.png>`): no EXIF, text chunks or content credentials. PNGs keep only `IHDR`, `PLTE`, `tRNS`, `IDAT` and `IEND`. `npm run validate` rejects anything else.
+- Generated images (README screenshots, the Open Graph image) are stripped the same way. Exports keep `pHYs` for 300 dpi ([DESIGN §5.5](docs/DESIGN.md)), and they aren't committed.
+
+## 13. Accessibility (hard)
+[`accessibility`](policies/accessibility.md)
+- The profile, the editor and "How it works" meet WCAG 2.2 AA. `e2e/a11y.spec.ts` runs axe on every editor tab in both languages at 1280 and 360 px, a keyboard-only task, a focus-ring check at every Tab stop and reduced motion, in all three engines. The profile, "How it works" and the other page specs run axe too.
+- A PR that changes the UI says in its Verified section whether a screen reader was used.
 
 ---
 
-## Releases
+## Releases (hard)
+[`release-automation`](policies/release-automation.md)
 - Each milestone in [DESIGN §14](docs/DESIGN.md) is a GitHub milestone.
 - Each milestone ends in a SemVer tag (`v0.1.0` = M1, …), a GitHub release, and a `CHANGELOG.md` entry grouped by commit type.
 - release-please makes them ([decision 0008](docs/decisions/0008-release-please.md)). It keeps a release PR (`chore(release): v…`) open with the next version and changelog entry, updated as PRs merge. Merge it at the milestone's end. release-please then tags and publishes the release; check the deploy afterwards.
 - Never commit to the release PR's branch (`release-please--branches--main--components--kobothewolf.com`): release-please rebuilds and force-updates it, the one exception to `preserve-history`.
+- The bot is the `release-kisser` GitHub App. Its key is the `RELEASE_APP_PRIVATE_KEY` secret of the `release` environment, which only `main` can use. Its Client ID is the `RELEASE_APP_CLIENT_ID` repository variable.
+- **Accepted trade-offs:** the app's tags are lightweight and unsigned (the release commit is signed by GitHub), the release branch is force-updated, and the release PRs credit Release Please.
 
 ## Local setup
 Requires the Node version in [`.nvmrc`](.nvmrc) (`nvm use`).

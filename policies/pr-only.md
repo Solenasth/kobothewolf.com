@@ -1,7 +1,7 @@
 ---
 id: pr-only
 title: PRs only, no direct pushes to main
-version: 1
+version: 2
 scope: opt-in
 enforcement: hard
 ---
@@ -17,7 +17,8 @@ PRs are the review checkpoint and the audit trail. A protected `main` is always 
 - Open the PR with `gh pr create`. The description links the issue and the requirement IDs, and says how the change was verified.
 - The user reviews and merges. Claude does not merge its own PRs unless the user explicitly asks for that PR.
 - Enable branch protection or a ruleset on `main` where the GitHub plan allows it. Where it doesn't, the rule still holds by convention.
+- The ruleset requires PRs, passing required checks and signed commits. Claude signs every commit (`git commit -S`) under the user's identity.
 - Exception: the initial bootstrap commit of a brand-new repo.
 
 ## Verification
-Before any `git push`, check that the target branch isn't `main`. Refuse and explain if it is.
+Before any `git push`, check that the target branch isn't `main`. Refuse and explain if it is. GitHub shows every commit on the PR as Verified.
