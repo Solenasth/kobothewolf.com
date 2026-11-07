@@ -117,8 +117,8 @@ export function Editor({ sessions }: { sessions: ReadonlyMap<string, Session> })
           </fieldset>
         </form>
         <div class="ed-stage">
-          <Viewer session={session} id={frente} heading={t('editor.front')} guias={guias} />
-          <Viewer session={session} id={reverso} heading={t('editor.back')} guias={guias} />
+          <Viewer session={session} id={frente} heading={t('editor.front')} name={label(`face.${frente}.name`)} guias={guias} />
+          <Viewer session={session} id={reverso} heading={t('editor.back')} name={label(`face.${reverso}.name`)} guias={guias} />
         </div>
       </div>
     </div>
@@ -175,7 +175,7 @@ function Tabs({ session, label }: { session: Session; label: (key: string) => st
 }
 
 /** One face at scale: the face element is moved in, and the guides sit over it, outside the face (FR-E10). */
-function Viewer({ session, id, heading, guias }: { session: Session; id: string; heading: string; guias: boolean }) {
+function Viewer({ session, id, heading, name, guias }: { session: Session; id: string; heading: string; name: string; guias: boolean }) {
   const visor = useRef<HTMLDivElement>(null);
   const escala = useRef<HTMLDivElement>(null);
 
@@ -198,7 +198,8 @@ function Viewer({ session, id, heading, guias }: { session: Session; id: string;
         <span>{heading}</span>
         <span>{t('editor.bleed')}</span>
       </h3>
-      <div class="ed-visor" ref={visor} data-face={id}>
+      {/* The face is artwork: one labeled image, its texts reachable through the form (NFR-6). */}
+      <div class="ed-visor" ref={visor} data-face={id} role="img" aria-label={t('editor.preview', { side: heading, name })}>
         <div class="ed-escala" ref={escala} />
         <div class="ed-guias" hidden={!guias} aria-hidden="true" />
       </div>

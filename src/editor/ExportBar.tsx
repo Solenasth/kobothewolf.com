@@ -89,6 +89,7 @@ export function ExportBar({ session, say, label }: { session: Session; say: Say;
       <button type="button" class="ed-boton" id="ed-pdf" disabled={disabled || !pdf} onClick={exportPdf}>
         {t('export.pdf')}
       </button>
+      <p class="ed-hint">{t('export.ios')}</p>
     </div>
   );
 }

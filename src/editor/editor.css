@@ -7,6 +7,7 @@
 
 /* Export bar */
 .ed-export { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.ed-export .ed-hint { flex-basis: 100%; margin: 0; }
 .ed-boton.prim { background: var(--chicle); box-shadow: 3px 4px 0 0 var(--rosa); font-size: 16px; padding: 6px 14px; }
 .ed-boton:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 
